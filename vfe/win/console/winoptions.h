@@ -6,20 +6,21 @@
 /// variables.
 ///
 /// @author Trevor SANDY<trevor.sandy@gmial.com>
-/// @author Based on winoptions.h by Christoph Hormann <chris_hormann@gmx.de>
+/// @author Based on POV-Ray winoptions.h by Christoph Hormann <chris_hormann@gmx.de>
 ///
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2016 Persistence of Vision Raytracer Pty. Ltd.
+/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+/// specially for LPub3D - An LDraw Building Instruction Editor.
+/// Copyright 2017 by Trevor SANDY.
 ///
-/// POV-Ray is free software: you can redistribute it and/or modify
+/// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
 /// published by the Free Software Foundation, either version 3 of the
 /// License, or (at your option) any later version.
 ///
-/// POV-Ray is distributed in the hope that it will be useful,
+/// LPub3D-Trace is distributed in the hope that it will be useful,
 /// but WITHOUT ANY WARRANTY; without even the implied warranty of
 /// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 /// GNU Affero General Public License for more details.
@@ -29,7 +30,9 @@
 ///
 /// ----------------------------------------------------------------------------
 ///
-/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+/// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 ///
@@ -55,16 +58,25 @@ using boost::to_lower_copy;
  * Default values for the location of the povray library and configuration.
  * These constants don't have to be in config.h .
  */
+
+#ifndef LPUB3D_TRACE_DEFAULT_PATH
+# define LPUB3D_TRACE_DEFAULT_PATH "C:\\ProgramData\\LPub3D Software\\" PACKAGE
+#endif
+
+#ifndef LPUB3D_TRACE_USER_PATH
+# define LPUB3D_TRACE_USER_PATH "AppData\\Local\\LPub3D Software\\LPub3D\\" PACKAGE
+#endif
+
 #ifndef POVLIBDIR
-# define POVLIBDIR  "C:\\ProgramData\\" PACKAGE "\\" VERSION_BASE
+# define POVLIBDIR LPUB3D_TRACE_DEFAULT_PATH
 #endif
 
 #ifndef POVCONFDIR_BACKWARD
-# define POVCONFDIR_BACKWARD  "C:\\ProgramData"
+# define POVCONFDIR_BACKWARD LPUB3D_TRACE_DEFAULT_PATH
 #endif
 
 #ifndef POVCONFDIR
-# define POVCONFDIR  "C:\\ProgramData\\" PACKAGE "\\" VERSION_BASE
+# define POVCONFDIR LPUB3D_TRACE_DEFAULT_PATH
 #endif
 
 namespace vfePlatform

@@ -11,15 +11,16 @@
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
+/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+/// specially for LPub3D - An LDraw Building Instruction Editor.
+/// Copyright 2017 by Trevor SANDY.
 ///
-/// POV-Ray is free software: you can redistribute it and/or modify
+/// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
 /// published by the Free Software Foundation, either version 3 of the
 /// License, or (at your option) any later version.
 ///
-/// POV-Ray is distributed in the hope that it will be useful,
+/// LPub3D-Trace is distributed in the hope that it will be useful,
 /// but WITHOUT ANY WARRANTY; without even the implied warranty of
 /// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 /// GNU Affero General Public License for more details.
@@ -29,7 +30,9 @@
 ///
 /// ----------------------------------------------------------------------------
 ///
-/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+/// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 ///
@@ -56,7 +59,7 @@ namespace vfePlatform
         WinConOptionsProcessor::Option_Info("general", "help", "off", false, "--help|-help|-h|-?", "", "display usage information"),
         WinConOptionsProcessor::Option_Info("general", "temppath", "", true, "", "POV_TEMP_DIR", "directory for temporary files"),
         WinConOptionsProcessor::Option_Info("general", "version", "off", false, "--version|-version|--V", "", "display program version"),
-        WinConOptionsProcessor::Option_Info("general", "benchmark", "off", false, "--benchmark|-benchmark", "", "run the standard POV-Ray benchmark"),
+        WinConOptionsProcessor::Option_Info("general", "benchmark", "off", false, "--benchmark|-benchmark", "", "run the standard " PACKAGE " benchmark"),
         WinConOptionsProcessor::Option_Info("", "", "", false, "", "", "") // has to be last
     };
 
@@ -83,8 +86,8 @@ namespace vfePlatform
         // user configuration file
         if (m_home.length() > 0)
         {
-            m_user_dir = m_home + "\\" PACKAGE "\\" VERSION_BASE;
-            m_userconf = m_home + "\\" PACKAGE "\\" VERSION_BASE "\\povray.conf";
+            m_user_dir = m_home + "\\" LPUB3D_TRACE_USER_PATH;
+            m_userconf = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\povray.conf";
         }
         else
         {
@@ -94,21 +97,21 @@ namespace vfePlatform
 
         // system ini file
         m_sysini     = POVCONFDIR "\\ini\\povray.ini";
-        m_sysini_old = POVCONFDIR_BACKWARD "\\povray.ini";
+        m_sysini_old = POVCONFDIR_BACKWARD "\\ini\\povray.ini";
 
         // user ini file
         if (m_home.length() > 0)
-            m_userini = m_home + "\\" PACKAGE "\\" VERSION_BASE "\\povray.ini";
+            m_userini = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\ini\\povray.ini";
         else
             m_userini = "";
 
         if (m_home.length() > 0)
-            m_userini_old = m_home + "\\povrayrc";
+            m_userini_old = m_home + "\\povray.ini";
         else
             m_userini_old = "";
 
 #ifdef WIN_DEBUG
-        cerr << "PATHS" << endl;
+        cerr << "DEFAULT PATHS" << endl;
         cerr << "  HOME        = " << m_home << endl;
         cerr << "  SYSCONF     = " << m_sysconf << endl;
         cerr << "  USERCONF    = " << m_userconf << endl;
@@ -468,7 +471,7 @@ namespace vfePlatform
             boost::replace_all(s, strings[i].match, strings[i].replace);
             ++i;
 #ifdef WIN_DEBUG
-            cerr << "    su: " << s << endl;
+            cerr << "    su(1.): " << s << endl;
 #endif
         }
 
@@ -476,33 +479,57 @@ namespace vfePlatform
         // or add the cwd to the first directory or "..\\"
         if (boost::starts_with(s, ".\\"))
         {
+#ifdef WIN_DEBUG
+        cerr << "    1a. Starts with '.\\',  Path: '" << s << "'" << endl;
+#endif			
             s.erase(0, 2);
             s.insert(0, win_getcwd());
+#ifdef WIN_DEBUG
+        cerr << "    1b. Insert Win_GetCWD  Path: '" << s << "'" << endl;
+#endif			
         }
-        else if(s[0] != '\\' || boost::starts_with(s, "..\\"))
+        else if(/* s[0] != '\\' || This comparison is not used on Windows */ boost::starts_with(s, "..\\"))
         {
+#ifdef WIN_DEBUG
+        cerr << "    2a. Starts with '..\\', Path: '" << s << "'" << endl;
+#endif			
             s.insert(0, win_getcwd());
+#ifdef WIN_DEBUG
+        cerr << "    2b. Insert Win_GetCWD  Path: '" << s << "'" << endl;
+#endif	
         }
 
+#if 0   // This section is not used on Windows
         // substitute all occurences of "dir\\.." by ""
         string tmp = s;
         string::size_type pos = s.find("\\..");
         while (pos != string::npos)
         {
+#ifdef WIN_DEBUG
+			cerr << s << endl;		
+#endif				
             string::size_type pos2 = s.rfind('\\', pos-1);
             s.erase(pos2+1, pos-pos2+3);
 #ifdef WIN_DEBUG
-            cerr << "    su: " << s << endl;
+			cerr << "--- SUBSTITUE 'dir\\..' ---" << endl;
+			cerr << "    su(2.): " << s << endl;
+			cerr << "   1. pos    = " << pos << " find( '\\..' )" << endl;
+			cerr << "   2. pos2   = " << pos2 << " rfind( '\\', last: pos-1: " << pos-1 << ")" << endl;
+			cerr << "   3. erase  = erase(start: pos2+1: " << pos2+1 << ", length: pos-pos2+3: " << pos-pos2+3 << ")" << endl;
+			string::size_type newPos = s.find("\\..", pos+3);
+			cerr << "   4. newPos = " << newPos << " find( '\\..', first: pos+3: " << pos+3 << ")" << endl;
+			cerr << "--- ------------------ ---" << endl;
 #endif
             pos = s.find("\\..", pos+3);
         }
+#endif
 
         // remove the last "\\." if any
         if (boost::ends_with(s, "\\."))
         {
             s.erase(s.length()-3);
 #ifdef WIN_DEBUG
-            cerr << "    su: " << s << endl;
+            cerr << "    su(3.): " << s << endl;
 #endif
         }
 
@@ -891,7 +918,18 @@ namespace vfePlatform
             {
                 m_permitted_paths = paths;  // assign new paths
             }
-        }
+        } 
+		else 
+		{
+			// If only system configuration file exist, assign permitted paths
+			if (!file_exist(m_userconf))
+			{
+				m_permitted_paths = paths;  // assign new paths
+#ifdef WIN_DEBUG
+				cerr << PACKAGE << ": user configuration file does not exist. Using system permitted paths." << endl;
+#endif				
+			}	
+		}
     }
 
     // based on 3.6 unix_process_povray_conf()
@@ -933,7 +971,7 @@ namespace vfePlatform
                 perror(m_userconf.c_str());
             }
         }
-
+		
         // no file was read, disable I/O restrictions
         if(m_conf.length() == 0)
             fprintf(stderr, "%s: I/O restrictions are disabled\n", PACKAGE);
@@ -1062,7 +1100,7 @@ namespace vfePlatform
 		}
 
         // warn that no INI file was found and add minimal library_path setting
-        fprintf(stderr, "%s: cannot open an INI file, adding default library path\n", PACKAGE);
+        fprintf(stderr, "%s: cannot open an INI file, adding default library path\n%s\\ini\n", PACKAGE, POVLIBDIR);
         opts.AddLibraryPath(string(POVLIBDIR "\\ini"));
     }
 

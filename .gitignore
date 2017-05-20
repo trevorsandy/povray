@@ -164,7 +164,6 @@ $RECYCLE.BIN/
 /windows/vs*/bin64/
 /windows/vs*/build/
 /windows/vs*/ipch/
-/windows/vs*/tests/
 
 # ============================
 # POV-Ray Unix build artefacts

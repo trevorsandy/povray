@@ -101,32 +101,32 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>bin32\</OutDir>
     <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>povconsole32d</TargetName>
+    <TargetName>lpub3d_trace_cui32d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>bin64\</OutDir>
     <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>povconsole64d</TargetName>
+    <TargetName>lpub3d_trace_cui64d</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>bin32\</OutDir>
     <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>povconsole32</TargetName>
+    <TargetName>lpub3d_trace_cui32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>bin64\</OutDir>
     <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>povconsole64</TargetName>
+    <TargetName>lpub3d_trace_cui64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|Win32'">
     <OutDir>bin32\</OutDir>
     <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>povconsole32-sse2</TargetName>
+    <TargetName>lpub3d_trace_cui32-sse2</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release-AVX|x64'">
     <OutDir>bin64\</OutDir>
     <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName>povconsole$(ConfigTag)</TargetName>
+    <TargetName>lpub3d_trace_cui$(ConfigTag)</TargetName>
   </PropertyGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>

@@ -11,15 +11,16 @@
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
+/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+/// specially for LPub3D - An LDraw Building Instruction Editor.
+/// Copyright 2017 by Trevor SANDY.
 ///
-/// POV-Ray is free software: you can redistribute it and/or modify
+/// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
 /// published by the Free Software Foundation, either version 3 of the
 /// License, or (at your option) any later version.
 ///
-/// POV-Ray is distributed in the hope that it will be useful,
+/// LPub3D-Trace is distributed in the hope that it will be useful,
 /// but WITHOUT ANY WARRANTY; without even the implied warranty of
 /// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 /// GNU Affero General Public License for more details.
@@ -29,7 +30,9 @@
 ///
 /// ----------------------------------------------------------------------------
 ///
-/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+/// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 ///
@@ -162,11 +165,13 @@ static void PrintVersion(void)
 {
   fprintf(stderr,
       "%s %s\n\n"
-      "%s\n%s\n%s\n"
+      "%s\n%s\n%s\n%s\n"
+	  "%s\n%s\n%s\n\n"
       "%s\n%s\n%s\n\n",
       PACKAGE_NAME, POV_RAY_VERSION,
-      DISTRIBUTION_MESSAGE_1, DISTRIBUTION_MESSAGE_2, DISTRIBUTION_MESSAGE_3,
-      POV_RAY_COPYRIGHT, DISCLAIMER_MESSAGE_1, DISCLAIMER_MESSAGE_2
+      DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1, DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2, DISTRIBUTION_MESSAGE_2, DISTRIBUTION_MESSAGE_3,
+	  DESCRIPTION_MESSAGE_LPUB3D_TRACE_1, DESCRIPTION_MESSAGE_LPUB3D_TRACE_2, DESCRIPTION_MESSAGE_LPUB3D_TRACE_3,
+      LPUB3D_TRACE_COPYRIGHT, DISCLAIMER_MESSAGE_1, DISCLAIMER_MESSAGE_2
   );
   fprintf(stderr,
       "Built-in features:\n"
@@ -249,12 +254,12 @@ static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts,
   int benchversion = pov::Get_Benchmark_Version();
   fprintf(stderr, "\
 %s %s\n\n\
-Entering the standard POV-Ray %s benchmark version %x.%02x.\n\n\
-This built-in benchmark requires POV-Ray to be installed on your system\n\
+Entering the standard " PACKAGE " %s benchmark version %x.%02x.\n\n\
+This built-in benchmark requires " PACKAGE " to be installed on your system\n\
 before running it.  There will be neither display nor file output, and\n\
 any additional command-line option except setting the number of render\n\
 threads (+wtN for N threads) and library paths (+Lpath) will be ignored.\n\
-To get an accurate benchmark result you might consider running POV-Ray\n\
+To get an accurate benchmark result you might consider running  " PACKAGE "\n\
 with the Win 'time' command (e.g. 'time povray -benchmark').\n\n\
 The benchmark will run using %d render thread(s).\n\
 Press <Enter> to continue or <Ctrl-C> to abort.\n\
@@ -320,7 +325,7 @@ Press <Enter> to continue or <Ctrl-C> to abort.\n\
   {
       fprintf(stderr, "%s: creating %s\n", PACKAGE, ini.c_str());
       fprintf(stderr, "%s: creating %s\n", PACKAGE, pov.c_str());
-      fprintf(stderr, "Running standard POV-Ray benchmark version %x.%02x\n", benchversion / 256, benchversion % 256);
+      fprintf(stderr, "Running standard " PACKAGE " benchmark version %x.%02x\n", benchversion / 256, benchversion % 256);
   }
   else
   {
@@ -342,10 +347,9 @@ static void CleanupBenchmark(vfeWinSession *session, string& ini, string& pov)
     session->DeleteTemporaryFile(ASCIItoUCS2String(pov.c_str()));
 }
 
-// This is the console user interface build of POV-Ray under Windows 
+// This is the console user interface build of LPub3D-Trace under Windows 
 // using the VFE (virtual front-end) library. This implementation 
-// includes the same capabiliteis as the Unix console build. 
-// It is not officially supported.
+// includes the same capabilities as POV-Ray Unix console build. 
 int main (int argc, char **argv)
 {
   char              *s;
@@ -360,12 +364,16 @@ int main (int argc, char **argv)
   int               argc_copy=argc; /* because it might also be updated */
 	
   fprintf(stderr,
-          "\nThis is the console user interface build of POV-Ray under Windows.\n\n"
-          "Persistence of Vision(tm) Ray Tracer Version " POV_RAY_VERSION_INFO ".\n\n"
-          DISTRIBUTION_MESSAGE_1 "\n"
-          DISTRIBUTION_MESSAGE_2 "\n"
+          "\n" PACKAGE_NAME " for Windows.\n\n"
+          PACKAGE " Ray Tracer Version " POV_RAY_VERSION_INFO ".\n\n"
+          DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 "\n"
+		  DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 "\n"
+          DISTRIBUTION_MESSAGE_2 ".\n"
           DISTRIBUTION_MESSAGE_3 "\n"
-          POV_RAY_COPYRIGHT "\n"
+		  DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 "\n"
+		  DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 "\n"
+		  DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 "\n\n"
+          LPUB3D_TRACE_COPYRIGHT "\n"
           DISCLAIMER_MESSAGE_1 "\n"
           DISCLAIMER_MESSAGE_2 "\n\n");
 

@@ -2,25 +2,27 @@
 ///
 /// @file windows/povconfig/syspovconfig.h
 ///
-/// Windows-specific general POV-Ray compile-time configuration.
+/// Windows-specific general LPub3D-Trace compile-time configuration.
 ///
-/// This header file configures module-independent aspects of POV-Ray for
+/// This header file configures module-independent aspects of LPub3D-Trace for
 /// running properly on a Windows platform.
 ///
-/// @author Christopher J. Cason
+/// @author Trevor SANDY<trevor.sandy@gmial.com>
+/// @author Based on POV-Ray syspovconf.h by @author Christopher J. Cason
 ///
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
+/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+/// specially for LPub3D - An LDraw Building Instruction Editor.
+/// Copyright 2017 by Trevor SANDY.
 ///
-/// POV-Ray is free software: you can redistribute it and/or modify
+/// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
 /// published by the Free Software Foundation, either version 3 of the
 /// License, or (at your option) any later version.
 ///
-/// POV-Ray is distributed in the hope that it will be useful,
+/// LPub3D-Trace is distributed in the hope that it will be useful,
 /// but WITHOUT ANY WARRANTY; without even the implied warranty of
 /// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 /// GNU Affero General Public License for more details.
@@ -30,7 +32,9 @@
 ///
 /// ----------------------------------------------------------------------------
 ///
-/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+/// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 ///
@@ -264,7 +268,7 @@ namespace pov_base
 #ifdef _CONSOLE
 
 /* Name of package */
-#define PACKAGE "POV-Ray"
+#define PACKAGE "LPub3D-Trace"
 /* Define to the full name of this package. */
 #define PACKAGE_NAME PACKAGE " Console User Interface"
 /* Supported image formats. */
@@ -278,6 +282,15 @@ namespace pov_base
 /* Base version number of package. */
 #include "..\..\source\base\version.h"
 #define VERSION_BASE OFFICIAL_GENERATION_STRING
+/* Distribution strings */
+#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE " is a modified, unofficial distribution of"
+#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 " Persistence of Vision Ray Tracer ('POV-Ray') version 3.7 compiled by:"
+/* Description strings */
+#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE " provides a rich Windows console user interface mirroring"
+#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 " most of the POV-Ray Unix console user inferface functionality."
+#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE " is developed by maintained by Trevor SANDY."
+/* Copyright string. */
+#define LPUB3D_TRACE_COPYRIGHT "Copyright 2017 Trevor SANDY"
 
 #define POV_MALLOC(size,msg)                malloc (size)
 #define POV_REALLOC(ptr,size,msg)           realloc ((ptr), (size))
@@ -323,7 +336,7 @@ namespace pov
 // use a larger buffer for more efficient parsing
 #define DEFAULT_ITEXTSTREAM_BUFFER_SIZE 65536
 
-// this adds some useful debugging information to each POV-Ray SDL object
+// this adds some useful debugging information to each LPub3D-Trace SDL object
 #if defined _DEBUG
   #define OBJECT_DEBUG_HELPER
 #endif
