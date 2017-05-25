@@ -2,23 +2,24 @@
 ///
 /// @file unix/povconfig/syspovconfig.h
 ///
-/// Unix-specific general POV-Ray compile-time configuration.
+/// Unix-specific general LPub3D-Trace compile-time configuration.
 ///
-/// This header file configures module-independent aspects of POV-Ray for
+/// This header file configures module-independent aspects of LPub3D-Trace for
 /// running properly on a Unix platform.
 ///
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
+/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+/// specially for LPub3D - An LDraw Building Instruction Editor.
+/// Copyright 2017 by Trevor SANDY.
 ///
-/// POV-Ray is free software: you can redistribute it and/or modify
+/// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
 /// published by the Free Software Foundation, either version 3 of the
 /// License, or (at your option) any later version.
 ///
-/// POV-Ray is distributed in the hope that it will be useful,
+/// LPub3D-Trace is distributed in the hope that it will be useful,
 /// but WITHOUT ANY WARRANTY; without even the implied warranty of
 /// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 /// GNU Affero General Public License for more details.
@@ -28,7 +29,9 @@
 ///
 /// ----------------------------------------------------------------------------
 ///
-/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+/// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 ///
@@ -262,5 +265,13 @@ const int NULL=0;
     #error "No Unix detected; proceed at your own risk."
     #include "syspovconfig_posix.h"
 #endif
+
+/* Distribution strings */
+#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE " is a modified, unofficial distribution of"
+#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 " Persistence of Vision Ray Tracer ('POV-Ray') version 3.7 compiled by:"
+/* Description strings */
+#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE " is developed by maintained by Trevor SANDY."
+/* Copyright string. */
+#define LPUB3D_TRACE_COPYRIGHT "Copyright 2017 Trevor SANDY"
 
 #endif // POVRAY_UNIX_SYSPOVCONFIG_H

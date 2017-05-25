@@ -5,21 +5,23 @@
 /// Processing system for options in povray.conf, command line and environment
 /// variables.
 ///
-/// @author Christoph Hormann <chris_hormann@gmx.de>
+/// @author Trevor SANDY<trevor.sandy@gmial.com>
+/// @author Based on unixiptions.cpp by Christoph Hormann <chris_hormann@gmx.de>
 /// @author Based on 3.6 elements by Nicolas Calimet
 ///
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2015 Persistence of Vision Raytracer Pty. Ltd.
+/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+/// specially for LPub3D - An LDraw Building Instruction Editor.
+/// Copyright 2017 by Trevor SANDY.
 ///
-/// POV-Ray is free software: you can redistribute it and/or modify
+/// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
 /// published by the Free Software Foundation, either version 3 of the
 /// License, or (at your option) any later version.
 ///
-/// POV-Ray is distributed in the hope that it will be useful,
+/// LPub3D-Trace is distributed in the hope that it will be useful,
 /// but WITHOUT ANY WARRANTY; without even the implied warranty of
 /// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 /// GNU Affero General Public License for more details.
@@ -29,7 +31,9 @@
 ///
 /// ----------------------------------------------------------------------------
 ///
-/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+/// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 ///
@@ -56,7 +60,7 @@ namespace vfePlatform
         UnixOptionsProcessor::Option_Info("general", "help", "off", false, "--help|-help|-h|-?", "", "display usage information"),
         UnixOptionsProcessor::Option_Info("general", "temppath", "", true, "", "POV_TEMP_DIR", "directory for temporary files"),
         UnixOptionsProcessor::Option_Info("general", "version", "off", false, "--version|-version|--V", "", "display program version"),
-        UnixOptionsProcessor::Option_Info("general", "benchmark", "off", false, "--benchmark|-benchmark", "", "run the standard POV-Ray benchmark"),
+        UnixOptionsProcessor::Option_Info("general", "benchmark", "off", false, "--benchmark|-benchmark", "", "run the standard " PACKAGE " benchmark"),
         UnixOptionsProcessor::Option_Info("", "", "", false, "", "", "") // has to be last
     };
 
@@ -71,38 +75,47 @@ namespace vfePlatform
         // Default values for I/O restrictions: everything is allowed.
         // Any restrictions must come from system or user configuration.
         m_file_io  = IO_UNSET;
-        m_shellout = SHL_UNSET;
-
+        m_shellout = SHL_UNSET;	
+		
         // system configuration file
         m_conf    = "";
         m_sysconf = POVCONFDIR "/povray.conf";
 
         // user configuration file
+#ifdef LPUB3D_OSX_BUILD
+	    m_user_dir = LPUB3D_TRACE_DEFAULT_PATH;
+        m_userconf = LPUB3D_TRACE_DEFAULT_PATH "/povray.conf";
+#else		
         if (m_home.length() > 0)
-        {
-            m_user_dir = m_home + "/." PACKAGE "/" VERSION_BASE;
-            m_userconf = m_home + "/." PACKAGE "/" VERSION_BASE "/povray.conf";
+        {			
+            m_user_dir = m_home + "/." PACKAGE;
+            m_userconf = m_home + "/." PACKAGE "/povray.conf";
         }
         else
         {
             m_user_dir = "";
             m_userconf = "";
         }
-
+#endif
         // system ini file
-        m_sysini     = POVCONFDIR "/povray.ini";
-        m_sysini_old = POVCONFDIR_BACKWARD "/povray.ini";
+        m_sysini     = POVCONFDIR "/ini/povray.ini";
+        m_sysini_old = POVCONFDIR_BACKWARD "/ini/povray.ini";
 
+#ifdef LPUB3D_OSX_BUILD
+		m_userini = LPUB3D_TRACE_DEFAULT_PATH "/ini/povray.ini";
+		m_userini_old = LPUB3D_TRACE_DEFAULT_PATH "/ini/povrayrc";
+#else
         // user ini file
         if (m_home.length() > 0)
-            m_userini = m_home + "/." PACKAGE "/" VERSION_BASE "/povray.ini";
+            m_userini = m_home + "/." PACKAGE "/povray.ini";
         else
             m_userini = "";
 
         if (m_home.length() > 0)
-            m_userini_old = m_home + "/.povrayrc";
+            m_userini_old = m_home +  "/." PACKAGE "/povrayrc";
         else
             m_userini_old = "";
+#endif
 
 #ifdef UNIX_DEBUG
         cerr << "PATHS" << endl;

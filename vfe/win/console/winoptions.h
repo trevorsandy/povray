@@ -59,12 +59,12 @@ using boost::to_lower_copy;
  * These constants don't have to be in config.h .
  */
 
-#ifndef LPUB3D_TRACE_DEFAULT_PATH
-# define LPUB3D_TRACE_DEFAULT_PATH "C:\\ProgramData\\LPub3D Software\\" PACKAGE
-#endif
-
 #ifndef LPUB3D_TRACE_USER_PATH
 # define LPUB3D_TRACE_USER_PATH "AppData\\Local\\LPub3D Software\\LPub3D\\" PACKAGE
+#endif
+
+#ifndef LPUB3D_TRACE_DEFAULT_PATH
+# define LPUB3D_TRACE_DEFAULT_PATH "C:\\ProgramData\\LPub3D Software\\" PACKAGE
 #endif
 
 #ifndef POVLIBDIR
