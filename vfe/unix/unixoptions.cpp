@@ -107,12 +107,12 @@ namespace vfePlatform
 #else
         // user ini file
         if (m_home.length() > 0)
-            m_userini = m_home + "/." PACKAGE "/povray.ini";
+            m_userini = m_home + "/." PACKAGE "/ini/povray.ini";
         else
             m_userini = "";
 
         if (m_home.length() > 0)
-            m_userini_old = m_home +  "/." PACKAGE "/povrayrc";
+            m_userini_old = m_home +  "/." PACKAGE "/ini/povray.ini";
         else
             m_userini_old = "";
 #endif
