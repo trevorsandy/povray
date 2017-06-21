@@ -285,7 +285,8 @@
 	16. CUI_README.txt.........../windows...........(New)
 	17. autobuild.cmd............/windows/vs2015....(New)
 	18. autobuild_defs.cmd......./windows/vs2015....(New)
-	
+	19. povray.conf............../windows/povconfig.(New)
+		
 	Note: Although I used VS2017 to develop the components described here.
 	I do not believe there is any material difference between VS2017 and VS2015
 	so you can substitute VS2017 for 2015.
