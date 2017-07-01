@@ -209,6 +209,7 @@ $RECYCLE.BIN/
 /ini/
 /scenes/
 /scripts/
+/unix/lpub3d_trace_cui
 
 # Files created by configure script in main directory
 /Makefile

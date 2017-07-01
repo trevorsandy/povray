@@ -4,15 +4,16 @@
 # Process this file with autoconf to produce the configure script.
 #
 # ---------------------------------------------------------------------------
-# Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-# Copyright 1991-2013 Persistence of Vision Raytracer Pty. Ltd.
+# LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+# specially for LPub3D - An LDraw Building Instruction Editor.
+# Copyright 2017 by Trevor SANDY.
 #
-# POV-Ray is free software: you can redistribute it and/or modify
+# LPub3D-Trace is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
 # published by the Free Software Foundation, either version 3 of the
 # License, or (at your option) any later version.
 #
-# POV-Ray is distributed in the hope that it will be useful,
+# LPub3D-Trace is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU Affero General Public License for more details.
@@ -20,7 +21,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-# POV-Ray is based on the popular DKB raytracer version 2.12.
+# LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+# Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+# in turn, based on the popular DKB raytracer version 2.12.
 # DKBTrace was originally written by David K. Buck.
 # DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 #---------------------------------------------------------------------------
@@ -32,9 +35,10 @@
 # $Log$
 ##############################################################################
 
-# configure.ac for the source distribution of POV-Ray 3.7 for UNIX
+# configure.ac for the source distribution of LPub3D-Trace 3.7 for UNIX
 # Written by Nicolas Calimet <nicolas.calimet@povray.org>
-# Report bugs via http://bugs.povray.org/
+# Modified by Trevor SANDY <trevor.sandy@gmail.com>
+# Report bugs via https://github.com/trevorsandy/povray/issues/
 # Based on configure.ac from POV-Ray 3.6
 
 # Required autoconf version.
@@ -94,7 +98,7 @@ AX_ARG_ENABLE([--disable-optimiz-arch],    [disable architecture-specific compil
 AX_ARG_ENABLE([--disable-pipe],            [disable usage of pipes during compilation (use temporary files instead)])
 AX_ARG_ENABLE([--disable-strip],           [disable stripping all symbols from the object files (larger binary)])
 AX_ARG_ENABLE([--disable-shared],          [disable linking with shared libraries (same as --enable-static)])
-AX_ARG_ENABLE([--disable-io-restrictions], [disable POV-Ray's mechanism for control of I/O operations])
+AX_ARG_ENABLE([--disable-io-restrictions], [disable LPub3D-Trace's mechanism for control of I/O operations])
 
 AX_ARG_WITH([--without-cygwin-dll], [],    [don't link with the Cygwin DLL (MinGW required)])
 AX_ARG_WITH([--with-zlib],          [DIR], [use the ZLIB library (in directory DIR)])
@@ -123,14 +127,14 @@ Welcome to the $PACKAGE_NAME $PACKAGE_VERSION configure script.
 
 This script will prepare the source distribution of $PACKAGE_NAME $PACKAGE_VERSION for Unix
 for compilation on this machine.  Compiling the program yourself means
-that the POV-Ray Team(tm) is not responsible for supporting this
-version, no matter if it is the unmodified official POV-Ray source code
-or a customized version.  Refer to the POV-Ray source license conditions
+that the LPub3D-Trace Team(tm) is not responsible for supporting this
+version, no matter if it is the unmodified official LPub3D-Trace source code
+or a customized version.  Refer to the LPub3D-Trace source license conditions
 that come with this package.
 
 In order to start configuration, you have to provide a valid contact
 information that will be included in the executable and displayed
-whenever POV-Ray (or a modified version of it) is started.  In case
+whenever LPub3D-Trace (or a modified version of it) is started.  In case
 you intend to distribute this binary, this information will help users
 to contact the appropriate maintainers.  To start configuring $PACKAGE_NAME
 type in the following command with your own contact information:
@@ -152,7 +156,7 @@ AC_MSG_RESULT([
 Configure $PACKAGE_NAME version $PACKAGE_VERSION
 ===============================================================================
 
-This is an unofficial version compiled by:
+This is an unofficial POV-Ray version compiled by:
  $COMPILED_BY
 The POV-Ray Team(tm) is not responsible for supporting this version.])
 
@@ -1337,7 +1341,7 @@ if test x"$pov_warn_path" != x""; then
 specified by the following environment variable(s)
  $pov_warn_path
 erroneously contain the "." directory, which may cause a build failure.
-In order to build POV-Ray successfully, the package has been configured
+In order to build LPub3D-Trace successfully, the package has been configured
 with all "." directory entries removed from the variables above.  You're
 strongly advised to correct your configuration accordingly.
 ])
@@ -1361,12 +1365,12 @@ Type 'make install' to install $PACKAGE_NAME on your system.
 
 The $PACKAGE_NAME components will be installed in the following directories:
   Program (executable):       ${povbindir}
-  System configuration files: ${povsysconfdir}/$PACKAGE/$VERSION_BASE
-  User configuration files:   ${HOME}/.$PACKAGE/$VERSION_BASE
-  Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/include
-  Standard INI files:         ${povdatadir}/$PACKAGE-$VERSION_BASE/ini
-  Standard demo scene files:  ${povdatadir}/$PACKAGE-$VERSION_BASE/scenes
-  Documentation (text, HTML): ${povdatadir}/doc/$PACKAGE-$VERSION_BASE
-  Unix man page:              ${povmandir}
+  System configuration files: ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/conf
+  User configuration files:   ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/.$PACKAGE
+  Standard include files:     ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/include
+  Standard INI files:         ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/ini
+  Standard demo scene files:  ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/scenes
+  Documentation (text, HTML): ${povdatadir}/docs/$PACKAGE-$VERSION_BASE
+  Unix man page:              ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/man
 ===============================================================================
 ])
