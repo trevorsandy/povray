@@ -581,13 +581,14 @@ case "$1" in
 # Please report bugs to $pov_config_bugreport
 
 # Directories.
-povbinbasedir = \$(prefix)/bin/@PACKAGE@-@VERSION_BASE@
-povbindir = \$(povbinbasedir)/@build_cpu@
 povlibdir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@
 povdocdir = \$(prefix)/docs/@PACKAGE@-@VERSION_BASE@
 povconfdir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/conf
+povmandir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/man
 povuser = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@
 povconfuser = \$(povuser)/.@PACKAGE@
+povbinbase = \$(prefix)/bin/@PACKAGE@-@VERSION_BASE@
+povbin = \$(povbinbase)/@build_cpu@
 povinstall = \$(top_builddir)/install.log
 povowner = @povowner@
 povgroup = @povgroup@
@@ -624,8 +625,8 @@ povconf_DATA = povray.ini
 povray.ini:
 	cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(povlibdir),g" > \$(top_builddir)/povray.ini
 
-# Install man page.
-dist_man_MANS = povray.1
+# Install man page in povmandir.
+dist_povman_DATA = povray.1
 
 # Remove all unwanted files for 'make dist(check)'.
 # Make all files user read-writeable.
@@ -668,17 +669,32 @@ install-data-local:
 	  \$(mkdir_p) \$(DESTDIR)/\$\$p && chown \$(povowner) \$(DESTDIR)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)/\$\$p && printf "%s\\n" "\$(DESTDIR)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
 	done
 	@echo "Copying user configuration and INI files..."; \\
-	\$(INSTALL_DATA) \$(top_srcdir)/povray.conf \$(DESTDIR)\$(povconfuser)/povray.conf && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.conf && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.conf && echo "\$(povconfuser)/povray.conf" >> \$(povinstall); \\
-	\$(INSTALL_DATA) \$(top_builddir)/povray.ini \$(DESTDIR)\$(povconfuser)/povray.ini && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.ini && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.ini && echo "\$(povconfuser)/povray.ini" >> \$(povinstall)
+	\$(INSTALL_DATA) \$(top_srcdir)/povray.conf \$(DESTDIR)\$(povconfuser)/povray.conf && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.conf && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.conf && echo "\$(DESTDIR)\$(povconfuser)/povray.conf" >> \$(povinstall); \\
+	\$(INSTALL_DATA) \$(top_builddir)/povray.ini \$(DESTDIR)\$(povconfuser)/povray.ini && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.ini && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.ini && echo "\$(DESTDIR)\$(povconfuser)/povray.ini" >> \$(povinstall)
+
+# Move executable to 3rd party bin location
+# Set doc, man, conf and script file permissions.
+install-data-hook:	
 	@echo "Creating \$(PACKAGE) bin directory..."; \\
-	for p in \$(povbinbasedir) \$(povbindir) ; do \\
+	for p in \$(povbinbase) \$(povbin) ; do \\
 	  \$(mkdir_p) \$\$p && chown \$(povowner) \$\$p && chgrp \$(povgroup) \$\$p && printf "%s\\n" "\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
 	done
 	@echo "Copying \$(PACKAGE) executable ..."; \\
-	\$(INSTALL_DATA) \$(bindir)/\$(PACKAGE) \$(DESTDIR)\$(povbindir)/\$(PACKAGE) && chown \$(povowner) \$(DESTDIR)\$(povbindir)/\$(PACKAGE) && chgrp \$(povgroup) \$(DESTDIR)\$(povbindir)/\$(PACKAGE) && echo "\$(DESTDIR)\$(povbindir)/\$(PACKAGE)" >> \$(povinstall)
-	@echo "Cleanup ..."; \\
-	rm -f \$(bindir)/\$(PACKAGE)
-	
+	\$(INSTALL_DATA) \$(bindir)/\$(PACKAGE) \$(DESTDIR)\$(povbin)/\$(PACKAGE) && chown \$(povowner) \$(DESTDIR)\$(povbin)/\$(PACKAGE) && chgrp \$(povgroup) \$(DESTDIR)\$(povbin)/\$(PACKAGE) && echo "\$(DESTDIR)\$(povbin)/\$(PACKAGE)" >> \$(povinstall)
+	@echo "Performing \$(PACKAGE) cleanup..."; \\
+	rm -f \$(bindir)/\$(PACKAGE) && echo "\$(bindir)/\$(PACKAGE)" >> \$(povinstall)	
+	@echo "Setting doc files permissions..."; \\
+	for f in AUTHORS ChangeLog NEWS ; do \\
+	  chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$f && echo "\$(DESTDIR)\$(povdocdir)/\$\$f" >> \$(povinstall); \\
+	done
+	@echo "Setting conf, man and script files permissions..."; \\
+	for p in conf man scripts ; do \\
+	  chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && echo "\$(DESTDIR)\$(povlibdir)/\$\$p" >> \$(povinstall); \\
+		filelist=\`find \$(DESTDIR)\$(povlibdir)/\$\$p/ -type f | sed s,\$(DESTDIR)\$(povlibdir)/\$\$p/,,\`; \\
+		for f in \$\$filelist ; do \\
+			chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p/\$\$f && echo "\$(DESTDIR)\$(povlibdir)/\$\$p/\$\$f" >> \$(povinstall); \\
+		done; \\ 
+	done
 
 # Remove data, config, and empty folders for 'make uninstall'.
 # Use 'hook' instead of 'local' so as to properly remove *empty* folders (e.g. scripts).
@@ -686,6 +702,7 @@ install-data-local:
 uninstall-hook:
 	@if test -f \$(top_builddir)/install.log ; then \\
 	  rmdir \$(DESTDIR)\$(povlibdir)/scripts; \\
+		rmdir \$(DESTDIR)\$(povbin); \\
 	  echo "Using install info from \$(top_builddir)/install.log"; \\
 	  echo "Removing data, documentation, and configuration files..."; \\
 	  for f in \`cat \$(top_builddir)/install.log\` ; do \\
@@ -698,12 +715,14 @@ uninstall-hook:
 	  echo "Removing \$(top_builddir)/install.log" && rm -f \$(top_builddir)/install.log ; \\
 	else \\
 	  "Removing all data unconditionally"; \\
-		rm -f 	 \$(DESTDIR)\$(povbindir)/$(PACKAGE); \\
 	  rm -f    \$(DESTDIR)\$(povconfdir)/povray.ini; \\
 	  rmdir    \$(DESTDIR)\$(povconfdir); \\
+		rm -f    \$(DESTDIR)\$(povmandir)/povray.1; \\
+		rmdir    \$(DESTDIR)\$(povmandir); \\
 	  rm -f    \$(DESTDIR)\$(povconfuser)/povray.conf; \\
 	  rm -f    \$(DESTDIR)\$(povconfuser)/povray.ini; \\
 	  rmdir    \$(DESTDIR)\$(povconfuser); \\
+		rm -f -r \$(DESTDIR)\$(povbinbase); \\
 	  rm -f -r \$(DESTDIR)\$(povdocdir); \\
 	  rm -f -r \$(DESTDIR)\$(povlibdir); \\
 	fi; \\
