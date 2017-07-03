@@ -1,7 +1,7 @@
 #!/bin/sh
 
 ###############################################################################
-# prebuild_lpub3d_trace_cui.sh script (maintainers only) 
+# prebuild_lpub3d_trace_cui.sh script (maintainers only)
 # Written by Nicolas Calimet and Christoph Hormann
 # Modified by Trevor SANDY <trevor.sandy@gmiil.com>
 #
@@ -291,7 +291,7 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
   # improve navigation from the keyword index by placing all link targets
   # directly in the heading section on the previous line
   for htmlfile in $files ; do
-    mv -f $htmlfile $htmlfile.temp 
+    mv -f $htmlfile $htmlfile.temp
     cat $htmlfile.temp | sed \
       '/<h[1-5]><a/ { N; s,\(<h[1-5]><a.*</a>\)\(.*\)\(</h[1-5]>\)\n\(<a id=.* name=.*></a>\)*,<!-- \2 -->\n\1\4\2\3,g }' \
       > $htmlfile
@@ -581,10 +581,12 @@ case "$1" in
 # Please report bugs to $pov_config_bugreport
 
 # Directories.
-povlibdir = @datadir@/resources/@PACKAGE@-@VERSION_BASE@
-povdocdir = @datadir@/docs/@PACKAGE@-@VERSION_BASE@
-povconfdir = @datadir@/resources/@PACKAGE@-@VERSION_BASE@/conf
-povuser = @datadir@/resources/@PACKAGE@-@VERSION_BASE@
+povbinbasedir = \$(prefix)/bin/@PACKAGE@-@VERSION_BASE@
+povbindir = \$(povbinbasedir)/@build_cpu@
+povlibdir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@
+povdocdir = \$(prefix)/docs/@PACKAGE@-@VERSION_BASE@
+povconfdir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/conf
+povuser = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@
 povconfuser = \$(povuser)/.@PACKAGE@
 povinstall = \$(top_builddir)/install.log
 povowner = @povowner@
@@ -601,7 +603,7 @@ EXTRA_DIST = \\
 
 # Additional files to clean with 'make distclean'.
 DISTCLEANFILES = \$(top_builddir)/povray.ini
-CONFIG_CLEAN_FILES = 
+CONFIG_CLEAN_FILES =
 
 # Render a test scene for 'make check'.
 # This is meant to run before 'make install'.
@@ -645,17 +647,17 @@ install-data-local:
 	dirlist=\`find \$\$list -type d | sed s,\$(top_srcdir)/,,\`; \\
 	for p in "" \$\$dirlist ; do \\
 	  \$(mkdir_p) \$(DESTDIR)\$(povlibdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povlibdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
-	done; \\  
+	done; \\
 	echo "Copying data files..."; \\
 	filelist=\`find \$\$list -type f | sed s,\$(top_srcdir)/,,\`; \\
 	for f in \$\$filelist ; do \\
 	  \$(INSTALL_DATA) \$(top_srcdir)/\$\$f \$(DESTDIR)\$(povlibdir)/\$\$f && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$f && echo "\$(DESTDIR)\$(povlibdir)/\$\$f" >> \$(povinstall); \\
-	done  
+	done
 	@echo "Creating documentation directories..."; \\
 	dirlist=\`find \$(top_srcdir)/doc/ -type d | sed s,\$(top_srcdir)/doc/,,\`; \\
 	for p in "" \$\$dirlist ; do \\
 	  \$(mkdir_p) \$(DESTDIR)\$(povdocdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povdocdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
-	done 
+	done
 	@echo "Copying documentation files..."; \\
 	filelist=\`find \$(top_srcdir)/doc/ -type f | sed s,\$(top_srcdir)/doc/,,\`; \\
 	for f in \$\$filelist ; do \\
@@ -668,6 +670,15 @@ install-data-local:
 	@echo "Copying user configuration and INI files..."; \\
 	\$(INSTALL_DATA) \$(top_srcdir)/povray.conf \$(DESTDIR)\$(povconfuser)/povray.conf && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.conf && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.conf && echo "\$(povconfuser)/povray.conf" >> \$(povinstall); \\
 	\$(INSTALL_DATA) \$(top_builddir)/povray.ini \$(DESTDIR)\$(povconfuser)/povray.ini && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.ini && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.ini && echo "\$(povconfuser)/povray.ini" >> \$(povinstall)
+	@echo "Creating \$(PACKAGE) bin directory..."; \\
+	for p in \$(povbinbasedir) \$(povbindir) ; do \\
+	  \$(mkdir_p) \$\$p && chown \$(povowner) \$\$p && chgrp \$(povgroup) \$\$p && printf "%s\\n" "\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
+	done
+	@echo "Copying \$(PACKAGE) executable ..."; \\
+	\$(INSTALL_DATA) \$(bindir)/\$(PACKAGE) \$(DESTDIR)\$(povbindir)/\$(PACKAGE) && chown \$(povowner) \$(DESTDIR)\$(povbindir)/\$(PACKAGE) && chgrp \$(povgroup) \$(DESTDIR)\$(povbindir)/\$(PACKAGE) && echo "\$(DESTDIR)\$(povbindir)/\$(PACKAGE)" >> \$(povinstall)
+	@echo "Cleanup ..."; \\
+	rm -f \$(bindir)/\$(PACKAGE)
+	
 
 # Remove data, config, and empty folders for 'make uninstall'.
 # Use 'hook' instead of 'local' so as to properly remove *empty* folders (e.g. scripts).
@@ -687,6 +698,7 @@ uninstall-hook:
 	  echo "Removing \$(top_builddir)/install.log" && rm -f \$(top_builddir)/install.log ; \\
 	else \\
 	  "Removing all data unconditionally"; \\
+		rm -f 	 \$(DESTDIR)\$(povbindir)/$(PACKAGE); \\
 	  rm -f    \$(DESTDIR)\$(povconfdir)/povray.ini; \\
 	  rmdir    \$(DESTDIR)\$(povconfdir); \\
 	  rm -f    \$(DESTDIR)\$(povconfuser)/povray.conf; \\
@@ -799,7 +811,7 @@ noinst_LIBRARIES = libpovray.a
 libpovray_a_SOURCES = \\
   `echo $files`
 
-cppflags_platformcpu = 
+cppflags_platformcpu =
 if BUILD_x86
 cppflags_platformcpu += -I\$(top_srcdir)/platform/x86
 endif
@@ -1337,7 +1349,7 @@ noinst_LIBRARIES = libvfe.a
 libvfe_a_SOURCES = \\
   `echo $files`
 
-cppflags_platformcpu = 
+cppflags_platformcpu =
 if BUILD_x86
 cppflags_platformcpu += -I\$(top_srcdir)/platform/x86
 endif
@@ -1355,9 +1367,9 @@ AM_CPPFLAGS = \\
 # They cannot be placed in config.h since they indirectly rely on \$prefix.
 DEFS = \\
   @DEFS@ \\
-  -DPOVLIBDIR=\"@datadir@/resources/@PACKAGE@-@VERSION_BASE@\" \\
-  -DPOVCONFDIR=\"@datadir@/resources/@PACKAGE@-@VERSION_BASE@/conf\" \\
-  -DPOVCONFDIR_BACKWARD=\"@datadir@/resources/@PACKAGE@-@VERSION_BASE@/conf\"
+  -DPOVLIBDIR=\"\$(prefix)/resources/@PACKAGE@-@VERSION_BASE@\" \\
+  -DPOVCONFDIR=\"\$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/conf\" \\
+  -DPOVCONFDIR_BACKWARD=\"\$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/conf\"
 pbEOF
   ;;
 esac
@@ -1447,9 +1459,9 @@ AM_CPPFLAGS = \\
 # They cannot be placed in config.h since they indirectly rely on \$prefix.
 DEFS = \\
   @DEFS@ \\
-  -DPOVLIBDIR=\"@datadir@/resources/@PACKAGE@-@VERSION_BASE@\" \\
-  -DPOVCONFDIR=\"@datadir@/resources/@PACKAGE@-@VERSION_BASE@/conf\" \\
-  -DPOVCONFDIR_BACKWARD=\"@datadir@/resources/@PACKAGE@-@VERSION_BASE@/conf\"
+  -DPOVLIBDIR=\"\$(prefix)/resources/@PACKAGE@-@VERSION_BASE@\" \\
+  -DPOVCONFDIR=\"\$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/conf\" \\
+  -DPOVCONFDIR_BACKWARD=\"\$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/conf\"
 pbEOF
   ;;
 esac

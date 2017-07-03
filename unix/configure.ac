@@ -162,6 +162,8 @@ The POV-Ray Team(tm) is not responsible for supporting this version.])
 
 AC_DEFINE_UNQUOTED([BUILT_BY], ["$COMPILED_BY"], [Who compiled this binary.])
 
+# LPu3D 3rd party installation
+pov_lpub3d_3rd_party_install="${LPUB3D_3RD_PARTY:-no}"
 
 ###############################################################################
 
@@ -1314,16 +1316,23 @@ AC_OUTPUT
 ###############################################################################
 
 # recursively expand the following variables for displaying
-for i in bindir sysconfdir datadir mandir
-do
-  eval povtemp=\$$i
-  while test x"$povtemp" != x"$oldpovtemp"
-  do
-    oldpovtemp=$povtemp
-    eval povtemp=$povtemp
-  done
-  eval pov$i=$povtemp
-done
+if test x"$pov_lpub3d_3rd_party_install" = x"no"; then
+	for i in bindir sysconfdir datadir mandir
+	do
+		eval povtemp=\$$i
+		while test x"$povtemp" != x"$oldpovtemp"
+		do
+		  oldpovtemp=$povtemp
+		  eval povtemp=$povtemp
+		done
+		eval pov$i=$povtemp
+	done
+else
+	eval povbindir=$bindir
+	eval povbindir=$povbindir
+	eval povdatadir=$prefix
+	eval povdatadir=$povdatadir
+fi
 
 AC_MSG_RESULT([
 ===============================================================================
@@ -1347,30 +1356,63 @@ strongly advised to correct your configuration accordingly.
 ])
 fi
 
-AC_MSG_RESULT([Built-in features:
-  I/O restrictions:          ${pov_io_msg}
-  X Window display:          ${pov_xwin_msg}
-  Supported image formats:   $pov_img_fmt_builtin $pov_img_fmt_enabled
-  Unsupported image formats: $pov_img_fmt_disabled
+# Check if to perform LPub3D 3rd party installation.
+if test x"$pov_lpub3d_3rd_party_install" = x"yes"; then
+	AC_MSG_RESULT([Built-in features:
+	I/O restrictions:          ${pov_io_msg}
+	X Window display:          ${pov_xwin_msg}
+	Supported image formats:   $pov_img_fmt_builtin $pov_img_fmt_enabled
+	Unsupported image formats: $pov_img_fmt_disabled
 
 Compilation settings:
-  Build architecture:  $build 
-  Built/Optimized for: $pov_built_for
-  Compiler vendor:     $pov_compiler_vendor
-  Compiler version:    $pov_compiler_version
-  Compiler flags:      $CXXFLAGS
+	Build architecture:  $build 
+	Built/Optimized for: $pov_built_for
+	Compiler vendor:     $pov_compiler_vendor
+	Compiler version:    $pov_compiler_version
+	Compiler flags:      $CXXFLAGS
 
 Type 'make check' to build the program and run a test render.
 Type 'make install' to install $PACKAGE_NAME on your system.
 
-The $PACKAGE_NAME components will be installed in the following directories:
-  Program (executable):       ${povbindir}
-  System configuration files: ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/conf
-  User configuration files:   ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/.$PACKAGE
-  Standard include files:     ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/include
-  Standard INI files:         ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/ini
-  Standard demo scene files:  ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/scenes
-  Documentation (text, HTML): ${povdatadir}/docs/$PACKAGE-$VERSION_BASE
-  Unix man page:              ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/man
+$PACKAGE_NAME will be packaged for an LPub3D 3rd party installation.
+
+The $PACKAGE_NAME components will be installed in the following directories.
+	Program (executable):       ${povbindir}/$PACKAGE-$VERSION_BASE/$build_cpu
+	System configuration files: ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/conf
+	User configuration files:   ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/.$PACKAGE
+	Standard include files:     ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/include
+	Standard INI files:         ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/ini
+	Standard demo scene files:  ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/scenes
+	Documentation (text, HTML): ${povdatadir}/docs/$PACKAGE-$VERSION_BASE
+	Unix man page:              ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/man
 ===============================================================================
 ])
+else
+	AC_MSG_RESULT([Built-in features:
+	I/O restrictions:          ${pov_io_msg}
+	X Window display:          ${pov_xwin_msg}
+	Supported image formats:   $pov_img_fmt_builtin $pov_img_fmt_enabled
+	Unsupported image formats: $pov_img_fmt_disabled
+
+Compilation settings:
+	Build architecture:  $build 
+	Built/Optimized for: $pov_built_for
+	Compiler vendor:     $pov_compiler_vendor
+	Compiler version:    $pov_compiler_version
+	Compiler flags:      $CXXFLAGS
+
+Type 'make check' to build the program and run a test render.
+Type 'make install' to install $PACKAGE_NAME on your system.
+
+The $PACKAGE_NAME components will be installed in the following directories.
+	Program (executable):       ${povbindir}
+	System configuration files: ${povsysconfdir}/$PACKAGE/$VERSION_BASE
+	User configuration files:   ${HOME}/.$PACKAGE/$VERSION_BASE
+	Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/include
+	Standard INI files:         ${povdatadir}/$PACKAGE-$VERSION_BASE/ini
+	Standard demo scene files:  ${povdatadir}/$PACKAGE-$VERSION_BASE/scenes
+	Documentation (text, HTML): ${povdatadir}/doc/$PACKAGE-$VERSION_BASE
+	Unix man page:              ${povmandir}
+===============================================================================
+])
+fi
