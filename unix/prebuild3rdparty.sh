@@ -127,7 +127,8 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
   # backward-compatible cleanup
   for file in \
     acinclude.m4 acx_pthread.m4 AUTHORS ChangeLog config/ configure.ac \
-    COPYING INSTALL NEWS README icons/ include/ ini/ povray.1 povray.conf \
+    COPYING INSTALL NEWS README CUI_README \
+    icons/ include/ ini/ povray.1 povray.conf \
     povray.ini.in scenes/ scripts/ VERSION
   do
     rm -r ../$file 2> /dev/null  &&  echo "Cleanup ../$file"
@@ -351,7 +352,8 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
   # some shells seem unable to expand properly wildcards in the list entries
   # (e.g. ../distribution/in*/).
   for file in \
-    AUTHORS ChangeLog configure.ac COPYING NEWS README VERSION \
+    AUTHORS ChangeLog configure.ac COPYING NEWS \
+    README CUI_README VERSION \
     povray.1 povray.conf \
     scripts \
     ../distribution/ini ../distribution/include ../distribution/scenes
@@ -609,13 +611,15 @@ CONFIG_CLEAN_FILES =
 # Render a test scene for 'make check'.
 # This is meant to run before 'make install'.
 check: all
-	\$(top_builddir)/unix/povray +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include
+	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include
+	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.png +w320 +h240 +UA +A
+#	\$(top_builddir)/unix/\$(PACKAGE) +I\$(top_srcdir)/lpub3d_csi.ldr.pov +O\$(top_srcdir)/lpub3d_csi.ldr.pov.png +w2549 +h1650 +UA +A
 
 # Install scripts in povlibdir.
 nobase_povlib_SCRIPTS = `echo $scriptfiles`
 
 # Install documentation in povdocdir.
-povdoc_DATA = AUTHORS ChangeLog NEWS
+povdoc_DATA = AUTHORS ChangeLog NEWS CUI_README
 
 # Install configuration and INI files in povconfdir.
 dist_povconf_DATA = povray.conf
@@ -647,26 +651,26 @@ install-data-local:
 	list='\$(top_srcdir)/icons \$(top_srcdir)/include \$(top_srcdir)/ini \$(top_srcdir)/scenes'; \\
 	dirlist=\`find \$\$list -type d | sed s,\$(top_srcdir)/,,\`; \\
 	for p in "" \$\$dirlist ; do \\
-	  \$(mkdir_p) \$(DESTDIR)\$(povlibdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povlibdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
+		\$(mkdir_p) \$(DESTDIR)\$(povlibdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povlibdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
 	done; \\
 	echo "Copying data files..."; \\
 	filelist=\`find \$\$list -type f | sed s,\$(top_srcdir)/,,\`; \\
 	for f in \$\$filelist ; do \\
-	  \$(INSTALL_DATA) \$(top_srcdir)/\$\$f \$(DESTDIR)\$(povlibdir)/\$\$f && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$f && echo "\$(DESTDIR)\$(povlibdir)/\$\$f" >> \$(povinstall); \\
+		\$(INSTALL_DATA) \$(top_srcdir)/\$\$f \$(DESTDIR)\$(povlibdir)/\$\$f && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$f && echo "\$(DESTDIR)\$(povlibdir)/\$\$f" >> \$(povinstall); \\
 	done
 	@echo "Creating documentation directories..."; \\
 	dirlist=\`find \$(top_srcdir)/doc/ -type d | sed s,\$(top_srcdir)/doc/,,\`; \\
 	for p in "" \$\$dirlist ; do \\
-	  \$(mkdir_p) \$(DESTDIR)\$(povdocdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povdocdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
+		\$(mkdir_p) \$(DESTDIR)\$(povdocdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povdocdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
 	done
 	@echo "Copying documentation files..."; \\
 	filelist=\`find \$(top_srcdir)/doc/ -type f | sed s,\$(top_srcdir)/doc/,,\`; \\
 	for f in \$\$filelist ; do \\
-	  \$(INSTALL_DATA) \$(top_srcdir)/doc/\$\$f \$(DESTDIR)\$(povdocdir)/\$\$f && chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$f && echo "\$(DESTDIR)\$(povdocdir)/\$\$f" >> \$(povinstall); \\
+		\$(INSTALL_DATA) \$(top_srcdir)/doc/\$\$f \$(DESTDIR)\$(povdocdir)/\$\$f && chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$f && echo "\$(DESTDIR)\$(povdocdir)/\$\$f" >> \$(povinstall); \\
 	done
 	@echo "Creating user directories..."; \\
 	for p in \$(povuser) \$(povconfuser) ; do \\
-	  \$(mkdir_p) \$(DESTDIR)/\$\$p && chown \$(povowner) \$(DESTDIR)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)/\$\$p && printf "%s\\n" "\$(DESTDIR)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
+		\$(mkdir_p) \$(DESTDIR)/\$\$p && chown \$(povowner) \$(DESTDIR)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)/\$\$p && printf "%s\\n" "\$(DESTDIR)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
 	done
 	@echo "Copying user configuration and INI files..."; \\
 	\$(INSTALL_DATA) \$(top_srcdir)/povray.conf \$(DESTDIR)\$(povconfuser)/povray.conf && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.conf && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.conf && echo "\$(DESTDIR)\$(povconfuser)/povray.conf" >> \$(povinstall); \\
@@ -674,59 +678,62 @@ install-data-local:
 
 # Move executable to 3rd party bin location
 # Set doc, man, conf and script file permissions.
-install-data-hook:	
-	@echo "Creating \$(PACKAGE) bin directory..."; \\
+install-data-hook:
+	@echo "Creating 3rdParyt distribution bin directory..."; \\
 	for p in \$(povbinbase) \$(povbin) ; do \\
-	  \$(mkdir_p) \$\$p && chown \$(povowner) \$\$p && chgrp \$(povgroup) \$\$p && printf "%s\\n" "\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
+		\$(mkdir_p) \$\$p && chown \$(povowner) \$\$p && chgrp \$(povgroup) \$\$p && printf "%s\\n" "\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
 	done
-	@echo "Copying \$(PACKAGE) executable ..."; \\
+	@echo "Copying \$(PACKAGE) executable..."; \\
 	\$(INSTALL_DATA) \$(bindir)/\$(PACKAGE) \$(DESTDIR)\$(povbin)/\$(PACKAGE) && chown \$(povowner) \$(DESTDIR)\$(povbin)/\$(PACKAGE) && chgrp \$(povgroup) \$(DESTDIR)\$(povbin)/\$(PACKAGE) && echo "\$(DESTDIR)\$(povbin)/\$(PACKAGE)" >> \$(povinstall)
-	@echo "Performing \$(PACKAGE) cleanup..."; \\
-	rm -f \$(bindir)/\$(PACKAGE) && echo "\$(bindir)/\$(PACKAGE)" >> \$(povinstall)	
-	@echo "Setting doc files permissions..."; \\
-	for f in AUTHORS ChangeLog NEWS ; do \\
-	  chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$f && echo "\$(DESTDIR)\$(povdocdir)/\$\$f" >> \$(povinstall); \\
+	@echo "Setting \$(PACKAGE) permissions..."; \\
+	chmod 755 \$(DESTDIR)\$(povbin)/\$(PACKAGE) && echo "\$(DESTDIR)\$(povbin)/\$(PACKAGE)" >> \$(povinstall)
+	@echo "Performing cleanup..."; \\
+	rm -f \$(bindir)/\$(PACKAGE) && echo "\$(bindir)/\$(PACKAGE)" >> \$(povinstall)
+	@echo "Setting doc files ownership..."; \\
+	for f in AUTHORS ChangeLog NEWS CUI_README ; do \\
+		chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$f && echo "\$(DESTDIR)\$(povdocdir)/\$\$f" >> \$(povinstall); \\
 	done
-	@echo "Setting conf, man and script files permissions..."; \\
+	@echo "Setting conf, man and script files ownership..."; \\
 	for p in conf man scripts ; do \\
-	  chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && echo "\$(DESTDIR)\$(povlibdir)/\$\$p" >> \$(povinstall); \\
+		chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && echo "\$(DESTDIR)\$(povlibdir)/\$\$p" >> \$(povinstall); \\
 		filelist=\`find \$(DESTDIR)\$(povlibdir)/\$\$p/ -type f | sed s,\$(DESTDIR)\$(povlibdir)/\$\$p/,,\`; \\
 		for f in \$\$filelist ; do \\
 			chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p/\$\$f && echo "\$(DESTDIR)\$(povlibdir)/\$\$p/\$\$f" >> \$(povinstall); \\
-		done; \\ 
-	done
+		done; \\
+	done; \\
+	echo "\$(PACKAGE) install finished"
 
 # Remove data, config, and empty folders for 'make uninstall'.
 # Use 'hook' instead of 'local' so as to properly remove *empty* folders (e.g. scripts).
 # The last echo prevents getting error from failed rmdir command.
 uninstall-hook:
 	@if test -f \$(top_builddir)/install.log ; then \\
-	  rmdir \$(DESTDIR)\$(povlibdir)/scripts; \\
+		rmdir \$(DESTDIR)\$(povlibdir)/scripts; \\
 		rmdir \$(DESTDIR)\$(povbin); \\
-	  echo "Using install info from \$(top_builddir)/install.log"; \\
-	  echo "Removing data, documentation, and configuration files..."; \\
-	  for f in \`cat \$(top_builddir)/install.log\` ; do \\
-	    test -f \$\$f && rm -f \$\$f ; \\
-	  done; \\
-	  echo "Removing empty directories..."; \\
-	  for f in \`cat \$(top_builddir)/install.log\` ; do \\
-	    test -d \$\$f && rmdir \$\$f ; \\
-	  done; \\
-	  echo "Removing \$(top_builddir)/install.log" && rm -f \$(top_builddir)/install.log ; \\
+		echo "Using install info from \$(top_builddir)/install.log"; \\
+		echo "Removing data, documentation, and configuration files..."; \\
+		for f in \`cat \$(top_builddir)/install.log\` ; do \\
+			test -f \$\$f && rm -f \$\$f ; \\
+		done; \\
+		echo "Removing empty directories..."; \\
+		for f in \`cat \$(top_builddir)/install.log\` ; do \\
+			test -d \$\$f && rmdir \$\$f ; \\
+		done; \\
+		echo "Removing \$(top_builddir)/install.log" && rm -f \$(top_builddir)/install.log ; \\
 	else \\
-	  "Removing all data unconditionally"; \\
-	  rm -f    \$(DESTDIR)\$(povconfdir)/povray.ini; \\
-	  rmdir    \$(DESTDIR)\$(povconfdir); \\
+		echo "Removing all data unconditionally"; \\
+		rm -f    \$(DESTDIR)\$(povconfdir)/povray.ini; \\
+		rmdir    \$(DESTDIR)\$(povconfdir); \\
 		rm -f    \$(DESTDIR)\$(povmandir)/povray.1; \\
 		rmdir    \$(DESTDIR)\$(povmandir); \\
-	  rm -f    \$(DESTDIR)\$(povconfuser)/povray.conf; \\
-	  rm -f    \$(DESTDIR)\$(povconfuser)/povray.ini; \\
-	  rmdir    \$(DESTDIR)\$(povconfuser); \\
+		rm -f    \$(DESTDIR)\$(povconfuser)/povray.conf; \\
+		rm -f    \$(DESTDIR)\$(povconfuser)/povray.ini; \\
+		rmdir    \$(DESTDIR)\$(povconfuser); \\
 		rm -f -r \$(DESTDIR)\$(povbinbase); \\
-	  rm -f -r \$(DESTDIR)\$(povdocdir); \\
-	  rm -f -r \$(DESTDIR)\$(povlibdir); \\
+		rm -f -r \$(DESTDIR)\$(povdocdir); \\
+		rm -f -r \$(DESTDIR)\$(povlibdir); \\
 	fi; \\
-	echo "Uninstall finished"
+	echo "\$(PACKAGE) uninstall finished"
 pbEOF
   ;;
 esac
@@ -1508,7 +1515,7 @@ case "$1" in
   echo "Run $dir/bootstrap"
   ok=`cd $dir/; ./bootstrap`
   # post-process DIST_COMMON in unix/Makefile.in
-  for file in AUTHORS COPYING NEWS README configure.ac ChangeLog; do
+  for file in AUTHORS COPYING NEWS README CUI_README configure.ac ChangeLog; do
     sed "s,$file,,g" ./Makefile.in > ./Makefile.in.tmp
     mv -f ./Makefile.in.tmp ./Makefile.in
   done

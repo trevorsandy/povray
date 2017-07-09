@@ -179,6 +179,7 @@ $RECYCLE.BIN/
 /Makefile.in
 /NEWS
 /README
+/CUI_README
 /VERSION
 /aclocal.m4
 /bootstrap
@@ -227,6 +228,8 @@ $RECYCLE.BIN/
 
 # Files created by make in main directory
 /povray.ini
+# Files created by make check in main directory
+/biscuit.pov.png
 # Files created by make in specific subdirectories
 /unix/povray
 # Files created by make in various subdirectories

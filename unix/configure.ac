@@ -107,7 +107,7 @@ AX_ARG_WITH([--with-libjpeg],       [DIR], [use the JPEG library (in directory D
 AX_ARG_WITH([--with-libtiff],       [DIR], [use the TIFF library (in directory DIR)])
 AX_ARG_WITH([--with-libsdl],        [DIR], [use the SDL library (in directory DIR)])
 AX_ARG_WITH([--with-libmkl],        [DIR], [use the Intel(R) Math Kernel Library (in directory DIR)])
-AX_ARG_WITH([--with-openexr],       [DIR], [use the OpenEXR library (in directory DIR)]) 
+AX_ARG_WITH([--with-openexr],       [DIR], [use the OpenEXR library (in directory DIR)])
 
 AC_ARG_VAR([COMPILED_BY], [customize the "unofficial version" message (required argument)])
 AC_ARG_VAR([NON_REDISTRIBUTABLE_BUILD], [see the installation documentation])
@@ -156,7 +156,7 @@ AC_MSG_RESULT([
 Configure $PACKAGE_NAME version $PACKAGE_VERSION
 ===============================================================================
 
-This is an unofficial POV-Ray version compiled by:
+$PACKAGE_NAME is an unofficial POV-Ray version compiled by:
  $COMPILED_BY
 The POV-Ray Team(tm) is not responsible for supporting this version.])
 
@@ -269,7 +269,7 @@ if test x"$with_cygwin_dll" = x"no"; then
             [
               LDFLAGS="$LDFLAGS $pov_flags"
               # -D__CYGWIN is required for tiffio.h (incl. in tiff_pov.cpp)
-              CPPFLAGS="$CPPFLAGS -D__CYGWIN $pov_flags" 
+              CPPFLAGS="$CPPFLAGS -D__CYGWIN $pov_flags"
             ],
             [with_cygwin_dll="yes"]
           )
@@ -362,7 +362,7 @@ AC_DEFINE([USE_OFFICIAL_BOOST], [], [Use the official Boost libraries.])
 # Intel Math Kernel library
 pov_save_ldflags="$LDFLAGS"
 test x"$with_libmkl" != x"" && test x"$with_libmkl" != x"no" && LDFLAGS="-L$with_libmkl $LDFLAGS"
-AC_CHECK_LIB([mkl], [sin]) 
+AC_CHECK_LIB([mkl], [sin])
 test x"$ac_cv_lib_mkl_sin" = x"no" && LDFLAGS="$pov_save_ldflags"
 
 # libm
@@ -479,7 +479,7 @@ if test x"$with_cygwin_dll" = x"no"; then
   AC_DEFINE([X_DISPLAY_MISSING], [], [Don't use the X Window System.])
   pov_xwin_msg="disabled"
 
-else 
+else
 
   # libX11
   # first add default paths to help finding X11
@@ -1365,13 +1365,14 @@ if test x"$pov_lpub3d_3rd_party_install" = x"yes"; then
 	Unsupported image formats: $pov_img_fmt_disabled
 
 Compilation settings:
-	Build architecture:  $build 
+	Build architecture:  $build
 	Built/Optimized for: $pov_built_for
 	Compiler vendor:     $pov_compiler_vendor
 	Compiler version:    $pov_compiler_version
 	Compiler flags:      $CXXFLAGS
 
-Type 'make check' to build the program and run a test render.
+Type 'make' to build $PACKAGE_NAME
+Type 'make check' to build $PACKAGE_NAME and run a test render.
 Type 'make install' to install $PACKAGE_NAME on your system.
 
 $PACKAGE_NAME will be packaged for an LPub3D 3rd party installation.
@@ -1395,13 +1396,14 @@ else
 	Unsupported image formats: $pov_img_fmt_disabled
 
 Compilation settings:
-	Build architecture:  $build 
+	Build architecture:  $build
 	Built/Optimized for: $pov_built_for
 	Compiler vendor:     $pov_compiler_vendor
 	Compiler version:    $pov_compiler_version
 	Compiler flags:      $CXXFLAGS
 
-Type 'make check' to build the program and run a test render.
+Type 'make' to build $PACKAGE_NAME
+Type 'make check' to build $PACKAGE_NAME and run a test render.
 Type 'make install' to install $PACKAGE_NAME on your system.
 
 The $PACKAGE_NAME components will be installed in the following directories.
