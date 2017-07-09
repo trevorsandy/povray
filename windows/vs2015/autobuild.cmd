@@ -29,6 +29,7 @@ SET CONFIGURATION=unknown
 SET PROJECT=unknown
 SET CONSOLE=unknown
 SET VERBOSE=unknown
+SET CHECK=unknown
 
 :: Check if invalid platform flag
 IF NOT [%1]==[] (
@@ -70,7 +71,9 @@ IF NOT [%2]==[] (
 	IF NOT "%2"=="-rel" (
 		IF NOT "%2"=="-avx" (
 			IF NOT "%2"=="-ins" (
-				IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+				IF NOT "%2"=="-chk" (
+					IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+				)
 			)
 		)
 	)
@@ -108,9 +111,13 @@ IF /I "%2"=="-ins" (
 	SET SET CONFIGURATION=Release
 	GOTO :BUILD
 )
+:: Perform quick check
+IF /I "%2"=="-chk" (
+	SET CHECK=1
+	GOTO :BUILD
+)
 
 :: If we get here display invalid command message
-echo  WHAT!!! WE GOT THERE
 GOTO :COMMAND_ERROR
 
 :SET_AVX
@@ -139,10 +146,12 @@ IF NOT [%3]==[] (
 IF /I "%3"=="-gui" (
 	SET CONSOLE=0
 	SET PROJECT=povray.sln
-) ELSE (
+)
+IF /I "%3"=="-cui" (
 	SET CONSOLE=1
 	SET PROJECT=console.vcxproj
 )
+
 :: Check if invalid verbose flag
 IF NOT [%4]==[] (
 	IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
@@ -161,7 +170,7 @@ IF /I "%4"=="-verbose" (
 :: Check if build all platforms
 IF /I "%PLATFORM%"=="-allcui" (
 	SET CONFIGURATION=Release
-  GOTO :BUILD_ALL_CUI
+	GOTO :BUILD_ALL_CUI
 )
 
 :: Display build project message
@@ -183,8 +192,10 @@ ECHO.
 
 :: Launch msbuild
 msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT%
-ECHO.
-GOTO :END
+:: Perform build check if specified
+IF %CHECK%==1 CALL :CHECK_BUILD %PLATFORM%
+:: Finish
+EXIT /b
 
 :BUILD_ALL_CUI
 :: Set CUI statically
@@ -206,14 +217,17 @@ ECHO   BUILD_DEFINES.....[%PovBuildDefs%]
 
 :: Launch msbuild across all CUI platform builds
 FOR %%P IN ( Win32, x64 ) DO (
-	:: Display the build configuration and platform settings
 	ECHO.
-  ECHO --All CUI Platforms: Building %CONFIGURATION% Configuration for %%P Platform...
-  ECHO.
-  msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT%
+	ECHO --All CUI Platforms: Building %CONFIGURATION% Configuration for %%P Platform...
+	ECHO.
+	msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT%
+	:: Perform build check if specified
+	IF %CHECK%==1 CALL :CHECK_BUILD %%P
 )
+:: Perform 3rd party install if specified
 IF %THIRD_INSTALL%==1 GOTO :3RD_PARTY_INSTALL
-GOTO :END
+:: Finish
+EXIT /b
 
 :3RD_PARTY_INSTALL
 ECHO.
@@ -221,19 +235,19 @@ ECHO -Copying 3rd party distribution files...
 ECHO.
 ECHO -Copying 32bit exe...
 IF NOT EXIST "%DIST_DIR_ROOT%\bin\%APPNAME%-%VERSION%\i386\" (
-  MKDIR "%DIST_DIR_ROOT%\bin\%APPNAME%-%VERSION%\i386\"
+	MKDIR "%DIST_DIR_ROOT%\bin\%APPNAME%-%VERSION%\i386\"
 )
 COPY /V /Y "bin32\%APPNAME%32.exe" "%DIST_DIR_ROOT%\bin\%APPNAME%-%VERSION%\i386\" /B
 
 ECHO -Copying 64bit exe...
 IF NOT EXIST "%DIST_DIR_ROOT%\bin\%APPNAME%-%VERSION%\x86_64\" (
-  MKDIR "%DIST_DIR_ROOT%\bin\%APPNAME%-%VERSION%\x86_64\"
+	MKDIR "%DIST_DIR_ROOT%\bin\%APPNAME%-%VERSION%\x86_64\"
 )
 COPY /V /Y "bin64\%APPNAME%64.exe" "%DIST_DIR_ROOT%\bin\%APPNAME%-%VERSION%\x86_64\" /B
 
 ECHO -Copying Documentaton...
 IF NOT EXIST "%DIST_DIR_ROOT%\docs\%APPNAME%-%VERSION%\" (
-  MKDIR "%DIST_DIR_ROOT%\docs\%APPNAME%-%VERSION%\"
+	MKDIR "%DIST_DIR_ROOT%\docs\%APPNAME%-%VERSION%\"
 )
 SET DIST_DIR="%DIST_DIR_ROOT%\docs\%APPNAME%-%VERSION%"
 SET DIST_SRC="..\..\distribution\platform-specific\windows"
@@ -246,7 +260,7 @@ rem COPY /V /Y "..\..\unix\AUTHORS" "%DIST_DIR%\AUTHORS.txt" /A
 
 ECHO -Copying Resources...
 IF NOT EXIST "%DIST_DIR_ROOT%\resources\%APPNAME%-%VERSION%\" (
-  MKDIR "%DIST_DIR_ROOT%\resources\%APPNAME%-%VERSION%\"
+	MKDIR "%DIST_DIR_ROOT%\resources\%APPNAME%-%VERSION%\"
 )
 SET DIST_DIR="%DIST_DIR_ROOT%\resources\%APPNAME%-%VERSION%"
 rem XCOPY /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
@@ -254,12 +268,12 @@ rem XCOPY /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
 rem XCOPY /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
 rem XCOPY /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 IF NOT EXIST "%DIST_DIR%\conf\" (
-  MKDIR "%DIST_DIR%\conf\"
+	MKDIR "%DIST_DIR%\conf\"
 )
 COPY /V /Y "..\povconfig\povray.conf" "%DIST_DIR%\conf\povray.conf" /A
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\conf\povray.ini" /A
-ECHO.
-GOTO :END
+:: Finish
+EXIT /b
 
 :PROJECT_MESSAGE
 SET OPTION=Build Graphic User Interface (GUI) solution...
@@ -273,6 +287,20 @@ SET STATE=Verbose tracing is OFF - Default
 IF %1==1 SET STATE=Verbose tracing is ON
 ECHO.
 ECHO -%STATE%
+EXIT /b
+
+:CHECK_BUILD
+IF %1==Win32 SET PL=32
+IF %1==x64 SET PL=64
+ECHO.
+ECHO --Check %CONFIGURATION% Configuration, %PL%bit Platform...
+ECHO.
+ECHO --Command: %APPNAME%%PL%.exe +I"tests\csi.ldr.pov" +O"tests\csi.ldr.pov.%PL%bit.png" +w2549 +h1650 +UA +A
+ECHO.
+IF EXIST "tests\csi.ldr.pov.%PL%bit.png" (
+	DEL /Q "tests\csi.ldr.pov.%PL%bit.png"
+)
+bin%PL%\%APPNAME%%PL%.exe +I"tests\csi.ldr.pov" +O"tests\csi.ldr.pov.%PL%bit.png" +w2549 +h1650 +UA +A
 EXIT /b
 
 :PLATFORM_ERROR
@@ -332,7 +360,7 @@ ECHO However, you are free to reconfigue this script to use different components
 ECHO.
 ECHO Usage:
 ECHO autobuild [ -help ]
-ECHO autobuild [ -allcui ^| x86 ^| x86_64 ^| ] [-rel ^| -avx ^| sse2 ^| -ins ] [-cui ^| -gui] [ -verbose ]
+ECHO autobuild [ -allcui ^| x86 ^| x86_64 ^| ] [ -rel ^| -avx ^| sse2 ^| -ins ^| -chk ] [-cui ^| -gui] [ -verbose ]
 ECHO.
 ECHO Build 64bit, AVX-Release CUI project example:
 ECHO autobuild x86_64 -avx
@@ -358,6 +386,7 @@ EChO  -rel......2.Configuration flag - [Default] Release, no extensions (must be
 ECHO  -avx......2.Configuraiton flag - AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
 ECHO  -sse2.....2.Configuration flag - SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
 ECHO  -ins......2.Project flag - Install distribution as LPub3D 3rd party installation
+ECHO  -chk......2.Project flag - Perform a quick image redering check
 ECHO  -cui......3.Project flag - [Default] Build Console User Interface (CUI) project (must be preceded by a configuration flag).
 ECHO  -gui......3.Project flag - Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
 ECHO  -verbose..4.Output flag - Display verbose output. Useful for debugging (must be preceded by -cui flag).

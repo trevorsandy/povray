@@ -39,6 +39,7 @@
 # MSTest test Results
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
+windows/vs2015/tests/*.png
 
 *_i.c
 *_p.c
@@ -150,10 +151,10 @@ $RECYCLE.BIN/
 # POV-Ray Library auto-generated artefacts
 # ========================================
 /libraries/ilmbase/Half/eLut.h
-/libraries/ilmbase/Half/toFloat.h 
-/libraries/png/pnglibconf.h 
-/libraries/tiff/libtiff/tif_config.h 
-/libraries/tiff/libtiff/tiffconf.h 
+/libraries/ilmbase/Half/toFloat.h
+/libraries/png/pnglibconf.h
+/libraries/tiff/libtiff/tif_config.h
+/libraries/tiff/libtiff/tiffconf.h
 
 # ===============================
 # POV-Ray Windows build artefacts
