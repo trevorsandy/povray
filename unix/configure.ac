@@ -469,6 +469,20 @@ if test x"$with_openexr" = x"no"; then
   AC_MSG_RESULT([no])
 else
   AC_MSG_RESULT([yes])
+  if test x"$with_openexr" != x""; then
+    AC_MSG_CHECKING([for --with-openexr pkgconfig])
+    ax_PKG_CONFIG_DIR="$with_openexr/pkgconfig"
+    AS_IF([ test -d "$ax_PKG_CONFIG_DIR" ], [
+      dnl On MacOS, the homebrew version of OpenEXR is throws an undefined reference error
+      dnl If using git repo built version, set the local pkgconfig directory
+      eval "export PKG_CONFIG_PATH=\"$ax_PKG_CONFIG_DIR:$PKG_CONFIG_PATH\""
+      CPPFLAGS="-I$ax_PKG_CONFIG_DIR/../../include $CPPFLAGS"
+      LDFLAGS="-L$ax_PKG_CONFIG_DIR/../../lib $LDFLAGS"
+      AC_MSG_RESULT([found])
+    ],
+      AC_MSG_RESULT([not found])
+    )
+  fi
   AX_CHECK_OPENEXR([$required_openexr_version])
   if test x"$ax_check_openexr" = x"ok"; then
     pov_libopenexr=ok
