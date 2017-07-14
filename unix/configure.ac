@@ -114,6 +114,7 @@ AX_ARG_WITH([--with-macosx-version-min],  [VER], [use the MacOS SDK deployment t
 AC_ARG_VAR([COMPILED_BY], [customize the "unofficial version" message (required argument)])
 AC_ARG_VAR([NON_REDISTRIBUTABLE_BUILD], [see the installation documentation])
 AC_ARG_VAR([C99_COMPATIBLE_RADIOSITY], [adapt radiosity code to non-IEEE 754 floating point, requires ISO C99 compiler and library (see octree.cpp for details)])
+AC_ARG_VAR([LPUB3D_3RD_PARTY], [create LPub3D 3rd party install bundle])
 
 
 ###############################################################################
