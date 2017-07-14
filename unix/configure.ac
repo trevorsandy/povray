@@ -100,14 +100,16 @@ AX_ARG_ENABLE([--disable-strip],           [disable stripping all symbols from t
 AX_ARG_ENABLE([--disable-shared],          [disable linking with shared libraries (same as --enable-static)])
 AX_ARG_ENABLE([--disable-io-restrictions], [disable LPub3D-Trace's mechanism for control of I/O operations])
 
-AX_ARG_WITH([--without-cygwin-dll], [],    [don't link with the Cygwin DLL (MinGW required)])
-AX_ARG_WITH([--with-zlib],          [DIR], [use the ZLIB library (in directory DIR)])
-AX_ARG_WITH([--with-libpng],        [DIR], [use the PNG library (in directory DIR)])
-AX_ARG_WITH([--with-libjpeg],       [DIR], [use the JPEG library (in directory DIR)])
-AX_ARG_WITH([--with-libtiff],       [DIR], [use the TIFF library (in directory DIR)])
-AX_ARG_WITH([--with-libsdl],        [DIR], [use the SDL library (in directory DIR)])
-AX_ARG_WITH([--with-libmkl],        [DIR], [use the Intel(R) Math Kernel Library (in directory DIR)])
-AX_ARG_WITH([--with-openexr],       [DIR], [use the OpenEXR library (in directory DIR)])
+AX_ARG_WITH([--without-cygwin-dll],       [],    [don't link with the Cygwin DLL (MinGW required)])
+AX_ARG_WITH([--with-zlib],                [DIR], [use the ZLIB library (in directory DIR)])
+AX_ARG_WITH([--with-libpng],              [DIR], [use the PNG library (in directory DIR)])
+AX_ARG_WITH([--with-libjpeg],             [DIR], [use the JPEG library (in directory DIR)])
+AX_ARG_WITH([--with-libtiff],             [DIR], [use the TIFF library (in directory DIR)])
+AX_ARG_WITH([--with-libsdl],              [DIR], [use the SDL library (in directory DIR)])
+AX_ARG_WITH([--with-libmkl],              [DIR], [use the Intel(R) Math Kernel Library (in directory DIR)])
+AX_ARG_WITH([--with-openexr],             [DIR], [use the OpenEXR library (in directory DIR)])
+AX_ARG_WITH([--with-macosx-sdk],          [DIR], [use the MacOS SDK (in directory DIR)])
+AX_ARG_WITH([--with-macosx-version-min],  [VER], [use the MacOS SDK deployment target (version)])
 
 AC_ARG_VAR([COMPILED_BY], [customize the "unofficial version" message (required argument)])
 AC_ARG_VAR([NON_REDISTRIBUTABLE_BUILD], [see the installation documentation])
@@ -227,6 +229,13 @@ AC_DEFINE_UNQUOTED([COMPILER_VENDOR], ["$pov_compiler_vendor"], [Compiler vendor
 AC_DEFINE_UNQUOTED([COMPILER_VERSION], ["$pov_compiler_version"], [Compiler version.])
 AC_DEFINE_UNQUOTED([POV_COMPILER_INFO], ["$pov_compiler_version @ $build"], [Compiler version (processed).])
 
+# Check if building on MacOS.
+case "$build" in
+  *darwin*)
+    ax_MacOS_build="yes"
+    AC_DEFINE([ALTMAIN], [], [Building on MacOS, use vfe main.])
+  ;;
+esac
 
 # Not necessary when AM_MAINTAINER_MODE is called above.
 ###AC_PROG_MAKE_SET
@@ -482,20 +491,24 @@ if test x"$with_cygwin_dll" = x"no"; then
 else
 
   # libX11
-  # first add default paths to help finding X11
-  test x"$x_includes"  = x"NONE" && x_includes="/usr/include"
-  test x"$x_libraries" = x"NONE" && x_libraries="/usr/lib"
+  # first add default paths to help find X11
+  if test x"$ax_MacOS_build" = x"yes" && test -d "/usr/X11"; then
+    test x"$x_includes"  = x"NONE" && x_includes="/usr/X11/include"
+    test x"$x_libraries" = x"NONE" && x_libraries="/usr/X11/lib"
+  else
+    test x"$x_includes"  = x"NONE" && x_includes="/usr/include"
+    test x"$x_libraries" = x"NONE" && x_libraries="/usr/lib"
+  fi
 
   pov_xwin_msg="disabled"
   AC_PATH_XTRA
   if test x"$have_x" = x"yes"; then
+    CPPFLAGS="$CPPFLAGS $X_CFLAGS"                # append
+    LDFLAGS="$LDFLAGS $X_LIBS"                    # append
     AC_CHECK_HEADER([X11/Xlib.h],
       [
         AC_CHECK_LIB([X11], [XFlush],
           [
-            # X_CFLAGS should actually be X_CPPFLAGS since it only adds -Idir
-            CPPFLAGS="$CPPFLAGS $X_CFLAGS"  # append
-            LDFLAGS="$LDFLAGS $X_LIBS"      # append
             LIBS="$X_PRE_LIBS -lX11 $X_EXTRA_LIBS $LIBS"  # $PTHREAD_LIBS is already in $LIBS
             pov_xwin_msg="enabled"
           ],
@@ -567,6 +580,105 @@ else
 
 fi  # with_cygwin_dll
 
+# MacOS SDK.
+if test x"$ax_MacOS_build" = x"yes"; then
+
+  dnl Capture command line input
+  ax_USE_MACOSX_SDK="$with_macosx_sdk"
+  ax_USE_MACOSX_VERSION_MIN="$with_macosx_version_min"
+
+  dnl Set up the Mac OS X SDK.  We do this early so configure tests will occur
+  dnl with the SDK in place.
+  dnl NOTE: We clobber ax_USE_MACOSX_SDK with the SDK path
+  if test x"$ax_USE_MACOSX_SDK" = x"no"; then
+      ax_USE_MACOSX_SDK=
+  elif test x"$ax_USE_MACOSX_SDK" = x"yes"; then
+      AC_MSG_CHECKING([for default MacOS SDK])
+      if test -d "/usr/bin/xcrun"; then
+        ax_USE_MACOSX_SDK=`/usr/bin/xcrun --show-sdk-path -sdk macosx`
+        AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
+      elif test -d "/Developer/SDKs/MacOSX.sdk"; then
+        ax_USE_MACOSX_SDK="/Developer/SDKs/MacOSX.sdk"
+        AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
+      else
+        AC_MSG_FAILURE([not found])
+      fi
+  fi
+
+  if test x"$ax_USE_MACOSX_SDK" != x""; then
+      AC_MSG_CHECKING([for SDK directory $ax_USE_MACOSX_SDK])
+      if ! test -d "$ax_USE_MACOSX_SDK"; then
+          AC_MSG_FAILURE([not found])
+      else
+          AC_MSG_RESULT([exists])
+      fi
+      MACOSX_SDK_OPTS="-isysroot $ax_USE_MACOSX_SDK"
+      eval "CC=\"$CC $MACOSX_SDK_OPTS\""
+      eval "CXX=\"$CXX $MACOSX_SDK_OPTS\""
+      eval "LD=\"$LD $MACOSX_SDK_OPTS\""
+      retest_macosx_linking=yes
+      dnl NOTE: When libtool is used in lieu of AR/RANLIB (i.e. in static mode)
+      dnl the syslibroot makes no difference.  We aren't using libtool now but
+      dnl if we ever did, be aware that you don't need to worry about it.
+  fi
+
+  dnl Set up the deployment target
+  dnl No   : Don't specify a min version even if using an SDK
+  dnl Yes  : Use the version from the SDK if used, otherwise same as no
+  dnl Param: Use the specified version
+  if test x"$ax_USE_MACOSX_VERSION_MIN" = x"no"; then
+      ax_USE_MACOSX_VERSION_MIN=
+  elif test x"$ax_USE_MACOSX_VERSION_MIN" = x"yes"; then
+      if test x"$ax_USE_MACOSX_SDK" != x""; then
+          AC_MSG_CHECKING([SDK deployment version])
+  dnl We need to quote the next line where we don't need macros and do need [] in the regex
+  [
+          MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" buildSettings | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
+  ]
+          # If that failed, try again with the new key
+          if test x"$MACOSX_SDK_PLIST_VERSION_MIN" == x""; then
+  [
+              MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" DefaultProperties | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
+  ]
+          fi
+
+          if test x"$MACOSX_SDK_PLIST_VERSION_MIN" != x""; then
+              ax_USE_MACOSX_VERSION_MIN=$MACOSX_SDK_PLIST_VERSION_MIN
+              AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
+          else
+              AC_MSG_WARN([Could not determine deployment target from SDKSettings.plist])
+              ax_USE_MACOSX_VERSION_MIN=
+          fi
+      else
+          ax_USE_MACOSX_VERSION_MIN=
+      fi
+  fi
+
+  if test x"$ax_USE_MACOSX_VERSION_MIN" != x""; then
+      AC_MSG_CHECKING([SDK deployment version])
+      AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
+      MACOSX_VERSION_MIN_OPTS="-mmacosx-version-min=$ax_USE_MACOSX_VERSION_MIN"
+      eval "CC=\"$CC $MACOSX_VERSION_MIN_OPTS\""
+      eval "CXX=\"$CXX $MACOSX_VERSION_MIN_OPTS\""
+      eval "LD=\"$LD $MACOSX_VERSION_MIN_OPTS\""
+      retest_macosx_linking=yes
+  fi
+
+  dnl If either an SDK or a version option was added, make sure that we can
+  dnl still compile and link both C and C++.  If we didn't do this, then most
+  dnl of the remaining tests would fail.
+  if test x"$retest_macosx_linking" = x"yes"; then
+      AC_LANG_PUSH(C)
+      AC_MSG_CHECKING([if C compiler works with SDK/version options])
+      AC_TRY_LINK([],[],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
+      AC_LANG_POP()
+
+      AC_LANG_PUSH(C++)
+      AC_MSG_CHECKING([if C++ compiler works with SDK/version options])
+      AC_TRY_LINK([],[],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
+      AC_LANG_POP()
+  fi
+fi
 
 ###############################################################################
 
