@@ -594,15 +594,16 @@ povbin = \$(povbinbase)/@build_cpu@
 povinstall = \$(top_builddir)/install.log
 povowner = @povowner@
 povgroup = @povgroup@
+pov_xwin_msg = @pov_xwin_msg@
 
 # Directories to build.
 SUBDIRS = source vfe platform unix
 
 # Additional files to distribute.
 EXTRA_DIST = \\
-  bootstrap kde_install.sh \\
-  doc icons include ini scenes scripts \\
-  povray.ini.in changes.txt revision.txt
+	bootstrap kde_install.sh \\
+	doc icons include ini scenes scripts \\
+	povray.ini.in changes.txt revision.txt
 
 # Additional files to clean with 'make distclean'.
 DISTCLEANFILES = \$(top_builddir)/povray.ini
@@ -611,8 +612,13 @@ CONFIG_CLEAN_FILES =
 # Render a test scene for 'make check'.
 # This is meant to run before 'make install'.
 check: all
-	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include
+	echo "Executing the Output File check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A
+	@case "\$(pov_xwin_msg)" in \\
+		*enabled*) echo "Executing the Render Window check..."; \\
+		\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include; q;; \\
+	esac
+
 
 # Install scripts in povlibdir.
 nobase_povlib_SCRIPTS = `echo $scriptfiles`

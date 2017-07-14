@@ -1436,6 +1436,7 @@ povowner=`stat ${stat_format}%u ${HOME}`
 povgroup=`stat ${stat_format}%g ${HOME}`
 AC_SUBST([povowner])
 AC_SUBST([povgroup])
+AC_SUBST([pov_xwin_msg])
 
 AC_OUTPUT
 
