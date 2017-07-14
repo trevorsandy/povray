@@ -230,6 +230,7 @@ $RECYCLE.BIN/
 /povray.ini
 # Files created by make check in main directory
 /biscuit.pov.png
+/biscuit.pov.cui.png
 # Files created by make in specific subdirectories
 /unix/povray
 # Files created by make in various subdirectories

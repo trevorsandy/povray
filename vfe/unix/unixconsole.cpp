@@ -163,9 +163,13 @@ static vfeDisplay *UnixDisplayCreator (unsigned int width, unsigned int height, 
             {
                 UnixDisplay *p = new UnixSDLDisplay (width, height, gamma, session, false) ;
                 if (p->TakeOver (display))
+                {
+                    fprintf(stderr, "%s: UnixSDLDisplay (Takeover): width %d, height %d, visible %s\n", PACKAGE, width, height, visible ? "true" : "false");
                     return p;
+                }
                 delete p;
             }
+            fprintf(stderr, "%s: UnixSDLDisplay: width %d, height %d, visible %s\n", PACKAGE, width, height, visible ? "true" : "false");
             return new UnixSDLDisplay (width, height, gamma, session, visible) ;
             break;
 #endif

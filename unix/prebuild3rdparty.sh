@@ -612,8 +612,7 @@ CONFIG_CLEAN_FILES =
 # This is meant to run before 'make install'.
 check: all
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include
-	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.png +w320 +h240 +UA +A
-#	\$(top_builddir)/unix/\$(PACKAGE) +I\$(top_srcdir)/lpub3d_csi.ldr.pov +O\$(top_srcdir)/lpub3d_csi.ldr.pov.png +w2549 +h1650 +UA +A
+	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A
 
 # Install scripts in povlibdir.
 nobase_povlib_SCRIPTS = `echo $scriptfiles`
