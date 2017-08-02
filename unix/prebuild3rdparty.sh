@@ -62,8 +62,8 @@ required_automake="1.9"
 ###############################################################################
 
 # Prevents running from another directory.
-if test x"`dirname $0`" != x"."; then
-  echo "$0: must ran from LPub3D-Trace's unix/ directory"
+if test x"`dirname $0`" != x"." && test x"${PWD##*/}" != x"unix"; then
+  echo "$0: must run from LPub3D-Trace's unix/ directory."
   exit 1
 fi
 
@@ -1553,3 +1553,5 @@ case "$1" in
   done
   ;;
 esac  # boost
+
+echo "$0 ran to completion."
