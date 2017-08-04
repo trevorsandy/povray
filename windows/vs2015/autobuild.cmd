@@ -22,7 +22,18 @@ Title LPub3D-Trace on Windows auto build script
 :: Variables
 SET APPNAME=lpub3d_trace_cui
 SET VERSION=3.7
-SET DIST_DIR_ROOT=..\..\..\lpub3d-windows-3rdparty
+SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
+:: Build check static settings - don't change these.
+SET BUILD_CHK_INCLUDE=+L"../../distribution/ini" +L"../../distribution/include" +L"../../distribution/scenes"
+:: Build check varialbe settings - set according to your check requirements
+:: Check 01
+::SET BUILD_CHK_POV_FILE=../../distribution/scenes/advanced/biscuit.pov
+::SET BUILD_CHK_PARAMS=-f +d +p +v +w320 +h240 +a0.3 %BUILD_CHK_INCLUDE%
+:: Check 02
+SET BUILD_CHK_POV_FILE=tests\csi.ldr.pov
+SET BUILD_CHK_INCLUDE=%BUILD_CHK_INCLUDE% +L"%USERPROFILE%\LDraw\lgeo\ar" +L"%USERPROFILE%\LDraw\lgeo\lg" +L"%USERPROFILE%\LDraw\lgeo\stl"
+SET BUILD_CHK_PARAMS=+w2549 +h1650 +UA +A %BUILD_CHK_INCLUDE%
+
 
 SET PLATFORM=unknown
 SET CONFIGURATION=unknown
@@ -33,7 +44,7 @@ SET CHECK=unknown
 
 :: Check if invalid platform flag
 IF NOT [%1]==[] (
-	IF NOT "%1"=="-x86" (
+	IF NOT "%1"=="x86" (
 		IF NOT "%1"=="x86_64" (
 			IF NOT "%1"=="-allcui" (
 					IF NOT "%1"=="-help" GOTO :PLATFORM_ERROR
@@ -71,8 +82,10 @@ IF NOT [%2]==[] (
 	IF NOT "%2"=="-rel" (
 		IF NOT "%2"=="-avx" (
 			IF NOT "%2"=="-ins" (
-				IF NOT "%2"=="-chk" (
-					IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+				IF NOT "%2"=="-allins" (
+					IF NOT "%2"=="-chk" (
+						IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+					)
 				)
 			)
 		)
@@ -108,12 +121,23 @@ IF "%PLATFORM%"=="x64" (
 IF /I "%2"=="-ins" (
 	:: 3rd party install
 	SET THIRD_INSTALL=1
-	SET SET CONFIGURATION=Release
+	SET INSTALL_ALL=0
+	SET CONFIGURATION=Release
 	GOTO :BUILD
 )
+
+IF /I "%2"=="-allins" (
+	:: 3rd party install
+	SET THIRD_INSTALL=1
+	SET INSTALL_ALL=1
+	SET CONFIGURATION=Release
+	GOTO :BUILD
+)
+
 :: Perform quick check
 IF /I "%2"=="-chk" (
 	SET CHECK=1
+	SET CONFIGURATION=Release
 	GOTO :BUILD
 )
 
@@ -143,6 +167,11 @@ IF NOT [%3]==[] (
 )
 
 :: Build CUI or GUI project - CUI is default
+:: Parse configuration input flag
+IF [%3]==[] (
+	SET CONSOLE=1
+	SET PROJECT=console.vcxproj
+)
 IF /I "%3"=="-gui" (
 	SET CONSOLE=0
 	SET PROJECT=povray.sln
@@ -158,7 +187,7 @@ IF NOT [%4]==[] (
 )
 :: Enable verbose tracing (useful for debugging)
 IF /I "%4"=="-verbose" (
-	:: Check if CUI project
+	:: Check if CUI or allCUI project build
 	IF NOT "%3"=="-cui" (
 		IF NOT "%PLATFORM%"=="-allcui" GOTO :VERBOSE_CUI_ERROR
 	)
@@ -251,22 +280,22 @@ IF NOT EXIST "%DIST_DIR_ROOT%\docs\%APPNAME%-%VERSION%\" (
 )
 SET DIST_DIR="%DIST_DIR_ROOT%\docs\%APPNAME%-%VERSION%"
 SET DIST_SRC="..\..\distribution\platform-specific\windows"
-rem XCOPY /S /I /E /V /Y "%DIST_SRC%\Help" "%DIST_DIR%\help"
-rem XCOPY /S /I /E /V /Y "..\..\doc\html" "%DIST_DIR%\html"
-rem COPY /V /Y "..\CUI_README.txt" "%DIST_DIR%" /A
-rem COPY /V /Y "..\..\LICENSE" "%DIST_DIR%\LICENSE.txt" /A
-rem COPY /V /Y "..\..\changes.txt" "%DIST_DIR%\ChangeLog.txt" /A
-rem COPY /V /Y "..\..\unix\AUTHORS" "%DIST_DIR%\AUTHORS.txt" /A
+IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "%DIST_SRC%\Help" "%DIST_DIR%\help"
+IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\doc\html" "%DIST_DIR%\html"
+IF  %INSTALL_ALL% == 1  COPY /V /Y "..\CUI_README.txt" "%DIST_DIR%" /A
+IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\LICENSE" "%DIST_DIR%\LICENSE.txt" /A
+IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\changes.txt" "%DIST_DIR%\ChangeLog.txt" /A
+IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\unix\AUTHORS" "%DIST_DIR%\AUTHORS.txt" /A
 
 ECHO -Copying Resources...
 IF NOT EXIST "%DIST_DIR_ROOT%\resources\%APPNAME%-%VERSION%\" (
 	MKDIR "%DIST_DIR_ROOT%\resources\%APPNAME%-%VERSION%\"
 )
 SET DIST_DIR="%DIST_DIR_ROOT%\resources\%APPNAME%-%VERSION%"
-rem XCOPY /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
-rem XCOPY /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
-rem XCOPY /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
-rem XCOPY /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
+IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
+IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
+IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
+IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 IF NOT EXIST "%DIST_DIR%\conf\" (
 	MKDIR "%DIST_DIR%\conf\"
 )
@@ -295,12 +324,14 @@ IF %1==x64 SET PL=64
 ECHO.
 ECHO --Check %CONFIGURATION% Configuration, %PL%bit Platform...
 ECHO.
-ECHO --Command: %APPNAME%%PL%.exe +I"tests\csi.ldr.pov" +O"tests\csi.ldr.pov.%PL%bit.png" +w2549 +h1650 +UA +A
+SET BUILD_CHK_OUTPUT=%BUILD_CHK_POV_FILE%.%PL%bit.png
+SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%" %BUILD_CHK_PARAMS%
+ECHO --Command: %APPNAME%%PL%.exe %BUILD_CHK_COMMAND%
 ECHO.
-IF EXIST "tests\csi.ldr.pov.%PL%bit.png" (
-	DEL /Q "tests\csi.ldr.pov.%PL%bit.png"
+IF EXIST "%BUILD_CHK_OUTPUT%" (
+	DEL /Q "%BUILD_CHK_OUTPUT%"
 )
-bin%PL%\%APPNAME%%PL%.exe +I"tests\csi.ldr.pov" +O"tests\csi.ldr.pov.%PL%bit.png" +w2549 +h1650 +UA +A
+bin%PL%\%APPNAME%%PL%.exe %BUILD_CHK_COMMAND%
 EXIT /b
 
 :PLATFORM_ERROR
@@ -360,7 +391,13 @@ ECHO However, you are free to reconfigue this script to use different components
 ECHO.
 ECHO Usage:
 ECHO autobuild [ -help ]
-ECHO autobuild [ -allcui ^| x86 ^| x86_64 ^| ] [ -rel ^| -avx ^| sse2 ^| -ins ^| -chk ] [-cui ^| -gui] [ -verbose ]
+ECHO autobuild [ -allcui ^| x86 ^| x86_64 ^| ] [ -allins ^| -rel ^| -avx ^| sse2 ^| -ins ^| -chk ] [-cui ^| -gui] [ -verbose ]
+ECHO.
+ECHO Build all CUI projects and deploy all artefacts as a 3rd party installation bundle
+ECHO autobuild -allcui -allins
+ECHO.
+ECHO Build 64bit, Release and perform build check
+ECHO autobuild x86_64 -chk
 ECHO.
 ECHO Build 64bit, AVX-Release CUI project example:
 ECHO autobuild x86_64 -avx
@@ -381,13 +418,14 @@ ECHO Flags:
 ECHO  -help.....1.Useage flag - Display useage.
 ECHO  x86.......1.Platform flag - Build 32bit architecture.
 ECHO  x86_64....1.Platform flag - Build 64bit architecture.
-ECHO  -allcui...1.Configuraiton flag - [Default] Build and install 32bit, 64bit, CUI configurations
+ECHO  -allcui...1.Configuraiton flag - [Default] Build and install 32bit, 64bit, CUI configurations.
+ECHO  -allins...2.Project flag - Install all distribution artefacts as LPub3D 3rd party installation.
+ECHO  -ins......2.Project flag - Install subset of distribution artefacts as LPub3D 3rd party installation.
 EChO  -rel......2.Configuration flag - [Default] Release, no extensions (must be preceded by platform flag).
 ECHO  -avx......2.Configuraiton flag - AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
 ECHO  -sse2.....2.Configuration flag - SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
-ECHO  -ins......2.Project flag - Install distribution as LPub3D 3rd party installation
-ECHO  -chk......2.Project flag - Perform a quick image redering check
-ECHO  -cui......3.Project flag - [Default] Build Console User Interface (CUI) project (must be preceded by a configuration flag).
+ECHO  -chk......2.Project flag - Perform a quick image redering check.
+ECHO  -cui......3.Project flag - Build Console User Interface (CUI) project (must be preceded by a configuration flag).
 ECHO  -gui......3.Project flag - Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
 ECHO  -verbose..4.Output flag - Display verbose output. Useful for debugging (must be preceded by -cui flag).
 ECHO.

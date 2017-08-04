@@ -60,24 +60,43 @@ using boost::to_lower_copy;
  */
 
 #ifndef LPUB3D_TRACE_USER_PATH
-# define LPUB3D_TRACE_USER_PATH "AppData\\Local\\LPub3D Software\\LPub3D\\" PACKAGE
+# define LPUB3D_TRACE_USER_PATH "AppData\\Local\\LPub3D Software\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
 #endif
 
-#ifndef LPUB3D_TRACE_DEFAULT_PATH
-# define LPUB3D_TRACE_DEFAULT_PATH "C:\\ProgramData\\LPub3D Software\\" PACKAGE
+#ifdef BUILDING_AMD64
+#ifndef LPUB3D_TRACE_SYS_PATH
+# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
+#endif
+#else
+#ifndef LPUB3D_TRACE_SYS_PATH
+# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files (x86)\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
+#endif
+#endif
+
+#ifndef LPUB3D_TRACE_USER_PATH_BACKWARD
+# define LPUB3D_TRACE_USER_PATH_BACKWARD LPUB3D_TRACE_USER_PATH
+#endif
+
+#ifndef LPUB3D_TRACE_SYS_PATH_BACKWARD
+# define LPUB3D_TRACE_SYS_PATH_BACKWARD LPUB3D_TRACE_SYS_PATH
 #endif
 
 #ifndef POVLIBDIR
-# define POVLIBDIR LPUB3D_TRACE_DEFAULT_PATH
-#endif
-
-#ifndef POVCONFDIR_BACKWARD
-# define POVCONFDIR_BACKWARD LPUB3D_TRACE_DEFAULT_PATH
+# define POVLIBDIR LPUB3D_TRACE_SYS_PATH
 #endif
 
 #ifndef POVCONFDIR
-# define POVCONFDIR LPUB3D_TRACE_DEFAULT_PATH
+# define POVCONFDIR LPUB3D_TRACE_SYS_PATH
 #endif
+
+#ifndef POVCONFDIR_BACKWARD
+# define POVCONFDIR_BACKWARD LPUB3D_TRACE_SYS_PATH
+#endif
+
+#ifndef POVLIBDIR_BACKWARD
+# define POVLIBDIR_BACKWARD LPUB3D_TRACE_SYS_PATH
+#endif
+
 
 namespace vfePlatform
 {
@@ -121,12 +140,12 @@ namespace vfePlatform
 
             The options are stored in the list m_user_options.
 
-            The constructor sets up the locations of the configuration files, adds 
-			the standard options to the list and processes the povray.conf files.  
-			The io-restrictions settings from those files are read with the old 
-			proven system and stored in their own list (m_permitted_paths).  At the 
-			end these are transferred into the corresponding vfeSession fields.  
-			All unknown options in the povray.conf files are read into a temporary 
+            The constructor sets up the locations of the configuration files, adds
+			the standard options to the list and processes the povray.conf files.
+			The io-restrictions settings from those files are read with the old
+			proven system and stored in their own list (m_permitted_paths).  At the
+			end these are transferred into the corresponding vfeSession fields.
+			All unknown options in the povray.conf files are read into a temporary
 			list (m_custom_conf_options).
 
             The actual options processing is done in ProcessOptions(). There all

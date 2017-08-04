@@ -57,26 +57,45 @@ using boost::to_lower_copy;
  * These constants don't have to be in config.h .
  */
 
+// Default System Library Locations (suffix = /conf)
 #ifdef LPUB3D_OSX_BUILD
-# ifndef LPUB3D_TRACE_DEFAULT_PATH
-#  define LPUB3D_TRACE_DEFAULT_PATH "/Applications/LPub3D.app/Contents/3rdParty/" PACKAGE "-" VERSION_BASE
+# ifndef LPUB3D_TRACE_SYS_PATH
+#  define LPUB3D_TRACE_SYS_PATH "/Applications/LPub3D.app/Contents/3rdParty/resources/" PACKAGE "-" VERSION_BASE
+# endif
+# ifndef LPUB3D_TRACE_USER_PATH
+#  define LPUB3D_TRACE_USER_PATH "/Library/Application Support/LPub3D  Software/LPub3D/3rdParty/resources/" PACKAGE "-" VERSION_BASE
 # endif
 #else
-# ifndef LPUB3D_TRACE_DEFAULT_PATH
-#  define LPUB3D_TRACE_DEFAULT_PATH "/usr/share/lpub3d/3rdParty/" PACKAGE
+# ifndef LPUB3D_TRACE_SYS_PATH
+#  define LPUB3D_TRACE_SYS_PATH "/usr/share/lpub3d/3rdParty/resources/" PACKAGE "-" VERSION_BASE
 # endif
+# ifndef LPUB3D_TRACE_USER_PATH
+#  define LPUB3D_TRACE_USER_PATH "/.local/share/LPub3D Software/LPub3D/3rdParty/resources/" PACKAGE "-" VERSION_BASE
+# endif
+#endif
+
+#ifndef LPUB3D_TRACE_USER_PATH_BACKWARD
+# define LPUB3D_TRACE_USER_PATH_BACKWARD LPUB3D_TRACE_USER_PATH
+#endif
+
+#ifndef LPUB3D_TRACE_SYS_PATH_BACKWARD
+# define LPUB3D_TRACE_SYS_PATH_BACKWARD LPUB3D_TRACE_SYS_PATH
 #endif
 
 #ifndef POVLIBDIR
-# define POVLIBDIR  LPUB3D_TRACE_DEFAULT_PATH
+# define POVLIBDIR LPUB3D_TRACE_SYS_PATH
 #endif
 
 #ifndef POVCONFDIR
-# define POVCONFDIR  LPUB3D_TRACE_DEFAULT_PATH
+# define POVCONFDIR LPUB3D_TRACE_SYS_PATH
 #endif
 
 #ifndef POVCONFDIR_BACKWARD
-# define POVCONFDIR_BACKWARD LPUB3D_TRACE_DEFAULT_PATH
+# define POVCONFDIR_BACKWARD LPUB3D_TRACE_SYS_PATH
+#endif
+
+#ifndef POVLIBDIR_BACKWARD
+# define POVLIBDIR_BACKWARD LPUB3D_TRACE_SYS_PATH
 #endif
 
 

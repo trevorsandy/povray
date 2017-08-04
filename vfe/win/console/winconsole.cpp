@@ -2,11 +2,11 @@
 ///
 /// @file vfe/win/console/winconsole.cpp
 ///
-/// This file contains a POV implementation using VFE. 
-/// 
+/// This file contains a POV implementation using VFE.
+///
 /// @author Trevor SANDY<trevor.sandy@gmial.com>
-/// @author Based on VFE proof-of-concept by Christopher J. Cason 
-/// and extensions adapted from vfe/unix/unixconsole.cpp 
+/// @author Based on VFE proof-of-concept by Christopher J. Cason
+/// and extensions adapted from vfe/unix/unixconsole.cpp
 ///
 /// @copyright
 /// @parblock
@@ -97,27 +97,27 @@ BOOL WINAPI ConsoleHandler(DWORD CEvent)
     switch(CEvent)
     {
     case CTRL_C_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_C_EVENT: CTRL+C; requested render cancel\n", PACKAGE);
+        fprintf(stderr, "\n%s: received CTRL_C_EVENT: CTRL+C; requested render cancel\n", PACKAGE_NAME);
         gCancelRender = true;
         break;
     case CTRL_BREAK_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_BREAK_EVENT: CTRL+BREAK; requested render cancel\n", PACKAGE);
+        fprintf(stderr, "\n%s: received CTRL_BREAK_EVENT: CTRL+BREAK; requested render cancel\n", PACKAGE_NAME);
         gCancelRender = true;
         break;
     case CTRL_CLOSE_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_CLOSE_EVENT: Program being closed; requested render cancel\n", PACKAGE);
+        fprintf(stderr, "\n%s: received CTRL_CLOSE_EVENT: Program being closed; requested render cancel\n", PACKAGE_NAME);
         gCancelRender = true;
         break;
     case CTRL_LOGOFF_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_LOGOFF_EVENT: User is logging off; requested render cancel\n", PACKAGE);
+        fprintf(stderr, "\n%s: received CTRL_LOGOFF_EVENT: User is logging off; requested render cancel\n", PACKAGE_NAME);
         gCancelRender = true;
         break;
     case CTRL_SHUTDOWN_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_SHUTDOWN_EVENT: User shutting down; requested render cancel\n", PACKAGE);
+        fprintf(stderr, "\n%s: received CTRL_SHUTDOWN_EVENT: User shutting down; requested render cancel\n", PACKAGE_NAME);
         gCancelRender = true;
         break;
     default:
-        fprintf(stderr, "\n%s: received UNKNOWN EVENT: Unknown interrupt; requested render cancel\n", PACKAGE);	
+        fprintf(stderr, "\n%s: received UNKNOWN EVENT: Unknown interrupt; requested render cancel\n", PACKAGE_NAME);
         gCancelRender = true;
     }
     return TRUE;
@@ -227,7 +227,7 @@ static void PauseWhenDone(vfeSession *session)
 
 static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts, string& ini, string& pov, int argc, char **argv)
 {
- 
+
   // parse command-line options
   while (*++argv)
   {
@@ -241,7 +241,7 @@ static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts,
           if (n)
               opts.SetThreadCount(n);
           else
-              fprintf(stderr, "%s: ignoring malformed '%s' command-line option\n", PACKAGE, *argv);
+              fprintf(stderr, "%s: ignoring malformed '%s' command-line option\n", PACKAGE_NAME, *argv);
       }
       // add library path
       else if (boost::starts_with(s, "+l") || boost::starts_with(s, "-l"))
@@ -254,12 +254,12 @@ static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts,
   int benchversion = pov::Get_Benchmark_Version();
   fprintf(stderr, "\
 %s %s\n\n\
-Entering the standard " PACKAGE " %s benchmark version %x.%02x.\n\n\
-This built-in benchmark requires " PACKAGE " to be installed on your system\n\
+Entering the standard " PACKAGE_NAME " %s benchmark version %x.%02x.\n\n\
+This built-in benchmark requires " PACKAGE_NAME " to be installed on your system\n\
 before running it.  There will be neither display nor file output, and\n\
 any additional command-line option except setting the number of render\n\
 threads (+wtN for N threads) and library paths (+Lpath) will be ignored.\n\
-To get an accurate benchmark result you might consider running  " PACKAGE "\n\
+To get an accurate benchmark result you might consider running  " PACKAGE_NAME "\n\
 with the Win 'time' command (e.g. 'time povray -benchmark').\n\n\
 The benchmark will run using %d render thread(s).\n\
 Press <Enter> to continue or <Ctrl-C> to abort.\n\
@@ -273,17 +273,17 @@ Press <Enter> to continue or <Ctrl-C> to abort.\n\
   INPUT_RECORD irInBuf[128];
   int counter = 0;
 
-  // Get the standard input handle. 
+  // Get the standard input handle.
   hStdin = GetStdHandle(STD_INPUT_HANDLE);
   if (hStdin == INVALID_HANDLE_VALUE)
 	  BenchMarkErrorExit("Invalid standard input handle.");
 
-  // Save the current input mode, to be restored on exit. 
+  // Save the current input mode, to be restored on exit.
 
   if (!GetConsoleMode(hStdin, &fdwSaveOldMode))
 	  BenchMarkErrorExit("Unable to get current console mode.");
 
-  // Enable the window and mouse input events. 
+  // Enable the window and mouse input events.
 
   fdwMode = ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT;
   if (!SetConsoleMode(hStdin, fdwMode))
@@ -299,16 +299,16 @@ Press <Enter> to continue or <Ctrl-C> to abort.\n\
 		  return RETURN_USER_ABORT;
 	  }
 
-	  // Wait for user input events. 
+	  // Wait for user input events.
 	  if (!ReadConsoleInput(
-		  hStdin,      // input buffer handle 
-		  irInBuf,     // buffer to read into 
-		  128,         // size of read buffer 
-		  &cNumRead))  // number of records read 
+		  hStdin,      // input buffer handle
+		  irInBuf,     // buffer to read into
+		  128,         // size of read buffer
+		  &cNumRead))  // number of records read
 		  BenchMarkErrorExit("ReadConsoleInput");
 
-	  if (cNumRead > 0)  // user input is available 
-	  {				
+	  if (cNumRead > 0)  // user input is available
+	  {
 		  for (i = 0; i < cNumRead; i++)     // read till <ENTER> is hit
 		  {
 			  if (irInBuf[i].EventType == KEY_EVENT && irInBuf[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
@@ -323,13 +323,13 @@ Press <Enter> to continue or <Ctrl-C> to abort.\n\
   pov = basename + ".pov";
   if (pov::Write_Benchmark_File(pov.c_str(), ini.c_str()))
   {
-      fprintf(stderr, "%s: creating %s\n", PACKAGE, ini.c_str());
-      fprintf(stderr, "%s: creating %s\n", PACKAGE, pov.c_str());
-      fprintf(stderr, "Running standard " PACKAGE " benchmark version %x.%02x\n", benchversion / 256, benchversion % 256);
+      fprintf(stderr, "%s: creating %s\n", PACKAGE_NAME, ini.c_str());
+      fprintf(stderr, "%s: creating %s\n", PACKAGE_NAME, pov.c_str());
+      fprintf(stderr, "Running standard " PACKAGE_NAME " benchmark version %x.%02x\n", benchversion / 256, benchversion % 256);
   }
   else
   {
-      fprintf(stderr, "%s: failed to write temporary files for benchmark\n", PACKAGE);
+      fprintf(stderr, "%s: failed to write temporary files for benchmark\n", PACKAGE_NAME);
       return RETURN_ERROR;
   }
 
@@ -341,15 +341,15 @@ Press <Enter> to continue or <Ctrl-C> to abort.\n\
 
 static void CleanupBenchmark(vfeWinSession *session, string& ini, string& pov)
 {
-    fprintf(stderr, "%s: removing %s\n", PACKAGE, ini.c_str());
+    fprintf(stderr, "%s: removing %s\n", PACKAGE_NAME, ini.c_str());
     session->DeleteTemporaryFile(ASCIItoUCS2String(ini.c_str()));
-    fprintf(stderr, "%s: removing %s\n", PACKAGE, pov.c_str());
+    fprintf(stderr, "%s: removing %s\n", PACKAGE_NAME, pov.c_str());
     session->DeleteTemporaryFile(ASCIItoUCS2String(pov.c_str()));
 }
 
-// This is the console user interface build of LPub3D-Trace under Windows 
-// using the VFE (virtual front-end) library. This implementation 
-// includes the same capabilities as POV-Ray Unix console build. 
+// This is the console user interface build of LPub3D-Trace under Windows
+// using the VFE (virtual front-end) library. This implementation
+// includes the same capabilities as POV-Ray Unix console build.
 int main (int argc, char **argv)
 {
   char              *s;
@@ -362,10 +362,10 @@ int main (int argc, char **argv)
   string            bench_pov_name;
   char **           argv_copy=argv; /* because argv is updated later */
   int               argc_copy=argc; /* because it might also be updated */
-	
+
   fprintf(stderr,
           "\n" PACKAGE_NAME " for Windows.\n\n"
-          PACKAGE " Ray Tracer Version " POV_RAY_VERSION_INFO ".\n\n"
+          PACKAGE_NAME " Ray Tracer Version " POV_RAY_VERSION_INFO ".\n\n"
           DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 "\n"
 		  DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 "\n"
           DISTRIBUTION_MESSAGE_2 ".\n"
@@ -381,7 +381,7 @@ int main (int argc, char **argv)
   if (session->Initialize(NULL, NULL) != vfeNoError)
     ErrorExit(session);
 
-  if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)ConsoleHandler,TRUE)) 
+  if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)ConsoleHandler,TRUE))
   {
      fprintf(stderr, "Unable to install console control handler!\n");
      return RETURN_ERROR;
@@ -454,7 +454,7 @@ int main (int argc, char **argv)
     session->PauseWhenDone(true);
 
   // main render loop
-  session->SetEventMask(stBackendStateChanged);  // immediately notify this event 
+  session->SetEventMask(stBackendStateChanged);  // immediately notify this event
 
   while (((flags = session->GetStatus(true, 200)) & stRenderShutdown) == 0)
   {

@@ -59,7 +59,7 @@ namespace vfePlatform
         WinConOptionsProcessor::Option_Info("general", "help", "off", false, "--help|-help|-h|-?", "", "display usage information"),
         WinConOptionsProcessor::Option_Info("general", "temppath", "", true, "", "POV_TEMP_DIR", "directory for temporary files"),
         WinConOptionsProcessor::Option_Info("general", "version", "off", false, "--version|-version|--V", "", "display program version"),
-        WinConOptionsProcessor::Option_Info("general", "benchmark", "off", false, "--benchmark|-benchmark", "", "run the standard " PACKAGE " benchmark"),
+        WinConOptionsProcessor::Option_Info("general", "benchmark", "off", false, "--benchmark|-benchmark", "", "run the standard " PACKAGE_NAME " benchmark"),
         WinConOptionsProcessor::Option_Info("", "", "", false, "", "", "") // has to be last
     };
 
@@ -72,7 +72,7 @@ namespace vfePlatform
 		if ((homeBuffer = getenv("USERPROFILE")) > 0)
 			m_home = homeBuffer;
 		else
-			fprintf(stderr, "%s: Could not get the user's home directory.\n", PACKAGE);
+			fprintf(stderr, "%s: Could not get the user's home directory.\n", PACKAGE_NAME);
 
         // Default values for I/O restrictions: everything is allowed.
         // Any restrictions must come from system or user configuration.
@@ -81,27 +81,27 @@ namespace vfePlatform
 
         // configuration and ini files
         m_conf    = "";
-		
-        if (m_home.length() > 0)
-        {
-            m_user_dir    = m_home + "\\" LPUB3D_TRACE_USER_PATH;
-            m_userconf    = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\povray.conf";
-			m_sysconf     = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\povray.conf";
-			m_userini     = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\ini\\povray.ini"; 
-			m_userini_old = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\ini\\povray.ini"; 			
-			m_sysini      = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\ini\\povray.ini"; 
-			m_sysini_old  = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\ini\\povray.ini"; 
-        }
-        else
-        {
-			m_user_dir    = LPUB3D_TRACE_DEFAULT_PATH;
-			m_userconf    = LPUB3D_TRACE_DEFAULT_PATH "\\povray.conf";
-			m_sysconf     = LPUB3D_TRACE_DEFAULT_PATH "\\povray.conf";			
-			m_userini     = LPUB3D_TRACE_DEFAULT_PATH "\\ini\\povray.ini";
-			m_userini_old = LPUB3D_TRACE_DEFAULT_PATH "\\ini\\povray.ini";		
-			m_sysini      = LPUB3D_TRACE_DEFAULT_PATH "\\ini\\povray.ini";
-			m_sysini_old  = LPUB3D_TRACE_DEFAULT_PATH "\\ini\\povray.ini";		
-        }		
+
+		if (m_home.length() > 0)
+		{
+			m_user_dir    = m_home + "\\" LPUB3D_TRACE_USER_PATH;
+			m_userconf    = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\conf\\povray.conf";
+			m_sysconf     = LPUB3D_TRACE_SYS_PATH "\\conf\\povray.conf";
+			m_userini     = m_home + "\\" LPUB3D_TRACE_USER_PATH "\\ini\\povray.ini";
+			m_userini_old = m_home + "\\" LPUB3D_TRACE_USER_PATH_BACKWARD "\\ini\\povray.ini";
+			m_sysini      = LPUB3D_TRACE_SYS_PATH "\\ini\\povray.ini";
+			m_sysini_old  = LPUB3D_TRACE_SYS_PATH_BACKWARD "\\ini\\povray.ini";
+		}
+		else
+		{
+			m_user_dir    = LPUB3D_TRACE_USER_PATH;
+			m_userconf    = LPUB3D_TRACE_USER_PATH "\\conf\\povray.conf";
+			m_sysconf     = LPUB3D_TRACE_SYS_PATH "\\conf\\povray.conf";
+			m_userini     = LPUB3D_TRACE_USER_PATH "\\ini\\povray.ini";
+			m_userini_old = LPUB3D_TRACE_USER_PATH_BACKWARD "\\ini\\povray.ini";
+			m_sysini      = LPUB3D_TRACE_SYS_PATH "\\ini\\povray.ini";
+			m_sysini_old  = LPUB3D_TRACE_SYS_PATH_BACKWARD "\\ini\\povray.ini";
+		}
 
 #ifdef WIN_DEBUG
         cerr << "DEFAULT PATHS" << endl;
@@ -388,7 +388,7 @@ namespace vfePlatform
 		char* cwdBuffer = new char[MAX_PATH]; // must not be NULL
 		if ((cwdBuffer = _getcwd(NULL, 0)) == NULL)
 		{
-			fprintf(stderr, "%s: Could not get the user's home directory.\n", PACKAGE);
+			fprintf(stderr, "%s: Could not get the user's home directory.\n", PACKAGE_NAME);
 			return m_cwd;
 		}
 		m_cwd = cwdBuffer + string("\\");  // add final slash
@@ -445,8 +445,8 @@ namespace vfePlatform
             { "//", "/" },
             { "/./", "/" },
             { NULL, NULL }  // sentinel
-        };		
-		
+        };
+
         // nothing to canonicalize; return an empty string
         if(path.length() == 0)
             return string("");
@@ -474,22 +474,22 @@ namespace vfePlatform
         {
 #ifdef WIN_DEBUG
         cerr << "    1a. Starts with '.\\',  Path: '" << s << "'" << endl;
-#endif			
+#endif
             s.erase(0, 2);
             s.insert(0, win_getcwd());
 #ifdef WIN_DEBUG
         cerr << "    1b. Insert Win_GetCWD  Path: '" << s << "'" << endl;
-#endif			
+#endif
         }
         else if(/* s[0] != '\\' || This comparison is not used on Windows */ boost::starts_with(s, "..\\"))
         {
 #ifdef WIN_DEBUG
         cerr << "    2a. Starts with '..\\', Path: '" << s << "'" << endl;
-#endif			
+#endif
             s.insert(0, win_getcwd());
 #ifdef WIN_DEBUG
         cerr << "    2b. Insert Win_GetCWD  Path: '" << s << "'" << endl;
-#endif	
+#endif
         }
 
 #if 0   // This section is not used on Windows
@@ -499,8 +499,8 @@ namespace vfePlatform
         while (pos != string::npos)
         {
 #ifdef WIN_DEBUG
-			cerr << s << endl;		
-#endif				
+			cerr << s << endl;
+#endif
             string::size_type pos2 = s.rfind('\\', pos-1);
             s.erase(pos2+1, pos-pos2+3);
 #ifdef WIN_DEBUG
@@ -588,7 +588,7 @@ namespace vfePlatform
                 if(quote  &&  s[i] != quote)  // no closing quote
                     fprintf(stderr,
                         "%s: %s: %lu: ignored entry: missing closing %c quote\n",
-                        PACKAGE, conf_name.c_str(), line_number, quote
+                        PACKAGE_NAME, conf_name.c_str(), line_number, quote
                     );
                 else if(i-begin)  // store given directory
                 {
@@ -603,20 +603,20 @@ namespace vfePlatform
                 else  // nothing found after the equal sign
                     fprintf(stderr,
                         "%s: %s: %lu: ignored entry: missing directory\n",
-                        PACKAGE, conf_name.c_str(), line_number
+                        PACKAGE_NAME, conf_name.c_str(), line_number
                     );
             }
             else  // equal sign not found
                 fprintf(stderr,
                     "%s: %s: %lu: ignored entry: missing equal sign\n",
-                    PACKAGE, conf_name.c_str(), line_number
+                    PACKAGE_NAME, conf_name.c_str(), line_number
                 );
         }
         // unknown entry
         else if(input.length() > 0)
             fprintf(stderr,
                 "%s: %s: %lu: unknown '%s' setting\n",
-                PACKAGE, conf_name.c_str(), line_number, input.c_str()
+                PACKAGE_NAME, conf_name.c_str(), line_number, input.c_str()
             );
     }
 
@@ -674,7 +674,7 @@ namespace vfePlatform
         shellout = SHL_UNSET;
 
 #ifdef WIN_DEBUG
-        cerr << PACKAGE << ": PARSE CONF FILE '" << conf_name << "'" << endl;
+        cerr << PACKAGE_NAME << ": PARSE CONF FILE '" << conf_name << "'" << endl;
 #endif
 
         // Since the file format allows to read permitted paths before
@@ -694,7 +694,7 @@ namespace vfePlatform
                 // used safely.
                 if(Stream.bad())
                 {
-                    fprintf(stderr, "%s: error while reading/opening configuration file ", PACKAGE);
+                    fprintf(stderr, "%s: error while reading/opening configuration file ", PACKAGE_NAME);
                     perror(conf_name.c_str());
                 }
                 break;
@@ -766,7 +766,7 @@ namespace vfePlatform
                 if(file_io_is_set)
                     fprintf(stderr,
                         "%s: %s: %lu: multiple settings for %s\n",
-                        PACKAGE, conf_name.c_str(), line_number, sections[section].label
+                        PACKAGE_NAME, conf_name.c_str(), line_number, sections[section].label
                     );
                 if(file_io != IO_UNSET)
                     file_io_is_set = true;
@@ -776,7 +776,7 @@ namespace vfePlatform
                 {
                     fprintf(stderr,
                         "%s: %s: %lu: unknown '%s' setting for %s: ",
-                        PACKAGE, conf_name.c_str(), line_number, line.c_str(), sections[section].label
+                        PACKAGE_NAME, conf_name.c_str(), line_number, line.c_str(), sections[section].label
                     );
                     if(user_mode)
                     {
@@ -801,7 +801,7 @@ namespace vfePlatform
                         "%s: %s: %lu: "
                         "the user setting '%s' for %s is less restrictive than "
                         "the system setting '%s' in '%s': using system setting\n",
-                        PACKAGE, conf_name.c_str(), line_number,
+                        PACKAGE_NAME, conf_name.c_str(), line_number,
                         io_settings[  file_io].label, sections[section].label,
                         io_settings[m_file_io].label, m_conf.c_str()
                     );
@@ -825,7 +825,7 @@ namespace vfePlatform
                 if(shellout_is_set)
                     fprintf(stderr,
                         "%s: %s: %lu: multiple settings for %s\n",
-                        PACKAGE, conf_name.c_str(), line_number, sections[section].label
+                        PACKAGE_NAME, conf_name.c_str(), line_number, sections[section].label
                     );
                 if(shellout != SHL_UNSET)
                     shellout_is_set = true;
@@ -835,7 +835,7 @@ namespace vfePlatform
                 {
                     fprintf(stderr,
                         "%s: %s: %lu: unknown '%s' setting for %s: ",
-                        PACKAGE, conf_name.c_str(), line_number, line.c_str(), sections[section].label
+                        PACKAGE_NAME, conf_name.c_str(), line_number, line.c_str(), sections[section].label
                     );
                     if(user_mode)
                     {
@@ -861,7 +861,7 @@ namespace vfePlatform
                         "%s: %s: %lu: "
                         "the user setting '%s' for %s is less restrictive than "
                         "the system '%s' setting in '%s': using system setting\n",
-                        PACKAGE, conf_name.c_str(), line_number,
+                        PACKAGE_NAME, conf_name.c_str(), line_number,
                         shl_settings[  shellout].label, sections[section].label,
                         shl_settings[m_shellout].label, m_conf.c_str()
                     );
@@ -883,7 +883,7 @@ namespace vfePlatform
         // used safely.
         if(Stream.bad())
         {
-            fprintf(stderr, "%s: error while reading/opening config file ", PACKAGE);
+            fprintf(stderr, "%s: error while reading/opening config file ", PACKAGE_NAME);
             perror(conf_name.c_str());
         }
 
@@ -904,24 +904,24 @@ namespace vfePlatform
             {
                 fprintf(stderr,
                     "%s: %s: user permitted paths are ignored: using system paths\n",
-                    PACKAGE, conf_name.c_str()
+                    PACKAGE_NAME, conf_name.c_str()
                 );
             }
             else
             {
                 m_permitted_paths = paths;  // assign new paths
             }
-        } 
-		else 
+        }
+		else
 		{
 			// If only system configuration file exist, assign permitted paths
 			if (!file_exist(m_userconf))
 			{
 				m_permitted_paths = paths;  // assign new paths
 #ifdef WIN_DEBUG
-				cerr << PACKAGE << ": user configuration file does not exist. Using system permitted paths." << endl;
-#endif				
-			}	
+				cerr << PACKAGE_NAME << ": user configuration file does not exist. Using system permitted paths." << endl;
+#endif
+			}
 		}
     }
 
@@ -930,7 +930,7 @@ namespace vfePlatform
     {
         m_Session->ClearPaths();
         m_Session->AddExcludedPath(string(POVCONFDIR));
-		
+
         if (m_user_dir.length() != 0)
             m_Session->AddExcludedPath(m_user_dir);
 
@@ -945,7 +945,7 @@ namespace vfePlatform
             }
             else
             {
-                fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE);
+                fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE_NAME);
                 perror(m_sysconf.c_str());
             }
         }
@@ -961,14 +961,14 @@ namespace vfePlatform
             }
             else
             {
-                fprintf(stderr, "%s: cannot open the user configuration file\n", PACKAGE);
+                fprintf(stderr, "%s: cannot open the user configuration file\n", PACKAGE_NAME);
                 perror(m_userconf.c_str());
             }
         }
-		
+
         // no file was read, disable I/O restrictions
         if(m_conf.length() == 0)
-            fprintf(stderr, "%s: I/O restrictions are disabled\n", PACKAGE);
+            fprintf(stderr, "%s: I/O restrictions are disabled\n", PACKAGE_NAME);
 
         // if no paths specified, at least include POVLIBDIR and POVCONFDIR
         else if(m_permitted_paths.empty())
@@ -1028,7 +1028,7 @@ namespace vfePlatform
             }
             else
             {
-                fprintf(stderr, "%s: INI environment: cannot open ", PACKAGE);
+                fprintf(stderr, "%s: INI environment: cannot open ", PACKAGE_NAME);
                 perror(povini.c_str());
             }
         }
@@ -1094,7 +1094,7 @@ namespace vfePlatform
 		}
 
         // warn that no INI file was found and add minimal library_path setting
-        fprintf(stderr, "%s: cannot open an INI file, adding default library path\n%s\\ini\n", PACKAGE, POVLIBDIR);
+        fprintf(stderr, "%s: cannot open an INI file, adding default library path\n%s\\ini\n", PACKAGE_NAME, POVLIBDIR);
         opts.AddLibraryPath(string(POVLIBDIR "\\ini"));
     }
 
@@ -1114,13 +1114,13 @@ namespace vfePlatform
         if (is_user_setting)
         {
             if (write)
-                fprintf(stderr, "%s: writing to '%s' is not permitted; check the configuration in '%s'\n", PACKAGE, fnm.c_str(), m_conf.c_str());
+                fprintf(stderr, "%s: writing to '%s' is not permitted; check the configuration in '%s'\n", PACKAGE_NAME, fnm.c_str(), m_conf.c_str());
             else
-                fprintf(stderr, "%s: reading from '%s' is not permitted; check the configuration in '%s'\n", PACKAGE, fnm.c_str(), m_conf.c_str());
+                fprintf(stderr, "%s: reading from '%s' is not permitted; check the configuration in '%s'\n", PACKAGE_NAME, fnm.c_str(), m_conf.c_str());
         }
         else
         {
-            fprintf(stderr, "%s: writing to '%s' is not permitted\n", PACKAGE, fnm.c_str());
+            fprintf(stderr, "%s: writing to '%s' is not permitted\n", PACKAGE_NAME, fnm.c_str());
         }
 
     }

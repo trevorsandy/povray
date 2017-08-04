@@ -57,7 +57,7 @@
 
 // _CONSOLE must be defined when building the console version of POVWIN.
 // failure to do so will lead to link errors.
-// #define _CONSOLE 
+// #define _CONSOLE
 
 // C++ variants of C standard headers
 #include <cmath>
@@ -268,12 +268,18 @@ namespace pov_base
 #ifdef _CONSOLE
 
 /* Name of package */
-#define PACKAGE "LPub3D-Trace"
+// #define PACKAGE "LPub3D-Trace"
 /* Define to the full name of this package. */
-#define PACKAGE_NAME PACKAGE " Console User Interface"
+// #define PACKAGE_NAME PACKAGE " Console User Interface"
+/* Supported image formats. */
+
+/* Name of package */
+#define PACKAGE "lpub3d_trace_cui"
+/* Define to the full name of this package. */
+#define PACKAGE_NAME "LPub3D-Trace"
 /* Supported image formats. */
 #define BUILTIN_IMG_FORMATS "gif tga iff ppm pgm hdr png jpeg tiff"
-/* Unsupported image formats. */
+/* image formats. */
 #define MISSING_IMG_FORMATS "none"
 /* I/O restrictions. */
 #define BUILTIN_IO_RESTRICTIONS "enabled"
@@ -283,12 +289,12 @@ namespace pov_base
 #include "..\..\source\base\version.h"
 #define VERSION_BASE OFFICIAL_GENERATION_STRING
 /* Distribution strings */
-#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE " is a modified, unofficial distribution of"
+#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE_NAME " is a modified, unofficial distribution of"
 #define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 " Persistence of Vision Ray Tracer ('POV-Ray') version 3.7 compiled by:"
 /* Description strings */
-#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE " provides a rich Windows console user interface mirroring"
+#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE_NAME " provides a rich Windows console user interface mirroring"
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 " most of the POV-Ray Unix console user inferface functionality."
-#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE " is developed by maintained by Trevor SANDY."
+#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE_NAME " is developed by maintained by Trevor SANDY."
 /* Copyright string. */
 #define LPUB3D_TRACE_COPYRIGHT "Copyright 2017 Trevor SANDY"
 
