@@ -63,7 +63,7 @@ using boost::to_lower_copy;
 #  define LPUB3D_TRACE_SYS_PATH "/Applications/LPub3D.app/Contents/3rdParty/resources/" PACKAGE "-" VERSION_BASE
 # endif
 # ifndef LPUB3D_TRACE_USER_PATH
-#  define LPUB3D_TRACE_USER_PATH "/Library/Application Support/LPub3D  Software/LPub3D/3rdParty/resources/" PACKAGE "-" VERSION_BASE
+#  define LPUB3D_TRACE_USER_PATH "/Library/Application Support/LPub3D Software/LPub3D/3rdParty/resources/" PACKAGE "-" VERSION_BASE
 # endif
 #else
 # ifndef LPUB3D_TRACE_SYS_PATH
@@ -74,30 +74,17 @@ using boost::to_lower_copy;
 # endif
 #endif
 
-#ifndef LPUB3D_TRACE_USER_PATH_BACKWARD
-# define LPUB3D_TRACE_USER_PATH_BACKWARD LPUB3D_TRACE_USER_PATH
-#endif
-
-#ifndef LPUB3D_TRACE_SYS_PATH_BACKWARD
-# define LPUB3D_TRACE_SYS_PATH_BACKWARD LPUB3D_TRACE_SYS_PATH
-#endif
-
 #ifndef POVLIBDIR
-# define POVLIBDIR LPUB3D_TRACE_SYS_PATH
+# define POVLIBDIR  LPUB3D_TRACE_SYS_PATH
 #endif
 
 #ifndef POVCONFDIR
-# define POVCONFDIR LPUB3D_TRACE_SYS_PATH
+# define POVCONFDIR  LPUB3D_TRACE_SYS_PATH
 #endif
 
 #ifndef POVCONFDIR_BACKWARD
-# define POVCONFDIR_BACKWARD LPUB3D_TRACE_SYS_PATH
+# define POVCONFDIR_BACKWARD  POVLIBDIR
 #endif
-
-#ifndef POVLIBDIR_BACKWARD
-# define POVLIBDIR_BACKWARD LPUB3D_TRACE_SYS_PATH
-#endif
-
 
 namespace vfePlatform
 {

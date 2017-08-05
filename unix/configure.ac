@@ -1508,12 +1508,12 @@ $PACKAGE_NAME will be packaged for an LPub3D 3rd party installation.
 The $PACKAGE_NAME components will be installed in the following directories.
 	Program (executable):       ${povbindir}/$PACKAGE-$VERSION_BASE/$build_cpu
 	System configuration files: ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/conf
-	User configuration files:   ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/.$PACKAGE
+	User configuration files:   ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/conf
 	Standard include files:     ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/include
 	Standard INI files:         ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/ini
 	Standard demo scene files:  ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/scenes
+	Unix man page:              ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/man	
 	Documentation (text, HTML): ${povdatadir}/docs/$PACKAGE-$VERSION_BASE
-	Unix man page:              ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/man
 ===============================================================================
 ])
 else

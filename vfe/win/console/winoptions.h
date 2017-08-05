@@ -63,22 +63,8 @@ using boost::to_lower_copy;
 # define LPUB3D_TRACE_USER_PATH "AppData\\Local\\LPub3D Software\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
 #endif
 
-#ifdef BUILDING_AMD64
 #ifndef LPUB3D_TRACE_SYS_PATH
-# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
-#endif
-#else
-#ifndef LPUB3D_TRACE_SYS_PATH
-# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files (x86)\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
-#endif
-#endif
-
-#ifndef LPUB3D_TRACE_USER_PATH_BACKWARD
-# define LPUB3D_TRACE_USER_PATH_BACKWARD LPUB3D_TRACE_USER_PATH
-#endif
-
-#ifndef LPUB3D_TRACE_SYS_PATH_BACKWARD
-# define LPUB3D_TRACE_SYS_PATH_BACKWARD LPUB3D_TRACE_SYS_PATH
+# define LPUB3D_TRACE_SYS_PATH "C:\\ProgramData\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
 #endif
 
 #ifndef POVLIBDIR
@@ -90,13 +76,8 @@ using boost::to_lower_copy;
 #endif
 
 #ifndef POVCONFDIR_BACKWARD
-# define POVCONFDIR_BACKWARD LPUB3D_TRACE_SYS_PATH
+# define POVCONFDIR_BACKWARD POVCONFDIR
 #endif
-
-#ifndef POVLIBDIR_BACKWARD
-# define POVLIBDIR_BACKWARD LPUB3D_TRACE_SYS_PATH
-#endif
-
 
 namespace vfePlatform
 {

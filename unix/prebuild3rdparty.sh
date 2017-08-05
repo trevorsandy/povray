@@ -588,13 +588,12 @@ povdocdir = \$(prefix)/docs/@PACKAGE@-@VERSION_BASE@
 povconfdir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/conf
 povmandir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/man
 povuser = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@
-povconfuser = \$(povuser)/.@PACKAGE@
+povconfuser = \$(povuser)/conf
 povbinbase = \$(prefix)/bin/@PACKAGE@-@VERSION_BASE@
 povbin = \$(povbinbase)/@build_cpu@
 povinstall = \$(top_builddir)/install.log
 povowner = @povowner@
 povgroup = @povgroup@
-pov_xwin_msg = @pov_xwin_msg@
 
 # Directories to build.
 SUBDIRS = source vfe platform unix
@@ -609,16 +608,29 @@ EXTRA_DIST = \\
 DISTCLEANFILES = \$(top_builddir)/povray.ini
 CONFIG_CLEAN_FILES =
 
+# Test scene display status
+pov_xwin_msg = @pov_xwin_msg@
+pov_build_os = @build_os@
+
 # Render a test scene for 'make check'.
 # This is meant to run before 'make install'.
 check: all
-	echo "Executing the Output File check..."; \\
+	echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A
-	@case "\$(pov_xwin_msg)" in \\
-		*enabled*) echo "Executing the Render Window check..."; \\
-		\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include; q;; \\
+	@echo "Executing the render display window check..."; \\
+	case "\$(pov_xwin_msg)" in \\
+		*enabled*) \\
+			case "\$(pov_build_os)" in \\
+				*darwin*) \\
+					echo "SDL display window not working on MacOS, render display is disabled"; \\
+					\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f -d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include; \\
+				;; \\
+				*) \\
+					\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include; \\
+				;; \\
+			esac \\
+		;; \\
 	esac
-
 
 # Install scripts in povlibdir.
 nobase_povlib_SCRIPTS = `echo $scriptfiles`

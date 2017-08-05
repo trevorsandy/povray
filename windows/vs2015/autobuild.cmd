@@ -107,6 +107,9 @@ IF /I "%2"=="-run" (
 
 :: Parse configuration input flag
 IF [%2]==[] (
+	SET CHECK=1
+	SET THIRD_INSTALL=1
+	SET INSTALL_ALL=0
 	SET CONFIGURATION=Release
 	GOTO :BUILD
 )
@@ -435,19 +438,19 @@ ECHO autobuild
 ECHO.
 ECHO Flags:
 ECHO  -help.....1.Useage flag - Display useage.
-ECHO  x86.......1.Platform flag - Build 32bit architecture.
-ECHO  x86_64....1.Platform flag - Build 64bit architecture.
-ECHO  -allcui...1.Configuraiton flag - [Default] Build and install 32bit, 64bit, CUI configurations.
-ECHO  -allins...2.Project flag - Install all distribution artefacts as LPub3D 3rd party installation.
-ECHO  -ins......2.Project flag - Install subset of distribution artefacts as LPub3D 3rd party installation.
-ECHO  -run......2.Project flag - Run an image redering check - must be preceded by x86 or x86_64 flag
-EChO  -rel......2.Configuration flag - [Default] Release, no extensions (must be preceded by platform flag).
-ECHO  -avx......2.Configuraiton flag - AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
-ECHO  -sse2.....2.Configuration flag - SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
-ECHO  -chk......2.Project flag - Build and run an image redering check.
-ECHO  -cui......3.Project flag - Build Console User Interface (CUI) project (must be preceded by a configuration flag).
-ECHO  -gui......3.Project flag - Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
-ECHO  -verbose..4.Output flag - Display verbose output. Useful for debugging (must be preceded by -cui flag).
+ECHO  x86.......1.Platform flag      [Default=On ] Build 32bit architecture.
+ECHO  x86_64....1.Platform flag      [Default=On ] Build 64bit architecture.
+ECHO  -allcui...1.Project flag       [Default=On ] Build and install 32bit, 64bit, CUI configurations.
+ECHO  -allins...2.Project flag       [Default=Off] Install all distribution artefacts as LPub3D 3rd party installation.
+ECHO  -ins......2.Project flag       [Default=On ] Install subset of distribution artefacts as LPub3D 3rd party installation.
+ECHO  -run......2.Project flag       [Default=Off] Run an image redering check - must be preceded by x86 or x86_64 flag
+EChO  -rel......2.Configuration flag [Default=On ] Release, no extensions (must be preceded by platform flag).
+ECHO  -avx......2.Configuraiton flag [Default=Off] AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
+ECHO  -sse2.....2.Configuration flag [Default=Off] SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
+ECHO  -chk......2.Project flag       [Default=On ] Build and run an image redering check.
+ECHO  -cui......3.Project flag       [Default=On ] Build Console User Interface (CUI) project (must be preceded by a configuration flag).
+ECHO  -gui......3.Project flag       [Default=Off] Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
+ECHO  -verbose..4.Project flag       [Default=Off] Display verbose output. Useful for debugging (must be preceded by -cui flag).
 ECHO.
 ECHO Flags are case sensitive, use lowere case.
 ECHO.

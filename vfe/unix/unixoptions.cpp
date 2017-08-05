@@ -89,7 +89,7 @@ namespace vfePlatform
     }
     // system ini file
     m_sysini   =  LPUB3D_TRACE_SYS_PATH "/ini/povray.ini";
-    m_sysini_old = LPUB3D_TRACE_SYS_PATH_BACKWARD "/ini/povray.ini";
+    m_sysini_old = LPUB3D_TRACE_SYS_PATH "/ini/povray.ini";
 
     // user ini file
     if (m_home.length() > 0)
@@ -98,7 +98,7 @@ namespace vfePlatform
         m_userini = "";
 
     if (m_home.length() > 0)
-        m_userini_old = m_home + "/" LPUB3D_TRACE_USER_PATH_BACKWARD "/ini/povray.ini";
+        m_userini_old = m_home + "/" LPUB3D_TRACE_USER_PATH "/ini/povray.ini";
     else
         m_userini_old = "";
 
