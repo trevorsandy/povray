@@ -10,7 +10,7 @@ Title LPub3D-Trace on Windows auto build script
 :: This script is requires autobuild_defs.cmd
 :: --
 ::  Trevor SANDY <trevor.sandy@gmail.com>
-::  Last Update: May 19, 2017
+::  Last Update: August 05, 2017
 ::  Copyright (c) 2017 by Trevor SANDY
 :: --
 :: This script is distributed in the hope that it will be useful,
@@ -69,7 +69,6 @@ IF /I "%1"=="-allcui" (
 	SET PLATFORM=-allcui
 	GOTO :SET_CONFIGURATION
 )
-
 IF /I "%1"=="-help" (
 	GOTO :USAGE
 )
@@ -84,13 +83,28 @@ IF NOT [%2]==[] (
 			IF NOT "%2"=="-ins" (
 				IF NOT "%2"=="-allins" (
 					IF NOT "%2"=="-chk" (
-						IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+						IF NOT "%2"=="-run" (
+							IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+						)
 					)
 				)
 			)
 		)
 	)
 )
+
+:: Run a render check without building
+IF /I "%2"=="-run" (
+	:: Check if invalid platform flag
+	IF NOT "%1"=="x86" (
+		IF NOT "%1"=="x86_64" GOTO :RUN_ERROR
+	)
+	SET CONFIGURATION=run render only
+	CALL :CHECK_BUILD %PLATFORM%
+	:: Finish
+	EXIT /b
+)
+
 :: Parse configuration input flag
 IF [%2]==[] (
 	SET CONFIGURATION=Release
@@ -134,7 +148,7 @@ IF /I "%2"=="-allins" (
 	GOTO :BUILD
 )
 
-:: Perform quick check
+:: Build and run an image render check
 IF /I "%2"=="-chk" (
 	SET CHECK=1
 	SET CONFIGURATION=Release
@@ -364,6 +378,11 @@ ECHO.
 ECHO -(FLAG ERROR) Output flag is invalid. Use -verbose.
 GOTO :USAGE
 
+:RUN_ERROR
+ECHO.
+ECHO -(FLAG ERROR) You must provide either x86 or x86_64 platform flag.
+GOTO :USAGE
+
 :VERBOSE_CUI_ERROR
 ECHO.
 ECHO -(FLAG ERROR) Output flag can only be used with CUI project. Use -verbose only with -cui flag.
@@ -391,7 +410,7 @@ ECHO However, you are free to reconfigue this script to use different components
 ECHO.
 ECHO Usage:
 ECHO autobuild [ -help ]
-ECHO autobuild [ -allcui ^| x86 ^| x86_64 ^| ] [ -allins ^| -rel ^| -avx ^| sse2 ^| -ins ^| -chk ] [-cui ^| -gui] [ -verbose ]
+ECHO autobuild [ -allcui ^| x86 ^| x86_64 ^| ] [ -allins ^| -run ^| -rel ^| -avx ^| sse2 ^| -ins ^| -chk ] [-cui ^| -gui] [ -verbose ]
 ECHO.
 ECHO Build all CUI projects and deploy all artefacts as a 3rd party installation bundle
 ECHO autobuild -allcui -allins
@@ -421,10 +440,11 @@ ECHO  x86_64....1.Platform flag - Build 64bit architecture.
 ECHO  -allcui...1.Configuraiton flag - [Default] Build and install 32bit, 64bit, CUI configurations.
 ECHO  -allins...2.Project flag - Install all distribution artefacts as LPub3D 3rd party installation.
 ECHO  -ins......2.Project flag - Install subset of distribution artefacts as LPub3D 3rd party installation.
+ECHO  -run......2.Project flag - Run an image redering check - must be preceded by x86 or x86_64 flag
 EChO  -rel......2.Configuration flag - [Default] Release, no extensions (must be preceded by platform flag).
 ECHO  -avx......2.Configuraiton flag - AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
 ECHO  -sse2.....2.Configuration flag - SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
-ECHO  -chk......2.Project flag - Perform a quick image redering check.
+ECHO  -chk......2.Project flag - Build and run an image redering check.
 ECHO  -cui......3.Project flag - Build Console User Interface (CUI) project (must be preceded by a configuration flag).
 ECHO  -gui......3.Project flag - Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
 ECHO  -verbose..4.Output flag - Display verbose output. Useful for debugging (must be preceded by -cui flag).
