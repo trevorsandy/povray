@@ -1456,7 +1456,7 @@ if test x"$pov_lpub3d_3rd_party_install" = x"no"; then
 		eval pov$i=$povtemp
 	done
 else
-	eval povbindir=$bindir
+	eval povbindir=$prefix
 	eval povbindir=$povbindir
 	eval povdatadir=$prefix
 	eval povdatadir=$povdatadir
@@ -1506,14 +1506,14 @@ Type 'make install' to install $PACKAGE_NAME on your system.
 $PACKAGE_NAME will be packaged for an LPub3D 3rd party installation.
 
 The $PACKAGE_NAME components will be installed in the following directories.
-	Program (executable):       ${povbindir}/$PACKAGE-$VERSION_BASE/$build_cpu
-	System configuration files: ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/conf
-	User configuration files:   ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/conf
-	Standard include files:     ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/include
-	Standard INI files:         ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/ini
-	Standard demo scene files:  ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/scenes
-	Unix man page:              ${povdatadir}/resources/$PACKAGE-$VERSION_BASE/man	
-	Documentation (text, HTML): ${povdatadir}/docs/$PACKAGE-$VERSION_BASE
+	Program (executable):       ${povbindir}/$PACKAGE-$VERSION_BASE/bin/$build_cpu
+	System configuration files: ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/config
+	User configuration files:   ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/config
+	Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/include
+	Standard INI files:         ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/ini
+	Standard demo scene files:  ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/scenes
+  Unix man page:              ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/man
+  Documentation (text, HTML): ${povdatadir}/$PACKAGE-$VERSION_BASE/docs
 ===============================================================================
 ])
 else

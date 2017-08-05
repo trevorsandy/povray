@@ -60,11 +60,17 @@ using boost::to_lower_copy;
  */
 
 #ifndef LPUB3D_TRACE_USER_PATH
-# define LPUB3D_TRACE_USER_PATH "AppData\\Local\\LPub3D Software\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
+# define LPUB3D_TRACE_USER_PATH "AppData\\Local\\LPub3D Software\\LPub3D\\3rdParty\\" PACKAGE "-" VERSION_BASE
 #endif
 
+#ifdef BUILDING_AMD64
 #ifndef LPUB3D_TRACE_SYS_PATH
-# define LPUB3D_TRACE_SYS_PATH "C:\\ProgramData\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
+# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
+#endif
+#else
+#ifndef LPUB3D_TRACE_SYS_PATH
+# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files (x86)\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
+#endif
 #endif
 
 #ifndef POVLIBDIR

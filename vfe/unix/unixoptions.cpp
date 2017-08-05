@@ -74,13 +74,13 @@ namespace vfePlatform
     m_home = value ? value:"";
 
     // sys configuration file
-    m_sysconf = LPUB3D_TRACE_SYS_PATH "/conf/povray.conf";
+    m_sysconf = LPUB3D_TRACE_SYS_PATH "/config/povray.conf";
 
     // user configuration file
     if (m_home.length() > 0)
     {
         m_user_dir = m_home + "/" LPUB3D_TRACE_USER_PATH;
-        m_userconf = m_home + "/" LPUB3D_TRACE_USER_PATH "/conf/povray.conf";
+        m_userconf = m_home + "/" LPUB3D_TRACE_USER_PATH "/config/povray.conf";
     }
     else
     {
@@ -88,23 +88,24 @@ namespace vfePlatform
         m_userconf = "";
     }
     // system ini file
-    m_sysini   =  LPUB3D_TRACE_SYS_PATH "/ini/povray.ini";
-    m_sysini_old = LPUB3D_TRACE_SYS_PATH "/ini/povray.ini";
+    m_sysini   =  LPUB3D_TRACE_SYS_PATH "/config/povray.ini";
+    m_sysini_old = LPUB3D_TRACE_SYS_PATH "/config/povray.ini";
 
     // user ini file
     if (m_home.length() > 0)
-        m_userini = m_home + "/" LPUB3D_TRACE_USER_PATH "/ini/povray.ini";
+        m_userini = m_home + "/" LPUB3D_TRACE_USER_PATH "/config/povray.ini";
     else
         m_userini = "";
 
     if (m_home.length() > 0)
-        m_userini_old = m_home + "/" LPUB3D_TRACE_USER_PATH "/ini/povray.ini";
+        m_userini_old = m_home + "/" LPUB3D_TRACE_USER_PATH "/config/povray.ini";
     else
         m_userini_old = "";
 
 #ifdef UNIX_DEBUG
         cerr << "PATHS" << endl;
         cerr << "  HOME        = " << m_home << endl;
+        cerr << "  INSTALLDIR  = " << POVLIBDIR << endl;
         cerr << "  SYSCONF     = " << m_sysconf << endl;
         cerr << "  USERCONF    = " << m_userconf << endl;
         cerr << "  SYSINI      = " << m_sysini << endl;

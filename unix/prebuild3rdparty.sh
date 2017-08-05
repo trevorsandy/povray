@@ -583,13 +583,14 @@ case "$1" in
 # Please report bugs to $pov_config_bugreport
 
 # Directories.
-povlibdir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@
-povdocdir = \$(prefix)/docs/@PACKAGE@-@VERSION_BASE@
-povconfdir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/conf
-povmandir = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@/man
-povuser = \$(prefix)/resources/@PACKAGE@-@VERSION_BASE@
-povconfuser = \$(povuser)/conf
-povbinbase = \$(prefix)/bin/@PACKAGE@-@VERSION_BASE@
+povbase = \$(prefix)/@PACKAGE@-@VERSION_BASE@
+povlibdir = \$(povbase)/resources
+povconfdir = \$(povlibdir)/config
+povdocdir = \$(povbase)/docs
+povmandir = \$(povlibdir)/man
+povuser = \$(povlibdir)
+povconfuser = \$(povuser)/config
+povbinbase = \$(povbase)/bin
 povbin = \$(povbinbase)/@build_cpu@
 povinstall = \$(top_builddir)/install.log
 povowner = @povowner@
@@ -696,7 +697,7 @@ install-data-local:
 # Move executable to 3rd party bin location
 # Set doc, man, conf and script file permissions.
 install-data-hook:
-	@echo "Creating 3rdParyt distribution bin directory..."; \\
+	@echo "Creating 3rdParty distribution bin directory..."; \\
 	for p in \$(povbinbase) \$(povbin) ; do \\
 		\$(mkdir_p) \$\$p && chown \$(povowner) \$\$p && chgrp \$(povgroup) \$\$p && printf "%s\\n" "\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
 	done
