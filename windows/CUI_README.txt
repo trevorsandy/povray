@@ -282,6 +282,8 @@
 	13. winconsole.cpp.........../vfe/win/console
 	14. winoptions.cpp.........../vfe/win/console...(New)
 	15. winoptions.h............./vfe/win/console...(New)
+	16. vfesession.cpp.........../vfe
+	17. vfesession.h............./vfe
 	16. CUI_README.txt.........../windows...........(New)
 	17. autobuild.cmd............/windows/vs2015....(New)
 	18. autobuild_defs.cmd......./windows/vs2015....(New)

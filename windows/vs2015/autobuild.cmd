@@ -23,17 +23,25 @@ Title LPub3D-Trace on Windows auto build script
 SET APPNAME=lpub3d_trace_cui
 SET VERSION=3.7
 SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
+
+:: Build checks settings - set according to your check requirements
+:: Check 01
+:: SET BUILD_CHK_MY_OUTPUT=
+:: SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
+:: SET BUILD_CHK_WH_PARMS=+w320 +h240
+:: SET BUILD_CHK_MY_PARMS=-f +d +p +v +a0.3
+:: SET BUILD_CHK_MY_INCLUDES=
+:: Check 02
+SET BUILD_CHK_MY_OUTPUT=
+SET BUILD_CHK_POV_FILE=tests\cli.ldr.pov
+SET BUILD_CHK_WH_PARMS=+w2549 +h1650
+SET BUILD_CHK_MY_PARMS=+UA +A
+SET BUILD_CHK_MY_INCLUDES=+L"%USERPROFILE%\LDraw\lgeo\ar" +L"%USERPROFILE%\LDraw\lgeo\lg" +L"%USERPROFILE%\LDraw\lgeo\stl"
+
 :: Build check static settings - don't change these.
 SET BUILD_CHK_INCLUDE=+L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
-:: Build check varialbe settings - set according to your check requirements
-:: Check 01
-:: SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
-:: SET BUILD_CHK_PARAMS=-f +d +p +v +w320 +h240 +a0.3 %BUILD_CHK_INCLUDE%
-:: Check 02
-SET BUILD_CHK_POV_FILE=tests\csi.ldr.pov
-SET BUILD_CHK_INCLUDE=%BUILD_CHK_INCLUDE% +L"%USERPROFILE%\LDraw\lgeo\ar" +L"%USERPROFILE%\LDraw\lgeo\lg" +L"%USERPROFILE%\LDraw\lgeo\stl"
-SET BUILD_CHK_PARAMS=+w2549 +h1650 +UA +A %BUILD_CHK_INCLUDE%
-
+SET BUILD_CHK_INCLUDE=%BUILD_CHK_INCLUDE% %BUILD_CHK_MY_INCLUDES%
+SET BUILD_CHK_PARAMS=%BUILD_CHK_WH_PARMS% %BUILD_CHK_MY_PARMS% %BUILD_CHK_INCLUDE%
 
 SET PLATFORM=unknown
 SET CONFIGURATION=unknown
@@ -78,7 +86,8 @@ IF /I "%1"=="-run" (
 	GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-verbose" (
-	SET PLATFORM=x64
+	::SET PLATFORM=x64
+	SET PLATFORM=Win32
 	GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-help" (
@@ -106,7 +115,10 @@ IF NOT [%2]==[] (
 )
 
 :: Run a render check without building
-IF /I "%1"=="-run" (
+:: Enable verbose tracing (useful for debugging)
+IF /I "%1"=="-run" SET RUN_CHK=true
+IF /I "%2"=="-run" SET RUN_CHK=true
+IF /I "%RUN_CHK%"=="true" (
 	SET CONFIGURATION=run render only
 	CALL :CHECK_BUILD %PLATFORM%
 	:: Finish
@@ -218,9 +230,9 @@ IF /I "%3"=="-cui" (
 IF NOT [%4]==[] (
 	IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
 )
+:: Enable verbose tracing (useful for debugging)
 IF /I "%1"=="-verbose" SET VERBOSE_CHK=true
 IF /I "%4"=="-verbose" SET VERBOSE_CHK=true
-:: Enable verbose tracing (useful for debugging)
 IF /I "%VERBOSE_CHK%"=="true" (
 	:: Check if CUI or allCUI project build
 	IF NOT %CONSOLE%==1 (
@@ -347,8 +359,8 @@ ECHO -%OPTION%
 EXIT /b
 
 :VERBOSE_MESSAGE
-SET STATE=Verbose tracing is OFF - Default
-IF %1==1 SET STATE=Verbose tracing is ON
+SET STATE=Verbose (Debug) tracing is OFF - Default
+IF %1==1 SET STATE=Verbose (Debug) tracing is ON
 ECHO.
 ECHO -%STATE%
 EXIT /b
@@ -359,7 +371,11 @@ IF %1==x64 SET PL=64
 ECHO.
 ECHO --Check %CONFIGURATION% Configuration, %PL%bit Platform...
 ECHO.
-SET BUILD_CHK_OUTPUT=%BUILD_CHK_POV_FILE%.%PL%bit.png
+IF NOT [%BUILD_CHK_MY_OUTPUT%]==[] (
+	SET BUILD_CHK_OUTPUT=%BUILD_CHK_MY_OUTPUT%
+) ELSE (
+	SET BUILD_CHK_OUTPUT=%BUILD_CHK_POV_FILE%.%PL%bit.png
+)
 SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%" %BUILD_CHK_PARAMS%
 ECHO --Command: %APPNAME%%PL%.exe %BUILD_CHK_COMMAND%
 ECHO.

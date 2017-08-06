@@ -861,7 +861,7 @@ const char *vfeSession::GetErrorString(int code) const
       return "Specified file gamma is too small";
   }
 
-  return "Unknown error code";
+  return ("Unknown error code [" + std::to_string(code) + "]").c_str() ;
 }
 
 // This method returns the current set of status flags as set by the worker
