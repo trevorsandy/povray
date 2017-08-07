@@ -706,7 +706,8 @@ install-data-hook:
 	@echo "Setting \$(PACKAGE) permissions..."; \\
 	chmod 755 \$(DESTDIR)\$(povbin)/\$(PACKAGE) && echo "\$(DESTDIR)\$(povbin)/\$(PACKAGE)" >> \$(povinstall)
 	@echo "Performing cleanup..."; \\
-	rm -f \$(bindir)/\$(PACKAGE) && echo "\$(bindir)/\$(PACKAGE)" >> \$(povinstall)
+	rm -f \$(bindir)/\$(PACKAGE) && echo "\$(bindir)/\$(PACKAGE)" >> \$(povinstall); \\
+	chown \$(povowner) \$(DESTDIR)\$(povbase) && chgrp \$(povgroup) \$(DESTDIR)\$(povbase) && echo "\$(DESTDIR)\$(povbase)" >> \$(povinstall)
 	@echo "Setting doc files ownership..."; \\
 	for f in AUTHORS ChangeLog NEWS CUI_README ; do \\
 		chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$f && echo "\$(DESTDIR)\$(povdocdir)/\$\$f" >> \$(povinstall); \\

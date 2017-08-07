@@ -1512,8 +1512,8 @@ The $PACKAGE_NAME components will be installed in the following directories.
 	Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/include
 	Standard INI files:         ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/ini
 	Standard demo scene files:  ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/scenes
-  Unix man page:              ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/man
-  Documentation (text, HTML): ${povdatadir}/$PACKAGE-$VERSION_BASE/docs
+    Unix man page:              ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/man
+    Documentation (text, HTML): ${povdatadir}/$PACKAGE-$VERSION_BASE/docs
 ===============================================================================
 ])
 else
