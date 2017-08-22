@@ -4,13 +4,14 @@
 ///
 /// SDL (Simple direct media layer) based render display system.
 ///
+/// @author Trevor SANDY<trevor.sandy@gmial.com>
 /// @author Christoph Hormann <chris_hormann@gmx.de>
 ///
 /// @copyright
 /// @parblock
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2016 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -46,7 +47,6 @@
 // this must be the last file included
 #include "syspovdebug.h"
 
-
 namespace pov_frontend
 {
     using namespace vfe;
@@ -77,6 +77,7 @@ namespace pov_frontend
         m_display_scale = 1.;
         m_screen = NULL;
         m_display = NULL;
+		m_window = NULL;
     }
 
     UnixSDLDisplay::~UnixSDLDisplay()
@@ -105,8 +106,9 @@ namespace pov_frontend
         m_valid = p->m_valid;
         m_display_scaled = p->m_display_scaled;
         m_display_scale = p->m_display_scale;
-        m_screen = p->m_screen;
+		m_window = p->m_window;
         m_display = p->m_display;
+		m_screen = p->m_screen;
 
         if (m_display_scaled)
         {
@@ -127,11 +129,23 @@ namespace pov_frontend
         if (!m_valid)
             return;
 
-// FIXME: should handle this correctly for the last frame
-//      SDL_FreeSurface(m_display);
-//      SDL_Quit();
         m_PxCount.clear();
         m_valid = false;
+
+		// Deallocate display surface
+		SDL_FreeSurface(m_display);
+		m_display = NULL;
+
+		// Deallocate screen surface
+		SDL_FreeSurface(m_screen);
+		m_screen = NULL;
+
+		// Destroy window
+		SDL_DestroyWindow(m_window);
+		m_window = NULL;
+
+		// Quit subsystems
+		SDL_Quit();
     }
 
     void UnixSDLDisplay::SetCaption(bool paused)
@@ -147,8 +161,7 @@ namespace pov_frontend
         else
             f = boost::format(PACKAGE_NAME " " VERSION_BASE " SDL display%s")
                 % (paused ? " [paused]" : "");
-        // FIXME: SDL_WM_SetCaption() causes locks on some distros, see http://bugs.povray.org/23
-        // FIXME: SDL_WM_SetCaption(f.str().c_str(), PACKAGE_NAME);
+		SDL_SetWindowTitle(m_window, f.str().c_str());
     }
 
     void UnixSDLDisplay::Show()
@@ -159,30 +172,31 @@ namespace pov_frontend
         if (!m_valid)
         {
             // Initialize SDL
-            if ( SDL_Init(SDL_INIT_VIDEO) != 0 )
+			if (SDL_Init(SDL_INIT_VIDEO) < 0)
             {
-                fprintf(stderr, "Couldn't initialize SDL: %s.\n", SDL_GetError());
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
                 return;
             }
 
-            int desired_bpp = 0;
-            Uint32 video_flags = 0;
             int width = GetWidth();
             int height = GetHeight();
 
             vfeUnixSession *UxSession = dynamic_cast<vfeUnixSession *>(m_Session);
 
-            if (UxSession->GetUnixOptions()->isOptionSet("display", "scaled"))
-            // determine maximum display area (wrong and ugly)
-            {
-                SDL_Rect **modes = SDL_ListModes(NULL, SDL_FULLSCREEN);
-                // [JG] about testing vs ...(-1), have a look at SDL_ListModes API (the return is very ugly).
-                if ((modes != NULL)&&(reinterpret_cast<SDL_Rect**>(-1) != modes))
-                {
-                    width = min(modes[0]->w - 10, width);
-                    height = min(modes[0]->h - 80, height);
-                }
-            }
+			// determine desktop area
+			if (UxSession->GetUnixOptions()->isOptionSet("display", "scaled"))
+			{
+				SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");			   // make the scaled rendering look smoother.
+
+				SDL_DisplayMode mode;
+				static int display_in_use = 0;										// only using first display
+				if (SDL_GetDesktopDisplayMode(display_in_use, &mode) < 0) {
+					SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't get desktop display mode: %s", SDL_GetError());
+					return;
+				}
+				width = min(mode.w - 10, width);
+				height = min(mode.h - 80, height);
+			}
 
             // calculate display area
             float AspectRatio = float(width)/float(height);
@@ -192,30 +206,73 @@ namespace pov_frontend
             else if (AspectRatio != AspectRatio_Full)
                 height = int(float(width)/AspectRatio_Full);
 
+			// create display window
+#ifdef __APPLE__
+			m_window = SDL_CreateWindow(PACKAGE_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
+#else
+			m_window = SDL_CreateWindow(PACKAGE_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
+#endif
+			if (m_window == NULL)
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create W%d x H%d SDL window: %s", width, height, SDL_GetError());
+				return;
+			}
+
+#ifdef WIN_DEBUG
+            SDL_version v;
+            SDL_VERSION(&v);
+            printf("SDL compiled against %d.%d.%d\n", v.major, v.minor, v.patch);
+            SDL_GetVersion(&v);
+            printf("SDL running against %d.%d.%d\n", v.major, v.minor, v.patch);
+#endif
+
+#ifdef __APPLE__
+			//if the window was created with SDL_WINDOW_ALLOW_HIGHDPI on a
+			//platform with high-dpi support (e.g. iOS or OS X). Use SDL_GL_GetDrawableSize() or
+			//SDL_GetRendererOutputSize() to get the real client area size in pixels.
+
+			// get the real client area size in pixels.
+			SDL_GL_GetDrawableSize(m_window, width, height);
+#endif
+
             // Initialize the display
-            m_screen = SDL_SetVideoMode(width, height, desired_bpp, video_flags);
-            if ( m_screen == NULL )
-            {
-                fprintf(stderr, "Couldn't set %dx%dx%d video mode: %s\n", width, height, desired_bpp, SDL_GetError());
-                return;
-            }
+			m_screen = SDL_GetWindowSurface(m_window);
+			if (m_screen == NULL)
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't get SDL window surface: %s", SDL_GetError());
+				return;
+			}
 
-            SDL_Surface *temp = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 32, 0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
+			int depth = 32;
+			int unused = 0;
+			Uint32 Rmask, Gmask, Bmask, Amask;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+			Rmask = 0xff000000;
+			Gmask = 0x00ff0000;
+			Bmask = 0x0000ff00;
+			Amask = 0x000000ff;
+#else
+			Rmask = 0x000000ff;
+			Gmask = 0x0000ff00;
+			Bmask = 0x00ff0000;
+			Amask = 0xff000000;
+#endif
+			SDL_Surface *optimized_surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, depth, Rmask, Gmask, Bmask, Amask);
+			if (optimized_surface == NULL)
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create optimized RGB surface for repeated blitting:: %s", SDL_GetError());
+				return;
+			}
 
-            if ( temp == NULL )
-            {
-                fprintf(stderr, "Couldn't create render display surface: %s\n", SDL_GetError());
-                return;
-            }
-
-            m_display = SDL_DisplayFormat(temp);
-            SDL_FreeSurface(temp);
-
-            if ( m_display == NULL )
-            {
-                fprintf(stderr, "Couldn't convert to optimized surface for repeated blitting: %s\n", SDL_GetError());
-                return;
-            }
+			SDL_PixelFormat* pixelFormat = m_screen->format;
+			Uint32 pixelFormatEnum = pixelFormat->format;
+			m_display = SDL_ConvertSurfaceFormat(optimized_surface, pixelFormatEnum, unused);
+			SDL_FreeSurface(optimized_surface);
+			if (m_display == NULL)
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't convert to optimized RGB display surface for repeated blitting:: %s", SDL_GetError());
+				return;
+			}
 
             m_PxCount.clear();
             m_PxCount.reserve(width*height);
@@ -535,8 +592,18 @@ namespace pov_frontend
             return;
         if (Force || m_PxCnt >= UpdateInterval)
         {
-            SDL_BlitSurface(m_display, &m_update_rect, m_screen, &m_update_rect);
-            SDL_UpdateRect(m_screen, m_update_rect.x, m_update_rect.y, m_update_rect.w, m_update_rect.h);
+			if (SDL_BlitSurface(m_display, &m_update_rect, m_screen, &m_update_rect) < 0)
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't copy display surface to screen surface: %s", SDL_GetError());
+				exit(1);
+			}
+
+			if (SDL_UpdateWindowSurface(m_window) < 0)
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't update window surface: %s", SDL_GetError());
+				exit(1);
+			}
+
             m_PxCnt = 0;
         }
     }

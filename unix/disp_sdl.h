@@ -4,13 +4,14 @@
 ///
 /// SDL (Simple direct media layer) based render display system.
 ///
+/// @author Trevor SANDY<trevor.sandy@gmial.com>
 /// @author Christoph Hormann <chris_hormann@gmx.de>
 ///
 /// @copyright
 /// @parblock
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2014 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -44,7 +45,7 @@
 #include "unixoptions.h"
 #include "disp.h"
 
-#include <SDL/SDL.h>
+#include <SDL2/SDL.h>
 
 namespace pov_frontend
 {
@@ -104,8 +105,9 @@ namespace pov_frontend
             float m_display_scale;
             /// for update interval
             unsigned int m_PxCnt;
-            SDL_Surface *m_screen;
-            SDL_Surface *m_display;
+			SDL_Window   *m_window;
+			SDL_Surface  *m_screen;
+			SDL_Surface  *m_display;
             SDL_Rect m_screen_rect;
             SDL_Rect m_update_rect;
             /// for mixing colors in scaled down display
