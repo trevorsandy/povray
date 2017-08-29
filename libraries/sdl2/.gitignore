@@ -1,0 +1,8 @@
+build/
+config.log
+config.status
+libtool
+Makefile
+sdl2-config
+sdl2-config-cmake
+SDL2.spec
