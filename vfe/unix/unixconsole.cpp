@@ -5,7 +5,7 @@
 /// Adapted from @ref vfe/win/console/winconsole.cpp
 ///
 /// @author Trevor SANDY<trevor.sandy@gmial.com>
-/// @author Based on vfe/unix/unixconsole.cpp 
+/// @author Based on vfe/unix/unixconsole.cpp
 ///
 /// @copyright
 /// @parblock
@@ -163,13 +163,9 @@ static vfeDisplay *UnixDisplayCreator (unsigned int width, unsigned int height, 
             {
                 UnixDisplay *p = new UnixSDLDisplay (width, height, gamma, session, false) ;
                 if (p->TakeOver (display))
-                {
-                    fprintf(stderr, "%s: UnixSDLDisplay (Takeover): width %d, height %d, visible %s\n", PACKAGE, width, height, visible ? "true" : "false");
                     return p;
-                }
                 delete p;
             }
-            fprintf(stderr, "%s: UnixSDLDisplay: width %d, height %d, visible %s\n", PACKAGE, width, height, visible ? "true" : "false");
             return new UnixSDLDisplay (width, height, gamma, session, visible) ;
             break;
 #endif
@@ -424,7 +420,7 @@ int main (int argc, char **argv)
 			  DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 "\n\n"
 			  LPUB3D_TRACE_COPYRIGHT "\n"
 			  DISCLAIMER_MESSAGE_1 "\n"
-			  DISCLAIMER_MESSAGE_2 "\n\n");	
+			  DISCLAIMER_MESSAGE_2 "\n\n");
 
     // block some signals for this thread as well as those created afterwards
     sigemptyset(&sigset);

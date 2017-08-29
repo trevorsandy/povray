@@ -68,39 +68,45 @@ namespace vfePlatform
     UnixOptionsProcessor::UnixOptionsProcessor(vfeSession *session) :
         m_Session(session)
     {
+        char* value;
+        value = getenv("HOME");
+        m_home = value ? value:"";
 
-    char* value;
-    value = getenv("HOME");
-    m_home = value ? value:"";
+        // Default values for I/O restrictions: everything is allowed.
+        // Any restrictions must come from system or user configuration.
+        m_file_io  = IO_UNSET;
+        m_shellout = SHL_UNSET;
 
-    // sys configuration file
-    m_sysconf = LPUB3D_TRACE_SYS_PATH "/config/povray.conf";
+        // system configuration file
+        m_conf    = "";
+        m_sysconf = LPUB3D_TRACE_SYS_PATH "/config/povray.conf";
 
-    // user configuration file
-    if (m_home.length() > 0)
-    {
-        m_user_dir = m_home + "/" LPUB3D_TRACE_USER_PATH;
-        m_userconf = m_home + "/" LPUB3D_TRACE_USER_PATH "/config/povray.conf";
-    }
-    else
-    {
-        m_user_dir = "";
-        m_userconf = "";
-    }
-    // system ini file
-    m_sysini   =  LPUB3D_TRACE_SYS_PATH "/config/povray.ini";
-    m_sysini_old = LPUB3D_TRACE_SYS_PATH "/config/povray.ini";
+        // user configuration file
+        if (m_home.length() > 0)
+        {
+            m_user_dir = m_home + "/" LPUB3D_TRACE_USER_PATH;
+            m_userconf = m_home + "/" LPUB3D_TRACE_USER_PATH "/config/povray.conf";
+        }
+        else
+        {
+            m_user_dir = "";
+            m_userconf = "";
+        }
 
-    // user ini file
-    if (m_home.length() > 0)
-        m_userini = m_home + "/" LPUB3D_TRACE_USER_PATH "/config/povray.ini";
-    else
-        m_userini = "";
+        // system ini file
+        m_sysini   =  LPUB3D_TRACE_SYS_PATH "/config/povray.ini";
+        m_sysini_old = LPUB3D_TRACE_SYS_PATH "/config/povray.ini";
 
-    if (m_home.length() > 0)
-        m_userini_old = m_home + "/" LPUB3D_TRACE_USER_PATH "/config/povray.ini";
-    else
-        m_userini_old = "";
+        // user ini file
+        if (m_home.length() > 0)
+            m_userini = m_home + "/" LPUB3D_TRACE_USER_PATH "/config/povray.ini";
+        else
+            m_userini = "";
+
+        if (m_home.length() > 0)
+            m_userini_old = m_home + "/" LPUB3D_TRACE_USER_PATH "/config/povray.ini";
+        else
+            m_userini_old = "";
 
 #ifdef UNIX_DEBUG
         cerr << "PATHS" << endl;

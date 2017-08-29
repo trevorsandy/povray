@@ -42,12 +42,13 @@
 # Based on configure.ac from POV-Ray 3.6
 
 # Required autoconf version.
-AC_PREREQ(2.59)
+AC_PREREQ([2.69])
 
 # Inits.
 
 # The file VERSION must contain only the version string MAJOR.MINOR(.PATCHLEVEL)(-PRERELEASE)
-AC_INIT([LPub3D-Trace], m4_normalize(m4_include([VERSION])), [https://github.com/trevorsandy/povray/issues], [lpub3d_trace_cui])
+#AC_INIT([LPub3D-Trace],[m4_normalize(m4_include(VERSION))],[https://github.com/trevorsandy/povray/issues],[lpub3d_trace_cui])
+AC_INIT([LPub3D-Trace],[m4_esyscmd_s([cat VERSION])],[https://github.com/trevorsandy/povray/issues],[lpub3d_trace_cui])
 
 # VERSION_BASE is then defined as MAJOR.MINOR
 VERSION_BASE=`echo $PACKAGE_VERSION | sed 's,\([[0-9]]*.[[0-9]]*\).*,\1,g'`
@@ -84,12 +85,12 @@ required_libz_version="1.2.1"
 required_libpng_version="1.2.5"
 required_libjpeg_version="6b"
 required_libtiff_version="3.6.1"
-required_libsdl_version="1.2"
+required_libsdl_version="2.0.5"
 required_openexr_version="1.2"
 
 # Supported options.
 # AX_ARG_ENABLE([--enable-avx2],             [enable AVX2 features and compiler optmization])
-AX_ARG_ENABLE([--enable-watch-cursor],     [enable a watch cursor over the display while rendering (X Window only)])
+AX_ARG_ENABLE([--enable-watch-cursor],     [enable a watch cursor over the display when rendering (X Window only)])
 AX_ARG_ENABLE([--enable-debug],            [enable compiler debugging mode])
 AX_ARG_ENABLE([--enable-profile],          [enable program execution profiling])
 AX_ARG_ENABLE([--enable-static],           [enable the linker to create static executable (no run-time dependancy to external libraries, larger binary)])
@@ -105,7 +106,7 @@ AX_ARG_WITH([--with-zlib],                [DIR], [use the ZLIB library (in direc
 AX_ARG_WITH([--with-libpng],              [DIR], [use the PNG library (in directory DIR)])
 AX_ARG_WITH([--with-libjpeg],             [DIR], [use the JPEG library (in directory DIR)])
 AX_ARG_WITH([--with-libtiff],             [DIR], [use the TIFF library (in directory DIR)])
-AX_ARG_WITH([--with-libsdl],              [DIR], [use the SDL library (in directory DIR)])
+AX_ARG_WITH([--with-libsdl],              [DIR], [use the SDL library built-in, system installed, or (in directory DIR)])
 AX_ARG_WITH([--with-libmkl],              [DIR], [use the Intel(R) Math Kernel Library (in directory DIR)])
 AX_ARG_WITH([--with-openexr],             [DIR], [use the OpenEXR library (in directory DIR)])
 AX_ARG_WITH([--with-macosx-sdk],          [DIR], [use the MacOS SDK (in directory DIR)])
@@ -177,12 +178,21 @@ Environment
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
-AM_INIT_AUTOMAKE([1.9 dist-bzip2 subdir-objects])
+AM_INIT_AUTOMAKE([1.9 dist-bzip2 subdir-objects -Wno-portability])
+AM_PROG_AR
 AM_MAINTAINER_MODE
 
 AX_FIX_INCORRECT_PATH(C_INCLUDE_PATH, ".", [pov_warn_path="$pov_warn_path C_INCLUDE_PATH"])
 AX_FIX_INCORRECT_PATH(CPLUS_INCLUDE_PATH, ".", [pov_warn_path="$pov_warn_path CPLUS_INCLUDE_PATH"])
 
+# Check if building on MacOS.
+case "$build" in
+  *darwin*)
+    ax_MacOS_build="yes"
+    AC_DEFINE([ALTMAIN], [], [Building on MacOS, use vfe main.])
+  ;;
+esac
+AM_CONDITIONAL([MACOS_BUILD], [test x"$ax_MacOS_build" = x"yes"])
 
 ###############################################################################
 
@@ -229,14 +239,6 @@ AC_DEFINE_UNQUOTED([BUILD_ARCH], ["$build"], [Build architecture.])
 AC_DEFINE_UNQUOTED([COMPILER_VENDOR], ["$pov_compiler_vendor"], [Compiler vendor.])
 AC_DEFINE_UNQUOTED([COMPILER_VERSION], ["$pov_compiler_version"], [Compiler version.])
 AC_DEFINE_UNQUOTED([POV_COMPILER_INFO], ["$pov_compiler_version @ $build"], [Compiler version (processed).])
-
-# Check if building on MacOS.
-case "$build" in
-  *darwin*)
-    ax_MacOS_build="yes"
-    AC_DEFINE([ALTMAIN], [], [Building on MacOS, use vfe main.])
-  ;;
-esac
 
 # Not necessary when AM_MAINTAINER_MODE is called above.
 ###AC_PROG_MAKE_SET
@@ -413,7 +415,7 @@ else
   AC_MSG_RESULT([yes])
   AX_CHECK_LIB([png], [$required_libpng_version], [png14 png png12 png], [png_get_libpng_ver], [png.h], [png_get_libpng_ver(NULL)], [$with_libpng])
   ### FIXME: do not allow for 1.4.x
-	# This doesn't appear to be needed now that we're allowing 1.4 (jh)
+  # This doesn't appear to be needed now that we're allowing 1.4 (jh)
   # AC_MSG_CHECKING([for libpng version < 1.4 (not supported at the moment!)])
   # AX_COMPARE_VERSION([$ax_check_lib_version], [ge], [1.4], [ax_check_lib="bad"], [ax_check_lib="ok"])
   # AC_MSG_RESULT([$ax_check_lib])
@@ -470,15 +472,16 @@ if test x"$with_openexr" = x"no"; then
   AC_MSG_RESULT([no])
 else
   AC_MSG_RESULT([yes])
-  if test x"$with_openexr" != x""; then
-    AC_MSG_CHECKING([for --with-openexr pkgconfig])
-    ax_PKG_CONFIG_DIR="$with_openexr/pkgconfig"
-    AS_IF([ test -d "$ax_PKG_CONFIG_DIR" ], [
-      dnl On MacOS, the homebrew version of OpenEXR is throws an undefined reference error
-      dnl If using git repo built version, set the local pkgconfig directory
-      eval "export PKG_CONFIG_PATH=\"$ax_PKG_CONFIG_DIR:$PKG_CONFIG_PATH\""
-      CPPFLAGS="-I$ax_PKG_CONFIG_DIR/../../include $CPPFLAGS"
-      LDFLAGS="-L$ax_PKG_CONFIG_DIR/../../lib $LDFLAGS"
+  if test x"$with_openexr" != x"" && test x"$with_openexr" != x"yes"; then  # this means directory specified so check for pkgconfig
+    pov_PKG_CONFIG_DIR="$with_openexr/pkgconfig"
+    AC_MSG_CHECKING([for openexr pkgconfig at $pov_PKG_CONFIG_DIR ])
+    AS_IF([ test -d "$pov_PKG_CONFIG_DIR" && test -f "$pov_PKG_CONFIG_DIR/OpenEXR.pc"],
+    [
+      dnl On MacOS, the homebrew version of OpenEXR throws an undefined reference error.
+      dnl If using version compiled from git, set the local pkgconfig directory if different than default.
+      eval "export PKG_CONFIG_PATH=\"$pov_PKG_CONFIG_DIR:$PKG_CONFIG_PATH\""
+      dnl Also set lib directory (-L) in LDFLAGS if different than default location
+      LDFLAGS="-L$with_openexr $LDFLAGS"
       AC_MSG_RESULT([found])
     ],
       AC_MSG_RESULT([not found])
@@ -581,21 +584,74 @@ else
     esac
   fi
 
-  # libSDL
+  # libSDL - including option to use built-in SDL2
+
   if test x"$pov_xwin_msg" = x"enabled"; then
-    AX_CHECK_LIBSDL([$required_libsdl_version])
-    if test x"$ax_check_libsdl" = x"ok"; then
-      pov_libsdl=ok
-      pov_xwin_msg="$pov_xwin_msg (using SDL)"
-    else
+    AC_MSG_CHECKING([whether to use SDL library])
+
+    if test x"$with_libsdl" = x"no"; then
+      AC_MSG_RESULT([no])
+
+    elif test x"$with_libsdl" = x"yes"; then # libsdl built from source
+      AC_MSG_RESULT([yes])
+
+      pov_save_cppflags="$CPPFLAGS"					  # save
+      CPPFLAGS="-I./libraries/sdl2/include $CPPFLAGS"  # append
+
+      AC_CHECK_HEADERS([SDL.h],
+      [
+        AS_IF([test x"$ac_cv_header_SDL_h" = x"yes"],
+        [
+          AC_MSG_CHECKING([for SDL v$required_libsdl_version])
+          AC_EGREP_CPP([version_confirmed],
+          [
+#include <SDL.h>
+#if defined(SDL_COMPILEDVERSION) && SDL_COMPILEDVERSION == 2005
+version_confirmed
+#endif
+          ],
+          [
+            AC_MSG_RESULT([yes])
+            pov_check_libsdl="ok"
+          ],
+          [
+            AC_MSG_RESULT([no])
+            pov_check_libsdl="ko"
+          ])
+        ])
+      ])
+
+      if test x"$pov_check_libsdl" = x"ok"; then
+        AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
+      fi
+
+    else                        # check if libsdl is installed
+      AC_MSG_RESULT([yes])
+
+      AX_CHECK_LIBSDL([$required_libsdl_version])
+
+    fi  # check libsdl
+
+    if test x"$ax_check_libsdl" != x"ok" && test x"$pov_check_libsdl" != x"ok"; then
       AC_MSG_WARN([the preview display is disabled])
-      pov_xwin_msg="disabled"  # FIXME
+      AC_DEFINE([LIBSDL_MISSING], [], [Don't use SDL.])
+      CPPFLAGS="$pov_save_cppflags" # restore
+      pov_xwin_msg="disabled"
+    else
+      pov_xwin_msg="$pov_xwin_msg (using SDL v$required_libsdl_version)"
     fi
+
   fi
 
 fi  # with_cygwin_dll
 
-# MacOS SDK.
+# build libsdl from source conditionals
+AM_CONDITIONAL([USE_SDL2], [test x"$pov_check_libsdl" = x"ok"])
+AM_CONDITIONAL([SDL2_MACOS_BUILD], [test x"$ax_MacOS_build" = x"yes" && test x"$pov_check_libsdl" = x"ok"])
+AM_COND_IF([SDL2_MACOS_BUILD], [AM_EXTRA_RECURSIVE_TARGETS([sdlmacosbuild])], [])
+
+# MacOS SDK
+
 if test x"$ax_MacOS_build" = x"yes"; then
 
   dnl Capture command line input
@@ -605,93 +661,98 @@ if test x"$ax_MacOS_build" = x"yes"; then
   dnl Set up the Mac OS X SDK.  We do this early so configure tests will occur
   dnl with the SDK in place.
   dnl NOTE: We clobber ax_USE_MACOSX_SDK with the SDK path
+
   if test x"$ax_USE_MACOSX_SDK" = x"no"; then
-      ax_USE_MACOSX_SDK=
+    ax_USE_MACOSX_SDK=
   elif test x"$ax_USE_MACOSX_SDK" = x"yes"; then
-      AC_MSG_CHECKING([for default MacOS SDK])
-      if test -d "/usr/bin/xcrun"; then
-        ax_USE_MACOSX_SDK=`/usr/bin/xcrun --show-sdk-path -sdk macosx`
-        AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
-      elif test -d "/Developer/SDKs/MacOSX.sdk"; then
-        ax_USE_MACOSX_SDK="/Developer/SDKs/MacOSX.sdk"
-        AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
-      else
-        AC_MSG_FAILURE([not found])
-      fi
+    AC_MSG_CHECKING([for default MacOS SDK])
+    if test -d "/usr/bin/xcrun"; then
+      ax_USE_MACOSX_SDK=`/usr/bin/xcrun --show-sdk-path -sdk macosx`
+      AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
+    elif test -d "/Developer/SDKs/MacOSX.sdk"; then
+      ax_USE_MACOSX_SDK="/Developer/SDKs/MacOSX.sdk"
+      AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
+    else
+      AC_MSG_FAILURE([not found])
+    fi
   fi
 
   if test x"$ax_USE_MACOSX_SDK" != x""; then
-      AC_MSG_CHECKING([for SDK directory $ax_USE_MACOSX_SDK])
-      if ! test -d "$ax_USE_MACOSX_SDK"; then
-          AC_MSG_FAILURE([not found])
-      else
-          AC_MSG_RESULT([exists])
-      fi
-      MACOSX_SDK_OPTS="-isysroot $ax_USE_MACOSX_SDK"
-      eval "CC=\"$CC $MACOSX_SDK_OPTS\""
-      eval "CXX=\"$CXX $MACOSX_SDK_OPTS\""
-      eval "LD=\"$LD $MACOSX_SDK_OPTS\""
-      retest_macosx_linking=yes
-      dnl NOTE: When libtool is used in lieu of AR/RANLIB (i.e. in static mode)
-      dnl the syslibroot makes no difference.  We aren't using libtool now but
-      dnl if we ever did, be aware that you don't need to worry about it.
+    AC_MSG_CHECKING([for SDK directory $ax_USE_MACOSX_SDK])
+    if ! test -d "$ax_USE_MACOSX_SDK"; then
+      AC_MSG_FAILURE([not found])
+    else
+      AC_MSG_RESULT([exists])
+    fi
+    MACOSX_SDK_OPTS="-isysroot $ax_USE_MACOSX_SDK"
+    eval "CC=\"$CC $MACOSX_SDK_OPTS\""
+    eval "CXX=\"$CXX $MACOSX_SDK_OPTS\""
+    eval "LD=\"$LD $MACOSX_SDK_OPTS\""
+    retest_macosx_linking=yes
+    dnl NOTE: When libtool is used in lieu of AR/RANLIB (i.e. in static mode)
+    dnl the syslibroot makes no difference.  We aren't using libtool now but
+    dnl if we ever did, be aware that you don't need to worry about it.
+
   fi
 
   dnl Set up the deployment target
   dnl No   : Don't specify a min version even if using an SDK
   dnl Yes  : Use the version from the SDK if used, otherwise same as no
   dnl Param: Use the specified version
-  if test x"$ax_USE_MACOSX_VERSION_MIN" = x"no"; then
-      ax_USE_MACOSX_VERSION_MIN=
-  elif test x"$ax_USE_MACOSX_VERSION_MIN" = x"yes"; then
-      if test x"$ax_USE_MACOSX_SDK" != x""; then
-          AC_MSG_CHECKING([SDK deployment version])
-  dnl We need to quote the next line where we don't need macros and do need [] in the regex
-  [
-          MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" buildSettings | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
-  ]
-          # If that failed, try again with the new key
-          if test x"$MACOSX_SDK_PLIST_VERSION_MIN" == x""; then
-  [
-              MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" DefaultProperties | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
-  ]
-          fi
 
-          if test x"$MACOSX_SDK_PLIST_VERSION_MIN" != x""; then
-              ax_USE_MACOSX_VERSION_MIN=$MACOSX_SDK_PLIST_VERSION_MIN
-              AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
-          else
-              AC_MSG_WARN([Could not determine deployment target from SDKSettings.plist])
-              ax_USE_MACOSX_VERSION_MIN=
-          fi
-      else
-          ax_USE_MACOSX_VERSION_MIN=
+  if test x"$ax_USE_MACOSX_VERSION_MIN" = x"no"; then
+    ax_USE_MACOSX_VERSION_MIN=
+  elif test x"$ax_USE_MACOSX_VERSION_MIN" = x"yes"; then
+    if test x"$ax_USE_MACOSX_SDK" != x""; then
+      AC_MSG_CHECKING([SDK deployment version])
+      dnl We need to quote the next line where we don't need macros and do need [] in the regex
+      [
+        MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" buildSettings | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
+      ]
+      # If that failed, try again with the new key
+      if test x"$MACOSX_SDK_PLIST_VERSION_MIN" == x""; then
+        [
+          MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" DefaultProperties | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
+        ]
       fi
+
+      if test x"$MACOSX_SDK_PLIST_VERSION_MIN" != x""; then
+        ax_USE_MACOSX_VERSION_MIN=$MACOSX_SDK_PLIST_VERSION_MIN
+        AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
+      else
+        AC_MSG_WARN([Could not determine deployment target from SDKSettings.plist])
+        ax_USE_MACOSX_VERSION_MIN=
+      fi
+    else
+      ax_USE_MACOSX_VERSION_MIN=
+    fi
   fi
 
   if test x"$ax_USE_MACOSX_VERSION_MIN" != x""; then
-      AC_MSG_CHECKING([SDK deployment version])
-      AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
-      MACOSX_VERSION_MIN_OPTS="-mmacosx-version-min=$ax_USE_MACOSX_VERSION_MIN"
-      eval "CC=\"$CC $MACOSX_VERSION_MIN_OPTS\""
-      eval "CXX=\"$CXX $MACOSX_VERSION_MIN_OPTS\""
-      eval "LD=\"$LD $MACOSX_VERSION_MIN_OPTS\""
-      retest_macosx_linking=yes
+    AC_MSG_CHECKING([SDK deployment version])
+    AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
+    MACOSX_VERSION_MIN_OPTS="-mmacosx-version-min=$ax_USE_MACOSX_VERSION_MIN"
+    eval "CC=\"$CC $MACOSX_VERSION_MIN_OPTS\""
+    eval "CXX=\"$CXX $MACOSX_VERSION_MIN_OPTS\""
+    eval "LD=\"$LD $MACOSX_VERSION_MIN_OPTS\""
+    retest_macosx_linking=yes
   fi
 
   dnl If either an SDK or a version option was added, make sure that we can
   dnl still compile and link both C and C++.  If we didn't do this, then most
   dnl of the remaining tests would fail.
-  if test x"$retest_macosx_linking" = x"yes"; then
-      AC_LANG_PUSH(C)
-      AC_MSG_CHECKING([if C compiler works with SDK/version options])
-      AC_TRY_LINK([],[],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
-      AC_LANG_POP()
 
-      AC_LANG_PUSH(C++)
-      AC_MSG_CHECKING([if C++ compiler works with SDK/version options])
-      AC_TRY_LINK([],[],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
-      AC_LANG_POP()
+  if test x"$retest_macosx_linking" = x"yes"; then
+    AC_LANG_PUSH(C)
+    AC_MSG_CHECKING([if C compiler works with SDK/version options])
+    AC_LINK_IFELSE([],[],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
+    AC_LANG_POP()
+
+    AC_LANG_PUSH(C++)
+    AC_MSG_CHECKING([if C++ compiler works with SDK/version options])
+    AC_LINK_IFELSE([],[],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
+    AC_LANG_POP()
+    propagate_settings=yes
   fi
 fi
 
@@ -721,8 +782,8 @@ AC_TYPE_SIZE_T
 AC_STRUCT_TM
 
 AC_CHECK_SIZEOF([int])
-AC_CHECK_SIZEOF([long int])	# check for 64 bit support
-AC_CHECK_SIZEOF([size_t])	# check for 64 bit support
+AC_CHECK_SIZEOF([long int]) # check for 64 bit support
+AC_CHECK_SIZEOF([size_t]) # check for 64 bit support
 AC_CHECK_SIZEOF([float])
 
 
@@ -1386,8 +1447,8 @@ AC_RUN_IFELSE([
   AC_MSG_RESULT([cross-compiling])  # FIXME
 ])
 
-
 ###############################################################################
+
 
 AC_MSG_RESULT([
 Makefiles
@@ -1401,8 +1462,11 @@ AC_CONFIG_FILES([\
   unix/Makefile \
 ])
 
+# configure SDL2 built-in library
+AM_COND_IF([USE_SDL2], [AC_CONFIG_SUBDIRS([libraries/sdl2])])
 
 ###############################################################################
+
 
 if test x"$enable_io_restrictions" = x"no"; then
   pov_io_msg="disabled"
@@ -1445,21 +1509,21 @@ AC_OUTPUT
 
 # recursively expand the following variables for displaying
 if test x"$pov_lpub3d_3rd_party_install" = x"no"; then
-	for i in bindir sysconfdir datadir mandir
-	do
-		eval povtemp=\$$i
-		while test x"$povtemp" != x"$oldpovtemp"
-		do
-		  oldpovtemp=$povtemp
-		  eval povtemp=$povtemp
-		done
-		eval pov$i=$povtemp
-	done
+  for i in bindir sysconfdir datadir mandir
+  do
+    eval povtemp=\$$i
+    while test x"$povtemp" != x"$oldpovtemp"
+    do
+      oldpovtemp=$povtemp
+      eval povtemp=$povtemp
+    done
+    eval pov$i=$povtemp
+  done
 else
-	eval povbindir=$prefix
-	eval povbindir=$povbindir
-	eval povdatadir=$prefix
-	eval povdatadir=$povdatadir
+  eval povbindir=$prefix
+  eval povbindir=$povbindir
+  eval povdatadir=$prefix
+  eval povdatadir=$povdatadir
 fi
 
 AC_MSG_RESULT([
@@ -1486,18 +1550,18 @@ fi
 
 # Check if to perform LPub3D 3rd party installation.
 if test x"$pov_lpub3d_3rd_party_install" = x"yes"; then
-	AC_MSG_RESULT([Built-in features:
-	I/O restrictions:          ${pov_io_msg}
-	X Window display:          ${pov_xwin_msg}
-	Supported image formats:   $pov_img_fmt_builtin $pov_img_fmt_enabled
-	Unsupported image formats: $pov_img_fmt_disabled
+  AC_MSG_RESULT([Built-in features:
+  I/O restrictions:          ${pov_io_msg}
+  X Window display:          ${pov_xwin_msg}
+  Supported image formats:   $pov_img_fmt_builtin $pov_img_fmt_enabled
+  Unsupported image formats: $pov_img_fmt_disabled
 
 Compilation settings:
-	Build architecture:  $build
-	Built/Optimized for: $pov_built_for
-	Compiler vendor:     $pov_compiler_vendor
-	Compiler version:    $pov_compiler_version
-	Compiler flags:      $CXXFLAGS
+  Build architecture:  $build
+  Built/Optimized for: $pov_built_for
+  Compiler vendor:     $pov_compiler_vendor
+  Compiler version:    $pov_compiler_version
+  Compiler flags:      $CXXFLAGS
 
 Type 'make' to build $PACKAGE_NAME
 Type 'make check' to build $PACKAGE_NAME and run a test render.
@@ -1506,43 +1570,43 @@ Type 'make install' to install $PACKAGE_NAME on your system.
 $PACKAGE_NAME will be packaged for an LPub3D 3rd party installation.
 
 The $PACKAGE_NAME components will be installed in the following directories.
-	Program (executable):       ${povbindir}/$PACKAGE-$VERSION_BASE/bin/$build_cpu
-	System configuration files: ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/config
-	User configuration files:   ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/config
-	Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/include
-	Standard INI files:         ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/ini
-	Standard demo scene files:  ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/scenes
-    Unix man page:              ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/man
-    Documentation (text, HTML): ${povdatadir}/$PACKAGE-$VERSION_BASE/docs
+  Program (executable):       ${povbindir}/$PACKAGE-$VERSION_BASE/bin/$build_cpu
+  System configuration files: ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/config
+  User configuration files:   ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/config
+  Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/include
+  Standard INI files:         ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/ini
+  Standard demo scene files:  ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/scenes
+  Unix man page:              ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/man
+  Documentation (text, HTML): ${povdatadir}/$PACKAGE-$VERSION_BASE/docs
 ===============================================================================
 ])
 else
-	AC_MSG_RESULT([Built-in features:
-	I/O restrictions:          ${pov_io_msg}
-	X Window display:          ${pov_xwin_msg}
-	Supported image formats:   $pov_img_fmt_builtin $pov_img_fmt_enabled
-	Unsupported image formats: $pov_img_fmt_disabled
+  AC_MSG_RESULT([Built-in features:
+  I/O restrictions:          ${pov_io_msg}
+  X Window display:          ${pov_xwin_msg}
+  Supported image formats:   $pov_img_fmt_builtin $pov_img_fmt_enabled
+  Unsupported image formats: $pov_img_fmt_disabled
 
 Compilation settings:
-	Build architecture:  $build
-	Built/Optimized for: $pov_built_for
-	Compiler vendor:     $pov_compiler_vendor
-	Compiler version:    $pov_compiler_version
-	Compiler flags:      $CXXFLAGS
+  Build architecture:  $build
+  Built/Optimized for: $pov_built_for
+  Compiler vendor:     $pov_compiler_vendor
+  Compiler version:    $pov_compiler_version
+  Compiler flags:      $CXXFLAGS
 
 Type 'make' to build $PACKAGE_NAME
 Type 'make check' to build $PACKAGE_NAME and run a test render.
 Type 'make install' to install $PACKAGE_NAME on your system.
 
 The $PACKAGE_NAME components will be installed in the following directories.
-	Program (executable):       ${povbindir}
-	System configuration files: ${povsysconfdir}/$PACKAGE/$VERSION_BASE
-	User configuration files:   ${HOME}/.$PACKAGE/$VERSION_BASE
-	Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/include
-	Standard INI files:         ${povdatadir}/$PACKAGE-$VERSION_BASE/ini
-	Standard demo scene files:  ${povdatadir}/$PACKAGE-$VERSION_BASE/scenes
-	Documentation (text, HTML): ${povdatadir}/doc/$PACKAGE-$VERSION_BASE
-	Unix man page:              ${povmandir}
+  Program (executable):       ${povbindir}
+  System configuration files: ${povsysconfdir}/$PACKAGE/$VERSION_BASE
+  User configuration files:   ${HOME}/.$PACKAGE/$VERSION_BASE
+  Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/include
+  Standard INI files:         ${povdatadir}/$PACKAGE-$VERSION_BASE/ini
+  Standard demo scene files:  ${povdatadir}/$PACKAGE-$VERSION_BASE/scenes
+  Documentation (text, HTML): ${povdatadir}/doc/$PACKAGE-$VERSION_BASE
+  Unix man page:              ${povmandir}
 ===============================================================================
 ])
 fi

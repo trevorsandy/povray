@@ -1,6 +1,6 @@
 //******************************************************************************
 ///
-/// @file unix/disp_sdl.cpp
+/// @file windows/disp_sdl.cpp
 ///
 /// SDL (Simple direct media layer) based render display system.
 ///
@@ -36,7 +36,7 @@
 ///
 //*******************************************************************************
 
-#include "config.h"
+#include "syspovconfig.h"
 
 #ifdef HAVE_LIBSDL
 
@@ -54,23 +54,23 @@ namespace pov_frontend
 
     extern shared_ptr<Display> gDisplay;
 
-    const UnixOptionsProcessor::Option_Info UnixSDLDisplay::Options[] =
+    const WinConOptionsProcessor::Option_Info WinConSDLDisplay::Options[] =
     {
         // command line/povray.conf/environment options of this display mode can be added here
         // section name, option name, default, has_param, command line parameter, environment variable name, help text
-        UnixOptionsProcessor::Option_Info("display", "scaled", "on", false, "", "POV_DISPLAY_SCALED", "scale render view to fit screen"),
-        UnixOptionsProcessor::Option_Info("", "", "", false, "", "", "") // has to be last
+        WinConOptionsProcessor::Option_Info("display", "scaled", "on", false, "", "POV_DISPLAY_SCALED", "scale render view to fit screen"),
+        WinConOptionsProcessor::Option_Info("", "", "", false, "", "", "") // has to be last
     };
 
-    bool UnixSDLDisplay::Register(vfeUnixSession *session)
+    bool WinConSDLDisplay::Register(vfeWinSession *session)
     {
-        session->GetUnixOptions()->Register(Options);
+        session->GetWinConOptions()->Register(Options);
         // TODO: correct display detection
         return true;
     }
 
-    UnixSDLDisplay::UnixSDLDisplay(unsigned int w, unsigned int h, GammaCurvePtr gamma, vfeSession *session, bool visible) :
-        UnixDisplay(w, h, gamma, session, visible)
+    WinConSDLDisplay::WinConSDLDisplay(unsigned int w, unsigned int h, GammaCurvePtr gamma, vfeSession *session, bool visible) :
+        WinConDisplay(w, h, gamma, session, visible)
     {
         m_valid = false;
         m_display_scaled = false;
@@ -80,24 +80,24 @@ namespace pov_frontend
 		m_window = NULL;
     }
 
-    UnixSDLDisplay::~UnixSDLDisplay()
+    WinConSDLDisplay::~WinConSDLDisplay()
     {
         Close();
     }
 
-    void UnixSDLDisplay::Initialise()
+    void WinConSDLDisplay::Initialise()
     {
         if (m_VisibleOnCreation)
             Show();
     }
 
-    void UnixSDLDisplay::Hide()
+    void WinConSDLDisplay::Hide()
     {
     }
 
-    bool UnixSDLDisplay::TakeOver(UnixDisplay *display)
+    bool WinConSDLDisplay::TakeOver(WinConDisplay *display)
     {
-        UnixSDLDisplay *p = dynamic_cast<UnixSDLDisplay *>(display);
+        WinConSDLDisplay *p = dynamic_cast<WinConSDLDisplay *>(display);
         if (p == NULL)
             return false;
         if ((GetWidth() != p->GetWidth()) || (GetHeight() != p->GetHeight()))
@@ -124,7 +124,7 @@ namespace pov_frontend
         return true;
     }
 
-    void UnixSDLDisplay::Close()
+    void WinConSDLDisplay::Close()
     {
         if (!m_valid)
             return;
@@ -136,10 +136,6 @@ namespace pov_frontend
 		SDL_FreeSurface(m_display);
 		m_display = NULL;
 
-		// Deallocate screen surface
-		SDL_FreeSurface(m_screen);
-		m_screen = NULL;
-
 		// Destroy window
 		SDL_DestroyWindow(m_window);
 		m_window = NULL;
@@ -148,7 +144,7 @@ namespace pov_frontend
 		SDL_Quit();
     }
 
-    void UnixSDLDisplay::SetCaption(bool paused)
+    void WinConSDLDisplay::SetCaption(bool paused)
     {
         if (!m_valid)
             return;
@@ -164,7 +160,7 @@ namespace pov_frontend
 		SDL_SetWindowTitle(m_window, f.str().c_str());
     }
 
-    void UnixSDLDisplay::Show()
+    void WinConSDLDisplay::Show()
     {
         if (gDisplay.get() != this)
             gDisplay = m_Session->GetDisplay();
@@ -181,10 +177,10 @@ namespace pov_frontend
             int width = GetWidth();
             int height = GetHeight();
 
-            vfeUnixSession *UxSession = dynamic_cast<vfeUnixSession *>(m_Session);
+            vfeWinSession *UxSession = dynamic_cast<vfeWinSession *>(m_Session);
 
 			// determine desktop area
-			if (UxSession->GetUnixOptions()->isOptionSet("display", "scaled"))
+			if (UxSession->GetWinConOptions()->isOptionSet("display", "scaled"))
 			{
 				SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");			   // make the scaled rendering look smoother.
 
@@ -207,11 +203,7 @@ namespace pov_frontend
                 height = int(float(width)/AspectRatio_Full);
 
 			// create display window
-#ifdef __APPLE__
-			m_window = SDL_CreateWindow(PACKAGE_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_SHOWN);
-#else
 			m_window = SDL_CreateWindow(PACKAGE_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
-#endif
 			if (m_window == NULL)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create W%d x H%d SDL window: %s", width, height, SDL_GetError());
@@ -219,20 +211,11 @@ namespace pov_frontend
 			}
 
 #ifdef WIN_DEBUG
-            SDL_version v;
-            SDL_VERSION(&v);
-            printf("SDL compiled against %d.%d.%d\n", v.major, v.minor, v.patch);
-            SDL_GetVersion(&v);
-            printf("SDL running against %d.%d.%d\n", v.major, v.minor, v.patch);
-#endif
-
-#ifdef __APPLE__
-			//if the window was created with SDL_WINDOW_ALLOW_HIGHDPI on a
-			//platform with high-dpi support (e.g. iOS or OS X). Use SDL_GL_GetDrawableSize() or
-			//SDL_GetRendererOutputSize() to get the real client area size in pixels.
-
-			// get the real client area size in pixels.
-			SDL_GL_GetDrawableSize(m_window, &width, &height);
+			SDL_version v;
+	        SDL_VERSION(&v);
+	        printf("SDL compiled against %d.%d.%d\n", v.major, v.minor, v.patch);
+	        SDL_GetVersion(&v);
+	        printf("SDL running against %d.%d.%d\n", v.major, v.minor, v.patch);
 #endif
 
             // Initialize the display
@@ -312,7 +295,7 @@ namespace pov_frontend
         }
     }
 
-    inline void UnixSDLDisplay::SetPixel(unsigned int x, unsigned int y, const RGBA8& colour)
+    inline void WinConSDLDisplay::SetPixel(unsigned int x, unsigned int y, const RGBA8& colour)
     {
         Uint8 *p = (Uint8 *) m_display->pixels + y * m_display->pitch + x * m_display->format->BytesPerPixel;
 
@@ -346,7 +329,7 @@ namespace pov_frontend
         }
     }
 
-    inline void UnixSDLDisplay::SetPixelScaled(unsigned int x, unsigned int y, const RGBA8& colour)
+    inline void WinConSDLDisplay::SetPixelScaled(unsigned int x, unsigned int y, const RGBA8& colour)
     {
         unsigned int ix = x * m_display_scale;
         unsigned int iy = y * m_display_scale;
@@ -396,7 +379,7 @@ namespace pov_frontend
         ++m_PxCount[ofs];
     }
 
-    void UnixSDLDisplay::UpdateCoord(unsigned int x, unsigned int y)
+    void WinConSDLDisplay::UpdateCoord(unsigned int x, unsigned int y)
     {
         unsigned int rx2 = m_update_rect.x + m_update_rect.w;
         unsigned int ry2 = m_update_rect.y + m_update_rect.h;
@@ -408,7 +391,7 @@ namespace pov_frontend
         m_update_rect.h = ry2 - m_update_rect.y;
     }
 
-    void UnixSDLDisplay::UpdateCoord(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
+    void WinConSDLDisplay::UpdateCoord(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
     {
         unsigned int rx2 = m_update_rect.x + m_update_rect.w;
         unsigned int ry2 = m_update_rect.y + m_update_rect.h;
@@ -420,18 +403,18 @@ namespace pov_frontend
         m_update_rect.h = ry2 - m_update_rect.y;
     }
 
-    void UnixSDLDisplay::UpdateCoordScaled(unsigned int x, unsigned int y)
+    void WinConSDLDisplay::UpdateCoordScaled(unsigned int x, unsigned int y)
     {
         UpdateCoord(static_cast<unsigned int>(x * m_display_scale), static_cast<unsigned int>(y * m_display_scale));
     }
 
-    void UnixSDLDisplay::UpdateCoordScaled(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
+    void WinConSDLDisplay::UpdateCoordScaled(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2)
     {
         UpdateCoord(static_cast<unsigned int>(x1 * m_display_scale), static_cast<unsigned int>(y1 * m_display_scale),
                     static_cast<unsigned int>(x2 * m_display_scale), static_cast<unsigned int>(y2 * m_display_scale));
     }
 
-    void UnixSDLDisplay::DrawPixel(unsigned int x, unsigned int y, const RGBA8& colour)
+    void WinConSDLDisplay::DrawPixel(unsigned int x, unsigned int y, const RGBA8& colour)
     {
         if (!m_valid || x >= GetWidth() || y >= GetHeight())
             return;
@@ -455,7 +438,7 @@ namespace pov_frontend
             SDL_UnlockSurface(m_display);
     }
 
-    void UnixSDLDisplay::DrawRectangleFrame(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour)
+    void WinConSDLDisplay::DrawRectangleFrame(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour)
     {
         if (!m_valid)
             return;
@@ -505,7 +488,7 @@ namespace pov_frontend
         m_PxCnt = UpdateInterval;
     }
 
-    void UnixSDLDisplay::DrawFilledRectangle(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour)
+    void WinConSDLDisplay::DrawFilledRectangle(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour)
     {
         if (!m_valid)
             return;
@@ -537,7 +520,7 @@ namespace pov_frontend
         m_PxCnt = UpdateInterval;
     }
 
-    void UnixSDLDisplay::DrawPixelBlock(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8 *colour)
+    void WinConSDLDisplay::DrawPixelBlock(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8 *colour)
     {
         if (!m_valid)
             return;
@@ -571,7 +554,7 @@ namespace pov_frontend
         m_PxCnt = UpdateInterval;
     }
 
-    void UnixSDLDisplay::Clear()
+    void WinConSDLDisplay::Clear()
     {
         for(vector<unsigned char>::iterator iter = m_PxCount.begin(); iter != m_PxCount.end(); iter++)
             (*iter) = 0;
@@ -586,7 +569,7 @@ namespace pov_frontend
         m_PxCnt = UpdateInterval;
     }
 
-    void UnixSDLDisplay::UpdateScreen(bool Force = false)
+    void WinConSDLDisplay::UpdateScreen(bool Force = false)
     {
         if (!m_valid)
             return;
@@ -608,7 +591,7 @@ namespace pov_frontend
         }
     }
 
-    void UnixSDLDisplay::PauseWhenDoneNotifyStart()
+    void WinConSDLDisplay::PauseWhenDoneNotifyStart()
     {
         if (!m_valid)
             return;
@@ -616,7 +599,7 @@ namespace pov_frontend
         SetCaption(true);
     }
 
-    void UnixSDLDisplay::PauseWhenDoneNotifyEnd()
+    void WinConSDLDisplay::PauseWhenDoneNotifyEnd()
     {
         if (!m_valid)
             return;
@@ -624,7 +607,7 @@ namespace pov_frontend
         fprintf(stderr, "\n\n");
     }
 
-    bool UnixSDLDisplay::PauseWhenDoneResumeIsRequested()
+    bool WinConSDLDisplay::PauseWhenDoneResumeIsRequested()
     {
         if (!m_valid)
             return true;
@@ -650,7 +633,7 @@ namespace pov_frontend
         return do_quit;
     }
 
-    bool UnixSDLDisplay::HandleEvents()
+    bool WinConSDLDisplay::HandleEvents()
     {
         if (!m_valid)
             return false;
@@ -669,7 +652,6 @@ namespace pov_frontend
                     {
                         if (!m_Session->IsPausable())
                             break;
-
                         if (m_Session->Paused())
                         {
                             if (m_Session->Resume())

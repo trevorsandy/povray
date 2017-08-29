@@ -473,7 +473,7 @@ namespace vfePlatform
             boost::replace_all(s, strings[i].match, strings[i].replace);
             ++i;
 #ifdef WIN_DEBUG
-            cerr << "    su(1.): " << s << endl;
+            cerr << "    su: " << s << endl;
 #endif
         }
 
@@ -481,24 +481,12 @@ namespace vfePlatform
         // or add the cwd to the first directory or "..\\"
         if (boost::starts_with(s, ".\\"))
         {
-#ifdef WIN_DEBUG
-        cerr << "    1a. Starts with '.\\',  Path: '" << s << "'" << endl;
-#endif
             s.erase(0, 2);
             s.insert(0, win_getcwd());
-#ifdef WIN_DEBUG
-        cerr << "    1b. Insert Win_GetCWD  Path: '" << s << "'" << endl;
-#endif
         }
         else if(/* s[0] != '\\' || This comparison is not used on Windows */ boost::starts_with(s, "..\\"))
         {
-#ifdef WIN_DEBUG
-        cerr << "    2a. Starts with '..\\', Path: '" << s << "'" << endl;
-#endif
             s.insert(0, win_getcwd());
-#ifdef WIN_DEBUG
-        cerr << "    2b. Insert Win_GetCWD  Path: '" << s << "'" << endl;
-#endif
         }
 
 #if 0   // This section is not used on Windows
@@ -507,20 +495,10 @@ namespace vfePlatform
         string::size_type pos = s.find("\\..");
         while (pos != string::npos)
         {
-#ifdef WIN_DEBUG
-			cerr << s << endl;
-#endif
             string::size_type pos2 = s.rfind('\\', pos-1);
             s.erase(pos2+1, pos-pos2+3);
 #ifdef WIN_DEBUG
-			cerr << "--- SUBSTITUE 'dir\\..' ---" << endl;
-			cerr << "    su(2.): " << s << endl;
-			cerr << "   1. pos    = " << pos << " find( '\\..' )" << endl;
-			cerr << "   2. pos2   = " << pos2 << " rfind( '\\', last: pos-1: " << pos-1 << ")" << endl;
-			cerr << "   3. erase  = erase(start: pos2+1: " << pos2+1 << ", length: pos-pos2+3: " << pos-pos2+3 << ")" << endl;
-			string::size_type newPos = s.find("\\..", pos+3);
-			cerr << "   4. newPos = " << newPos << " find( '\\..', first: pos+3: " << pos+3 << ")" << endl;
-			cerr << "--- ------------------ ---" << endl;
+            cerr << "    su: " << s << endl;
 #endif
             pos = s.find("\\..", pos+3);
         }
@@ -531,7 +509,7 @@ namespace vfePlatform
         {
             s.erase(s.length()-3);
 #ifdef WIN_DEBUG
-            cerr << "    su(3.): " << s << endl;
+            cerr << "    su: " << s << endl;
 #endif
         }
 
@@ -939,7 +917,6 @@ namespace vfePlatform
     {
         m_Session->ClearPaths();
         m_Session->AddExcludedPath(string(POVCONFDIR));
-
         if (m_user_dir.length() != 0)
             m_Session->AddExcludedPath(m_user_dir);
 

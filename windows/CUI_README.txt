@@ -30,7 +30,8 @@
 	//////////////////////////////////////////////////////
 	
 	Updated Windows Console User Interface (CUI) LPub3D-Trace build, including:
-	- Port Unix CUI functionality to Windows project (except image display during rendering)
+	- Port Unix CUI functionality to Windows project
+	- SDL2 image display window (Using SDL2 v2.0.5)
 	- Options processor class
 	- Benchmark, help and version options
 	- Detailed console output_iterator 
@@ -88,8 +89,8 @@
 	architecture similar to that of the Unix build. The default 
 	locations for the povray conf, INI, scene, and include files are:
 	
-	- System Location:  C:\ProgramData\LPub3D Software\LPub3D-Trace
-	- User Location:    %USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\lpub3d-trace
+	- System Location:  C:\Program Files (86)\LPub3D\3rdParty\lpub3d-trace-3.7
+	- User Location:    %USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d-trace
 	
 	There is no default location for the povray binary itself. 
 	At this moment, the default	locations are fixed (hard-coded) only.
@@ -194,41 +195,38 @@
 	; You can set permitted paths to control where LPub3D-Trace can access content.
 	; To enable remove the preceding ';'.
 
+	; Default (hard coded) paths:
+	; HOME        = C:\Users\<user> (%USERPROFILE%)
+	; INSTALLDIR  = C:\Program Files (x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.7
+	; SYSCONF     = C:\Program Files (x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.7\config\povray.conf
+	; USERCONF    = %HOME%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.7\config\povray.conf
+	; SYSINI      = C:\Program Files (x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.7\config\povray.ini
+	; USERINI     = %HOME%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.7\config\povray.ini
+	;
+
 	; This example shows how to qualify path names containing space(s):
 	; read = "C:\this\directory\contains space characters"
-	
-	; You can use %HOME% and/or %INSTALLDIR% as the origin to explicitly define content paths:
-	
-	; %HOME% is hard-coded to the path returned by the %USERPROFILE% environment variable.
-	; read* = "%HOME%\AppData\Local\LPub3D Software\LPub3D\lpub3d-trace\include"
-	; read* = "%HOME%\AppData\Local\LPub3D Software\LPub3D\lpub3d-trace\ini"
-	; read* = "%HOME%\LDraw\lgeo\ar"
-	; read* = "%HOME%\LDraw\lgeo\lg"
-	; read* = "%HOME%\LDraw\lgeo\stl"
-	; read+write* = "HOME%\Desktop\Models\FooModel\LPub3D\tmp
-	
-	; %INSTALLDIR% is hard-coded to: C:\ProgramData\LPub3D Software\LPub3D-Trace
-	; read* = "%INSTALLDIR%\include"
-	; read* = "%INSTALLDIR%\ini"
-	; read* = "%INSTALLDIR%\..\..\..\Users\<Joe Blow>\LDraw\lgeo\ar"
-	; read* = "%INSTALLDIR%\..\..\..\Users\<Joe Blow>\LDraw\lgeo\lg"
-	; read* = "%INSTALLDIR%\..\..\..\Users\<Joe Blow>\LDraw\lgeo\stl"
-	; read+write* = "%INSTALLDIR%\..\..\..\Users\<Joe Blow>\Desktop\Models\FooModel\LPub3D\tmp"
-	
-	; You can also use your working directory path as the origin.
-	
-	; 1. Map LPub3D-Trace library paths at 'C:\Users\<Joe Blow>\AppData\Local\LPub3D Software\LPub3D\lpub3d-trace' 
-	; from desktop working directory, where LPub3D is rendering a model at 'C:\Users\<Joe Blow>\Desktop\Models\FooModel'.	
-	; 2. Map LGEO library paths at 'C:\Users\<Joe Blow>\LDraw\lgeo' from desktop working directory,
-	; where LPub3D is rendering a model, at 'C:\Users\<Joe Blow>\Desktop\Models\FooModel'.	
-	; 3. Working directory read and write access - to write rendered images.
-	; read* = "..\..\..\..\..\AppData\Local\LPub3D Software\LPub3D\lpub3d-trace\include"
-	; read* = "..\..\..\..\..\AppData\Local\LPub3D Software\LPub3D\lpub3d-trace\ini"
-	; read* = "..\..\..\..\..\LDraw\lgeo\ar"
-	; read* = "..\..\..\..\..\LDraw\lgeo\lg"
-	; read* = "..\..\..\..\..\LDraw\lgeo\stl"
-	; read+write* = .
-	
+
+	; You can use %HOME%, %INSTALLDIR% and the current working directory as the origin to define permitted paths:
+
+	; %HOME% is hard-coded to the %USERPROFILE% environment variable.
+	read* = "%HOME%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.7\config"
+
+	read* = "%HOME%\Projects\build-LPub3D-Desktop_Qt_5_7_1_MinGW_32bit-Debug\mainApp\debug\3rdParty\lpub3d_trace_cui-3.7\resources\include"
+	read* = "%HOME%\Projects\build-LPub3D-Desktop_Qt_5_7_1_MinGW_32bit-Debug\mainApp\debug\3rdParty\lpub3d_trace_cui-3.7\resources\ini"
+	read* = "%HOME%\LDraw\lgeo\ar"
+	read* = "%HOME%\LDraw\lgeo\lg"
+	read* = "%HOME%\LDraw\lgeo\stl"
+
+	; %INSTALLDIR% is hard-coded to the default LPub3D installation path - see default paths above.
+
+	; The current working directory is where LPub3D-Trace is called from.
+	read* = "..\..\distribution\ini"
+    read* = "..\..\distribution\include"
+    read* = "..\..\distribution\scenes"
+
+	read+write* = .
+
 	; End povray conf file
 
 	Here are the INI file options for the conf file above (cut and paste to create your povray.ini file(s)):
@@ -248,25 +246,9 @@
 	; path list after reading this file, so in those cases you don't
 	; necessarily have to have anything at all here.
 	;
-	
-	System INI:
-	; Library_Path="C:\ProgramData\LPub3D Software\LPub3D-Trace\scenes"
-	; Library_Path="C:\ProgramData\LPub3D Software\LPub3D-Trace\include"
-	; Library_Path="C:\ProgramData\LPub3D Software\LPub3D-Trace\ini"
-	; Library_Path="C:\Users\<Joe Blow>\LDraw\lgeo\ar"
-	; Library_Path="C:\Users\<Joe Blow>\LDraw\lgeo\lg"
-	; Library_Path="C:\Users\<Joe Blow>\LDraw\lgeo\stl"
-	
-	User INI
-	; Library_Path="C:\Users\<Joe Blow>\AppData\Local\LPub3D Software\LPub3D\lpub3d-trace\scenes"
-	; Library_Path="C:\Users\<Joe Blow>\AppData\Local\LPub3D Software\LPub3D\lpub3d-trace\include"
-	; Library_Path="C:\Users\<Joe Blow>\AppData\Local\LPub3D Software\LPub3D\lpub3d-trace\ini"
-	; Library_Path="C:\Users\<Joe Blow>\LDraw\lgeo\ar"
-	; Library_Path="C:\Users\<Joe Blow>\LDraw\lgeo\lg"
-	; Library_Path="C:\Users\<Joe Blow>\LDraw\lgeo\stl"
-	
+
 	/// Updated files
-    /////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////
 	1.  .gitignore.............../
 	2.  appveyor.yml............./
 	3.  console.vcxproj........../windows/vs2015
@@ -279,16 +261,27 @@
 	10. syspovconfig.h.........../windows/povconfig
 	11. vfeplatform.cpp........../vfe/win
 	12. vfeplatform.h............/vfe/win
-	13. winconsole.cpp.........../vfe/win/console
-	14. winoptions.cpp.........../vfe/win/console...(New)
-	15. winoptions.h............./vfe/win/console...(New)
-	16. vfesession.cpp.........../vfe
-	17. vfesession.h............./vfe
-	16. CUI_README.txt.........../windows...........(New)
-	17. autobuild.cmd............/windows/vs2015....(New)
-	18. autobuild_defs.cmd......./windows/vs2015....(New)
-	19. povray.conf............../windows/povconfig.(New)
+	13. disp.h.................../windows...........(New) 
+	14. disp_sdl.cpp............./windows...........(New) 
+	15. disp_sdl.h.............../windows...........(New) 
+	16. disp_text.h............../windows...........(New) 
+	17. disp_text.cpp............/windows...........(New) 
+	18. winconsole.cpp.........../vfe/win/console
+	19. winoptions.cpp.........../vfe/win/console...(New)
+	20. winoptions.h............./vfe/win/console...(New)
+	21. CUI_README.txt.........../windows...........(New)
+	22. autobuild.cmd............/windows/vs2015....(New)
+	23. autobuild_defs.cmd......./windows/vs2015....(New)
+	24. SDL2.vcxproj............./windows/vs2015....(New)
+	25. SDL2_vcxproj.filters...../windows/vs2015....(New)
+	26. SDL2Main.vcxproj........./windows/vs2015....(New)
 		
+	TODO:
+
+	On Windows, I have not yet been successful to process interrupt signals passed to the console - e.g. pause, resume and quit. I think the issue is linked with the way SDL creates and uses the WinMain entry point (using SDL_Main) to manage the Windows GUI display screen...
+	
+	On MacOS, the current disp_sdl code (v1.2.15) does not launch the display window; however, execution seems to be without issue. The display window is created, it is just not persisted to the screen. In the next few days I'll see how v2.0.15 behaves as there are some new capabilities that may better support generating the display window on MacOS.
+
 	Note: Although I used VS2017 to develop the components described here.
 	I do not believe there is any material difference between VS2017 and VS2015
 	so you can substitute VS2017 for 2015.

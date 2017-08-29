@@ -10,7 +10,7 @@ Title LPub3D-Trace on Windows auto build script
 :: This script is requires autobuild_defs.cmd
 :: --
 ::  Trevor SANDY <trevor.sandy@gmail.com>
-::  Last Update: August 05, 2017
+::  Last Update: August 07, 2017
 ::  Copyright (c) 2017 by Trevor SANDY
 :: --
 :: This script is distributed in the hope that it will be useful,
@@ -20,22 +20,30 @@ Title LPub3D-Trace on Windows auto build script
 :: It is expected that this script will reside in .\windows\vs2015
 
 :: Variables
+SET DEBUG=0
 SET APPNAME=lpub3d_trace_cui
-SET VERSION=3.7
 SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
+
+SET VERSION=3.7
 
 :: Build checks settings - set according to your check requirements
 :: Check 01
-:: SET BUILD_CHK_MY_OUTPUT=
-:: SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
-:: SET BUILD_CHK_WH_PARMS=+w320 +h240
-:: SET BUILD_CHK_MY_PARMS=-f +d +p +v +a0.3
-:: SET BUILD_CHK_MY_INCLUDES=
+rem SET BUILD_CHK_MY_OUTPUT=
+rem SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
+rem SET BUILD_CHK_WH_PARMS=+w320 +h240
+rem SET BUILD_CHK_MY_PARMS=-f +d +p +v +a0.3 +UA +A
+rem SET BUILD_CHK_MY_INCLUDES=
+rem :: Check 01
+rem SET BUILD_CHK_MY_OUTPUT=
+rem SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
+rem SET BUILD_CHK_WH_PARMS=+w320 +h240
+rem SET BUILD_CHK_MY_PARMS=+d +p +a0.3 +UA +A
+rem SET BUILD_CHK_MY_INCLUDES=
 :: Check 02
 SET BUILD_CHK_MY_OUTPUT=
-SET BUILD_CHK_POV_FILE=tests\cli.ldr.pov
+SET BUILD_CHK_POV_FILE=tests\csi.ldr.pov
 SET BUILD_CHK_WH_PARMS=+w2549 +h1650
-SET BUILD_CHK_MY_PARMS=+UA +A
+SET BUILD_CHK_MY_PARMS=+d +a0.3 +UA +A
 SET BUILD_CHK_MY_INCLUDES=+L"%USERPROFILE%\LDraw\lgeo\ar" +L"%USERPROFILE%\LDraw\lgeo\lg" +L"%USERPROFILE%\LDraw\lgeo\stl"
 
 :: Build check static settings - don't change these.
@@ -43,12 +51,19 @@ SET BUILD_CHK_INCLUDE=+L"..\..\distribution\ini" +L"..\..\distribution\include" 
 SET BUILD_CHK_INCLUDE=%BUILD_CHK_INCLUDE% %BUILD_CHK_MY_INCLUDES%
 SET BUILD_CHK_PARAMS=%BUILD_CHK_WH_PARMS% %BUILD_CHK_MY_PARMS% %BUILD_CHK_INCLUDE%
 
+:: VS Command Argument: +d +UA +A +W2549 +H1650 +I"$(ProjectDir)\tests\cli.ldr.pov" +O"$(ProjectDir)\tests\cli.ldr.pov.png" +L"$(ProjectDir)\..\..\distribution\ini" +L"$(ProjectDir)\..\..\distribution\include" +L"$(ProjectDir)\..\..\distribution\scenes" +L"$(USERPROFILE%\LDraw\lgeo\ar)" +L"$(USERPROFILE%\LDraw\lgeo\lg)" +L"$(USERPROFILE%\LDraw\lgeo\stl)"
+
 SET PLATFORM=unknown
 SET CONFIGURATION=unknown
 SET PROJECT=unknown
 SET CONSOLE=unknown
 SET VERBOSE=unknown
 SET CHECK=unknown
+IF %DEBUG%==1 (
+	SET d=d
+) ELSE (
+  SET d=
+)
 
 :: Check if invalid platform flag
 IF NOT [%1]==[] (
@@ -83,6 +98,7 @@ IF /I "%1"=="-allcui" (
 )
 IF /I "%1"=="-run" (
 	SET PLATFORM=x64
+	::SET PLATFORM=Win32
 	GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-verbose" (
@@ -313,13 +329,13 @@ ECHO -Copying 32bit exe...
 IF NOT EXIST "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\i386\" (
 	MKDIR "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\i386\"
 )
-COPY /V /Y "bin32\%APPNAME%32.exe" "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\i386\" /B
+COPY /V /Y "bin32\%APPNAME%32%d%.exe" "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\i386\" /B
 
 ECHO -Copying 64bit exe...
 IF NOT EXIST "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\x86_64\" (
 	MKDIR "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\x86_64\"
 )
-COPY /V /Y "bin64\%APPNAME%64.exe" "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\x86_64\" /B
+COPY /V /Y "bin64\%APPNAME%64%d%.exe" "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\x86_64\" /B
 
 ECHO -Copying Documentaton...
 IF NOT EXIST "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\docs\" (
@@ -346,7 +362,7 @@ IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_
 IF NOT EXIST "%DIST_DIR%\config\" (
 	MKDIR "%DIST_DIR%\config\"
 )
-COPY /V /Y "..\povconfig\povray.conf" "%DIST_DIR%\config\povray.conf" /A
+COPY /V /Y "..\povray-win.conf" "%DIST_DIR%\config\povray.conf" /A
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\config\povray.ini" /A
 :: Finish
 EXIT /b
@@ -377,12 +393,12 @@ IF NOT [%BUILD_CHK_MY_OUTPUT%]==[] (
 	SET BUILD_CHK_OUTPUT=%BUILD_CHK_POV_FILE%.%PL%bit.png
 )
 SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%" %BUILD_CHK_PARAMS%
-ECHO --Command: %APPNAME%%PL%.exe %BUILD_CHK_COMMAND%
+ECHO --Command: %APPNAME%%PL%%d%.exe %BUILD_CHK_COMMAND%
 ECHO.
 IF EXIST "%BUILD_CHK_OUTPUT%" (
 	DEL /Q "%BUILD_CHK_OUTPUT%"
 )
-bin%PL%\%APPNAME%%PL%.exe %BUILD_CHK_COMMAND%
+bin%PL%\%APPNAME%%PL%%d%.exe %BUILD_CHK_COMMAND%
 EXIT /b
 
 :PLATFORM_ERROR
@@ -466,9 +482,9 @@ ECHO Build 32bit, Release CUI project example:
 ECHO autobuild
 ECHO.
 ECHO Flags:
-ECHO----------------------------------------------------------------
-ECHO^| Flag   ^| Pos ^| Type            ^| Description
-ECHO----------------------------------------------------------------
+ECHO ----------------------------------------------------------------
+ECHO ^| Flag    ^| Pos ^| Type             ^| Description
+ECHO ----------------------------------------------------------------
 ECHO  -help......1.....Useage flag        [Difault=Off] Display useage.
 ECHO  x86........1.....Platform flag      [Default=On ] Build 32bit architecture.
 ECHO  x86_64.....1.....Platform flag      [Default=On ] Build 64bit architecture.

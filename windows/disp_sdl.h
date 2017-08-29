@@ -1,6 +1,6 @@
 //******************************************************************************
 ///
-/// @file unix/disp_sdl.h
+/// @file windows/disp_sdl.h
 ///
 /// SDL (Simple direct media layer) based render display system.
 ///
@@ -42,40 +42,53 @@
 #define _DISP_SDL_H
 
 #include "vfe.h"
-#include "unixoptions.h"
+#include "console\winoptions.h"
 #include "disp.h"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
+/**
+*  On Windows, to launch an SDL window without the console window you have to declare WinMain()
+*  instead of main() so SDL looks for and replaces main() with SDL_main() and then provides
+*  a WinMain() in a static library that calls SDL_main().
+*
+*  So for SDL on Windows, a main() function must be declared using C linkage like this:
+*/
+#ifdef __cplusplus
+extern "C" {
+#endif
+	int main(int argc, char **argv);
+#ifdef __cplusplus
+};
+#endif
 
 namespace pov_frontend
 {
     using namespace vfe;
     using namespace vfePlatform;
 
-    class UnixSDLDisplay : public UnixDisplay
-    {
-        public:
-            static const UnixOptionsProcessor::Option_Info Options[];
-            static bool Register(vfeUnixSession *session);
+	class WinConSDLDisplay : public WinConDisplay
+	{
+	public:
+		static const WinConOptionsProcessor::Option_Info Options[];
+		static bool Register(vfeWinSession *session);
 
-            UnixSDLDisplay(unsigned int w, unsigned int h, GammaCurvePtr gamma, vfeSession *session, bool visible);
-            virtual ~UnixSDLDisplay();
-            void Initialise();
-            void Close();
-            void Show();
-            void Hide();
-            bool TakeOver(UnixDisplay *display);
-            void DrawPixel(unsigned int x, unsigned int y, const RGBA8& colour);
-            void DrawRectangleFrame(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour);
-            void DrawFilledRectangle(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour);
-            void DrawPixelBlock(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8 *colour);
-            void Clear();
-            bool HandleEvents();
-            void UpdateScreen(bool Force);
-            void PauseWhenDoneNotifyStart();
-            bool PauseWhenDoneResumeIsRequested();
-            void PauseWhenDoneNotifyEnd();
-
+		WinConSDLDisplay(unsigned int w, unsigned int h, GammaCurvePtr gamma, vfeSession *session, bool visible);
+		virtual ~WinConSDLDisplay();
+		void Initialise();
+		void Close();
+		void Show();
+		void Hide();
+		bool TakeOver(WinConDisplay *display);
+		void DrawPixel(unsigned int x, unsigned int y, const RGBA8& colour);
+		void DrawRectangleFrame(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour);
+		void DrawFilledRectangle(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour);
+		void DrawPixelBlock(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8 *colour);
+		void Clear();
+		bool HandleEvents();
+		void UpdateScreen(bool Force);
+		void PauseWhenDoneNotifyStart();
+		bool PauseWhenDoneResumeIsRequested();
+		void PauseWhenDoneNotifyEnd();
         protected:
             /// Number of Pixels before the display is updated
             static const unsigned int UpdateInterval = 100;

@@ -279,7 +279,7 @@ namespace pov_base
 #define PACKAGE_NAME "LPub3D-Trace"
 /* Supported image formats. */
 #define BUILTIN_IMG_FORMATS "gif tga iff ppm pgm hdr png jpeg tiff"
-/* image formats. */
+/* Unsupported image formats. */
 #define MISSING_IMG_FORMATS "none"
 /* I/O restrictions. */
 #define BUILTIN_IO_RESTRICTIONS "enabled"
@@ -288,6 +288,9 @@ namespace pov_base
 /* Base version number of package. */
 #include "..\..\source\base\version.h"
 #define VERSION_BASE OFFICIAL_GENERATION_STRING
+/* SDL display library */
+#define HAVE_LIBSDL
+
 /* Distribution strings */
 #define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE_NAME " is a modified, unofficial distribution of"
 #define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 " Persistence of Vision Ray Tracer ('POV-Ray') version 3.7 compiled by:"
