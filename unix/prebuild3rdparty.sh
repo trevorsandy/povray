@@ -38,7 +38,7 @@
 #
 # Clean up the docs:
 #   % ./prebuild3rdparty.sh doc(s)clean
-# 
+#
 #
 # Note that the 'clean' and 'doc(s)(clean)' options are mutually exclusive.
 #
@@ -462,20 +462,16 @@ AM_CPPFLAGS = \\
 	\$(cppflags_platformcpu) \\
 	-I\$(top_srcdir)/vfe \\
 	-I\$(top_srcdir)/vfe/unix
-if USE_SDL2
-AM_CPPFLAGS += \\
-	-I\$(top_srcdir)/libraries/sdl2/include \\
-	-I\$(top_builddir)/libraries/sdl2/include
-endif
 
 LDADD =
 if USE_SDL2
-sdl2_prefix = \$(top_builddir)/libraries/sdl2/build
-sdl2_libdir = \$(sdl2_prefix)/lib
-AM_LDFLAGS = -Wl,--enable-new-dtags -Wl,--no-undefined
+# Set SDL2 lib and cflags arguments
+sdl2_srcdir = \$(top_srcdir)/libraries/sdl2
+AM_CPPFLAGS += \$(shell \$(sdl2_srcdir)/sdl2-config --cflags 2> /dev/null)
+LIBS += \$(shell \$(sdl2_srcdir)/sdl2-config --static-libs 2> /dev/null)
 LDADD += \\
-	\$(sdl2_libdir)/libSDL2.a \\
-	\$(sdl2_libdir)/libSDL2main.a
+	\$(sdl2_srcdir)/build/lib/libSDL2.a \\
+	\$(sdl2_srcdir)/build/lib/libSDL2main.a
 endif
 
 # Libraries to link with.
@@ -517,6 +513,7 @@ case "$1" in
 # LPub3D-Trace $pov_version_base - Unix source version - KDE install script
 # ==================================================================
 # written July 2003 - March 2004 by Christoph Hormann
+# updated August 2017 by Trevor SANDY
 # Based on parts of the Linux binary version install script
 # This file is part of LPub3D-Trace and subject to the LPub3D-Trace licence
 # see POVLEGAL.DOC for details.
@@ -607,6 +604,9 @@ case "$1" in
 # Makefile.am for the source distribution of LPub3D-Trace $pov_version_base for UNIX
 # Please report bugs to $pov_config_bugreport
 
+# Build OS from configure
+pov_build_os = @build_os@
+
 # Directories.
 povbase = \$(prefix)/@PACKAGE@-@VERSION_BASE@
 povlibdir = \$(povbase)/resources
@@ -622,14 +622,7 @@ povowner = @povowner@
 povgroup = @povgroup@
 
 # Directories to build.
-SUBDIRS = source
-
-if USE_SDL2
-# Build the SDL2 library before vfe - if specified.
-SUBDIRS += libraries/sdl2
-endif
-
-SUBDIRS += vfe platform unix
+SUBDIRS = source vfe platform unix 
 
 # Additional files to distribute.
 EXTRA_DIST = \\
@@ -643,12 +636,11 @@ CONFIG_CLEAN_FILES =
 
 # Test scene display status
 pov_xwin_msg = @pov_xwin_msg@
-pov_build_os = @build_os@
 
 # Render a test scene for 'make check'.
 # This is meant to run before 'make install'.
 check: all
-	echo "Executing render output file check..."; \\
+	@echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A
 	@echo "Executing the render display window check..."; \\
 	case "\$(pov_xwin_msg)" in \\
@@ -702,8 +694,8 @@ install-data-local:
 	dirlist=\`find \$\$list -type d | sed s,\$(top_srcdir)/,,\`; \\
 	for p in "" \$\$dirlist ; do \\
 		\$(mkdir_p) \$(DESTDIR)\$(povlibdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povlibdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
-	done; \\
-	echo "Copying data files..."; \\
+	done
+	@echo "Copying data files..."; \\
 	filelist=\`find \$\$list -type f | sed s,\$(top_srcdir)/,,\`; \\
 	for f in \$\$filelist ; do \\
 		\$(INSTALL_DATA) \$(top_srcdir)/\$\$f \$(DESTDIR)\$(povlibdir)/\$\$f && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$f && echo "\$(DESTDIR)\$(povlibdir)/\$\$f" >> \$(povinstall); \\
@@ -726,7 +718,7 @@ install-data-local:
 	\$(INSTALL_DATA) \$(top_srcdir)/povray.conf \$(DESTDIR)\$(povconfuser)/povray.conf && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.conf && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.conf && echo "\$(DESTDIR)\$(povconfuser)/povray.conf" >> \$(povinstall); \\
 	\$(INSTALL_DATA) \$(top_builddir)/povray.ini \$(DESTDIR)\$(povconfuser)/povray.ini && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.ini && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.ini && echo "\$(DESTDIR)\$(povconfuser)/povray.ini" >> \$(povinstall)
 
-# Move executable to 3rd party bin location
+# Move executable to 3rd party bin location 
 # Set doc, man, conf and script file permissions.
 install-data-hook:
 	@echo "Creating 3rdParty distribution bin directory..."; \\
@@ -744,8 +736,8 @@ install-data-hook:
 	for f in AUTHORS ChangeLog NEWS CUI_README ; do \\
 		chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$f && echo "\$(DESTDIR)\$(povdocdir)/\$\$f" >> \$(povinstall); \\
 	done
-	@echo "Setting conf, man and script files ownership..."; \\
-	for p in conf man scripts ; do \\
+	@echo "Setting config, man and script files ownership..."; \\
+	for p in config man scripts ; do \\
 		chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && echo "\$(DESTDIR)\$(povlibdir)/\$\$p" >> \$(povinstall); \\
 		filelist=\`find \$(DESTDIR)\$(povlibdir)/\$\$p/ -type f | sed s,\$(DESTDIR)\$(povlibdir)/\$\$p/,,\`; \\
 		for f in \$\$filelist ; do \\
@@ -995,10 +987,6 @@ case "$1" in
 	;;
 esac
 
-
-
-##### Supporting libraries: SDL2 ##############################################
-
 ###
 ### ../libraries/sdl2/Makefile.in
 ###
@@ -1035,13 +1023,13 @@ srcdir  = @srcdir@
 objects = build
 gen = gen
 prefix  = @srcdir@/\$(objects)
-exec_prefix = @exec_prefix@
-libdir  = @libdir@
-includedir = @includedir@
+exec_prefix = \$(prefix)
+libdir  = \$(exec_prefix)/lib
+includedir = \$(exec_prefix)/include
 auxdir  = @ac_aux_dir@
 
 @SET_MAKE@
-SHELL = @SHELL@
+SHELL   = @SHELL@
 CC      = @CC@
 INCLUDE = @INCLUDE@
 CFLAGS  = @BUILD_CFLAGS@
@@ -1172,9 +1160,10 @@ update-revision:
 
 build-setup:
 	\$(LIBTOOL) --mode=install \$(INSTALL) \$(objects)/\$(TARGET) \$(DESTDIR)\$(libdir)/\$(TARGET)
-	@{ set +x; } 2>/dev/null
+	@echo "Removing dynamic libraries..."
 	@find \$(DESTDIR)\$(libdir) \\( \\
 		-name '*.so*' -o \\
+		-name '*.dylib' -o \\
 		-name '.#*' \\) \\
 	-exec rm -f {} \\;
 	@echo "Creating SDL2 include symbolic link..."
@@ -1185,7 +1174,6 @@ build-setup:
 	else \\
 		echo "Ignored - SDL2 symbolic link exist."; \\
 	fi
-	@{ set -x; } 2>/dev/null
 
 clean:
 	rm -rf \$(objects)
@@ -1652,9 +1640,19 @@ AM_CPPFLAGS = \\
 	-I\$(top_srcdir)/vfe/unix \\
 	-I\$(top_srcdir)/unix \\
 	-I\$(top_srcdir)/source
+
+if SDL2_MACOS_BUILD
+# Update AM_MAKEFLAGS/CC with MACOS SDK options
+AM_MAKEFLAGS = "CC=@CC@"
+endif
+
 if USE_SDL2
-AM_CPPFLAGS += \\
-	-I\$(top_srcdir)/libraries/sdl2/include
+# Build the SDL2 library - if specified - before unix subdir.
+sdl2_srcdir = \$(top_srcdir)/libraries/sdl2
+all-am: sdlmacosbuild-local
+sdlmacosbuild-local:
+	@echo "Building SDL at \$(sdl2_srcdir)..."
+	cd \$(sdl2_srcdir) && \$(MAKE) \$(AM_MAKEFLAGS)
 endif
 
 # Extra definitions for compiling.

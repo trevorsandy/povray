@@ -90,7 +90,7 @@ required_openexr_version="1.2"
 
 # Supported options.
 # AX_ARG_ENABLE([--enable-avx2],             [enable AVX2 features and compiler optmization])
-AX_ARG_ENABLE([--enable-watch-cursor],     [enable a watch cursor over the display while rendering (X Window only)])
+AX_ARG_ENABLE([--enable-watch-cursor],     [enable a watch cursor over the display when rendering (X Window only)])
 AX_ARG_ENABLE([--enable-debug],            [enable compiler debugging mode])
 AX_ARG_ENABLE([--enable-profile],          [enable program execution profiling])
 AX_ARG_ENABLE([--enable-static],           [enable the linker to create static executable (no run-time dependancy to external libraries, larger binary)])
@@ -178,13 +178,21 @@ Environment
 AC_CANONICAL_BUILD
 AC_CANONICAL_HOST
 
-AM_INIT_AUTOMAKE([1.9 dist-bzip2 subdir-objects])
+AM_INIT_AUTOMAKE([1.9 dist-bzip2 subdir-objects -Wno-portability])
 AM_PROG_AR
 AM_MAINTAINER_MODE
 
 AX_FIX_INCORRECT_PATH(C_INCLUDE_PATH, ".", [pov_warn_path="$pov_warn_path C_INCLUDE_PATH"])
 AX_FIX_INCORRECT_PATH(CPLUS_INCLUDE_PATH, ".", [pov_warn_path="$pov_warn_path CPLUS_INCLUDE_PATH"])
 
+# Check if building on MacOS.
+case "$build" in
+  *darwin*)
+    ax_MacOS_build="yes"
+    AC_DEFINE([ALTMAIN], [], [Building on MacOS, use vfe main.])
+  ;;
+esac
+AM_CONDITIONAL([MACOS_BUILD], [test x"$ax_MacOS_build" = x"yes"])
 
 ###############################################################################
 
@@ -231,14 +239,6 @@ AC_DEFINE_UNQUOTED([BUILD_ARCH], ["$build"], [Build architecture.])
 AC_DEFINE_UNQUOTED([COMPILER_VENDOR], ["$pov_compiler_vendor"], [Compiler vendor.])
 AC_DEFINE_UNQUOTED([COMPILER_VERSION], ["$pov_compiler_version"], [Compiler version.])
 AC_DEFINE_UNQUOTED([POV_COMPILER_INFO], ["$pov_compiler_version @ $build"], [Compiler version (processed).])
-
-# Check if building on MacOS.
-case "$build" in
-  *darwin*)
-    ax_MacOS_build="yes"
-    AC_DEFINE([ALTMAIN], [], [Building on MacOS, use vfe main.])
-  ;;
-esac
 
 # Not necessary when AM_MAINTAINER_MODE is called above.
 ###AC_PROG_MAKE_SET
@@ -472,15 +472,16 @@ if test x"$with_openexr" = x"no"; then
   AC_MSG_RESULT([no])
 else
   AC_MSG_RESULT([yes])
-  if test x"$with_openexr" != x""; then
-    AC_MSG_CHECKING([for --with-openexr pkgconfig])
-    ax_PKG_CONFIG_DIR="$with_openexr/pkgconfig"
-    AS_IF([ test -d "$ax_PKG_CONFIG_DIR" ], [
+  if test x"$with_openexr" != x"" && test x"$with_openexr" != x"yes"; then  # this means directory specified so check for pkgconfig
+    pov_PKG_CONFIG_DIR="$with_openexr/pkgconfig"
+    AC_MSG_CHECKING([for openexr pkgconfig at $pov_PKG_CONFIG_DIR ])
+    AS_IF([ test -d "$pov_PKG_CONFIG_DIR" && test -f "$pov_PKG_CONFIG_DIR/OpenEXR.pc"],
+    [
       dnl On MacOS, the homebrew version of OpenEXR throws an undefined reference error.
-      dnl If using git repo built version, set the local pkgconfig directory.
-      eval "export PKG_CONFIG_PATH=\"$ax_PKG_CONFIG_DIR:$PKG_CONFIG_PATH\""
-      CPPFLAGS="-I$ax_PKG_CONFIG_DIR/../../include $CPPFLAGS"
-      LDFLAGS="-L$ax_PKG_CONFIG_DIR/../../lib $LDFLAGS"
+      dnl If using version compiled from git, set the local pkgconfig directory if different than default.
+      eval "export PKG_CONFIG_PATH=\"$pov_PKG_CONFIG_DIR:$PKG_CONFIG_PATH\""
+      dnl Also set lib directory (-L) in LDFLAGS if different than default location
+      LDFLAGS="-L$with_openexr $LDFLAGS"
       AC_MSG_RESULT([found])
     ],
       AC_MSG_RESULT([not found])
@@ -587,16 +588,16 @@ else
 
   if test x"$pov_xwin_msg" = x"enabled"; then
     AC_MSG_CHECKING([whether to use SDL library])
-    
+
     if test x"$with_libsdl" = x"no"; then
       AC_MSG_RESULT([no])
-      
+
     elif test x"$with_libsdl" = x"yes"; then # libsdl built from source
       AC_MSG_RESULT([yes])
-            
-      pov_save_cppflags="$CPPFLAGS"
-      CPPFLAGS="-I./libraries/sdl2/include $CPPFLAGS"  # temporarily append library path
-      
+
+      pov_save_cppflags="$CPPFLAGS"					  # save
+      CPPFLAGS="-I./libraries/sdl2/include $CPPFLAGS"  # append
+
       AC_CHECK_HEADERS([SDL.h],
       [
         AS_IF([test x"$ac_cv_header_SDL_h" = x"yes"],
@@ -619,34 +620,37 @@ version_confirmed
           ])
         ])
       ])
-      
+
       if test x"$pov_check_libsdl" = x"ok"; then
         AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
-        AC_SEARCH_LIBS([dlerror], [dl])
-      fi  
-        
+      fi
+
     else                        # check if libsdl is installed
-      AC_MSG_RESULT([yes])  
-        
+      AC_MSG_RESULT([yes])
+
       AX_CHECK_LIBSDL([$required_libsdl_version])
-      
+
     fi  # check libsdl
-    
+
     if test x"$ax_check_libsdl" != x"ok" && test x"$pov_check_libsdl" != x"ok"; then
       AC_MSG_WARN([the preview display is disabled])
       AC_DEFINE([LIBSDL_MISSING], [], [Don't use SDL.])
-      CPPFLAGS="$pov_save_cppflags" # restore     
+      CPPFLAGS="$pov_save_cppflags" # restore
       pov_xwin_msg="disabled"
     else
       pov_xwin_msg="$pov_xwin_msg (using SDL v$required_libsdl_version)"
-    fi 
-    
+    fi
+
   fi
 
 fi  # with_cygwin_dll
 
-# build libsdl from source subdir conditional
+# build libsdl from source conditionals
 AM_CONDITIONAL([USE_SDL2], [test x"$pov_check_libsdl" = x"ok"])
+AM_CONDITIONAL([SDL2_MACOS_BUILD], [test x"$ax_MacOS_build" = x"yes" && test x"$pov_check_libsdl" = x"ok"])
+AM_COND_IF([SDL2_MACOS_BUILD], [AM_EXTRA_RECURSIVE_TARGETS([sdlmacosbuild])], [])
+
+# MacOS SDK
 
 if test x"$ax_MacOS_build" = x"yes"; then
 
@@ -659,35 +663,35 @@ if test x"$ax_MacOS_build" = x"yes"; then
   dnl NOTE: We clobber ax_USE_MACOSX_SDK with the SDK path
 
   if test x"$ax_USE_MACOSX_SDK" = x"no"; then
-      ax_USE_MACOSX_SDK=
+    ax_USE_MACOSX_SDK=
   elif test x"$ax_USE_MACOSX_SDK" = x"yes"; then
-      AC_MSG_CHECKING([for default MacOS SDK])
-      if test -d "/usr/bin/xcrun"; then
-        ax_USE_MACOSX_SDK=`/usr/bin/xcrun --show-sdk-path -sdk macosx`
-        AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
-      elif test -d "/Developer/SDKs/MacOSX.sdk"; then
-        ax_USE_MACOSX_SDK="/Developer/SDKs/MacOSX.sdk"
-        AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
-      else
-        AC_MSG_FAILURE([not found])
-      fi
+    AC_MSG_CHECKING([for default MacOS SDK])
+    if test -d "/usr/bin/xcrun"; then
+      ax_USE_MACOSX_SDK=`/usr/bin/xcrun --show-sdk-path -sdk macosx`
+      AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
+    elif test -d "/Developer/SDKs/MacOSX.sdk"; then
+      ax_USE_MACOSX_SDK="/Developer/SDKs/MacOSX.sdk"
+      AC_MSG_RESULT([found, $ax_USE_MACOSX_SDK])
+    else
+      AC_MSG_FAILURE([not found])
+    fi
   fi
 
   if test x"$ax_USE_MACOSX_SDK" != x""; then
-      AC_MSG_CHECKING([for SDK directory $ax_USE_MACOSX_SDK])
-      if ! test -d "$ax_USE_MACOSX_SDK"; then
-          AC_MSG_FAILURE([not found])
-      else
-          AC_MSG_RESULT([exists])
-      fi
-      MACOSX_SDK_OPTS="-isysroot $ax_USE_MACOSX_SDK"
-      eval "CC=\"$CC $MACOSX_SDK_OPTS\""
-      eval "CXX=\"$CXX $MACOSX_SDK_OPTS\""
-      eval "LD=\"$LD $MACOSX_SDK_OPTS\""
-      retest_macosx_linking=yes
-      dnl NOTE: When libtool is used in lieu of AR/RANLIB (i.e. in static mode)
-      dnl the syslibroot makes no difference.  We aren't using libtool now but
-      dnl if we ever did, be aware that you don't need to worry about it.
+    AC_MSG_CHECKING([for SDK directory $ax_USE_MACOSX_SDK])
+    if ! test -d "$ax_USE_MACOSX_SDK"; then
+      AC_MSG_FAILURE([not found])
+    else
+      AC_MSG_RESULT([exists])
+    fi
+    MACOSX_SDK_OPTS="-isysroot $ax_USE_MACOSX_SDK"
+    eval "CC=\"$CC $MACOSX_SDK_OPTS\""
+    eval "CXX=\"$CXX $MACOSX_SDK_OPTS\""
+    eval "LD=\"$LD $MACOSX_SDK_OPTS\""
+    retest_macosx_linking=yes
+    dnl NOTE: When libtool is used in lieu of AR/RANLIB (i.e. in static mode)
+    dnl the syslibroot makes no difference.  We aren't using libtool now but
+    dnl if we ever did, be aware that you don't need to worry about it.
 
   fi
 
@@ -695,57 +699,60 @@ if test x"$ax_MacOS_build" = x"yes"; then
   dnl No   : Don't specify a min version even if using an SDK
   dnl Yes  : Use the version from the SDK if used, otherwise same as no
   dnl Param: Use the specified version
-  if test x"$ax_USE_MACOSX_VERSION_MIN" = x"no"; then
-      ax_USE_MACOSX_VERSION_MIN=
-  elif test x"$ax_USE_MACOSX_VERSION_MIN" = x"yes"; then
-      if test x"$ax_USE_MACOSX_SDK" != x""; then
-          AC_MSG_CHECKING([SDK deployment version])
-        dnl We need to quote the next line where we don't need macros and do need [] in the regex
-        [
-          MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" buildSettings | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
-        ]
-          # If that failed, try again with the new key
-          if test x"$MACOSX_SDK_PLIST_VERSION_MIN" == x""; then
-        [
-              MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" DefaultProperties | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
-        ]
-          fi
 
-          if test x"$MACOSX_SDK_PLIST_VERSION_MIN" != x""; then
-              ax_USE_MACOSX_VERSION_MIN=$MACOSX_SDK_PLIST_VERSION_MIN
-              AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
-          else
-              AC_MSG_WARN([Could not determine deployment target from SDKSettings.plist])
-              ax_USE_MACOSX_VERSION_MIN=
-          fi
-      else
-          ax_USE_MACOSX_VERSION_MIN=
+  if test x"$ax_USE_MACOSX_VERSION_MIN" = x"no"; then
+    ax_USE_MACOSX_VERSION_MIN=
+  elif test x"$ax_USE_MACOSX_VERSION_MIN" = x"yes"; then
+    if test x"$ax_USE_MACOSX_SDK" != x""; then
+      AC_MSG_CHECKING([SDK deployment version])
+      dnl We need to quote the next line where we don't need macros and do need [] in the regex
+      [
+        MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" buildSettings | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
+      ]
+      # If that failed, try again with the new key
+      if test x"$MACOSX_SDK_PLIST_VERSION_MIN" == x""; then
+        [
+          MACOSX_SDK_PLIST_VERSION_MIN=`defaults read "$ax_USE_MACOSX_SDK/SDKSettings" DefaultProperties | grep '^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}[^"]*"\{0,1\}; *$' | sed 's/^ *"\{0,1\}MACOSX_DEPLOYMENT_TARGET"\{0,1\} *= *"\{0,1\}\([^"]*\)"\{0,1\} *; *$/\1/'`
+        ]
       fi
+
+      if test x"$MACOSX_SDK_PLIST_VERSION_MIN" != x""; then
+        ax_USE_MACOSX_VERSION_MIN=$MACOSX_SDK_PLIST_VERSION_MIN
+        AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
+      else
+        AC_MSG_WARN([Could not determine deployment target from SDKSettings.plist])
+        ax_USE_MACOSX_VERSION_MIN=
+      fi
+    else
+      ax_USE_MACOSX_VERSION_MIN=
+    fi
   fi
 
   if test x"$ax_USE_MACOSX_VERSION_MIN" != x""; then
-      AC_MSG_CHECKING([SDK deployment version])
-      AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
-      MACOSX_VERSION_MIN_OPTS="-mmacosx-version-min=$ax_USE_MACOSX_VERSION_MIN"
-      eval "CC=\"$CC $MACOSX_VERSION_MIN_OPTS\""
-      eval "CXX=\"$CXX $MACOSX_VERSION_MIN_OPTS\""
-      eval "LD=\"$LD $MACOSX_VERSION_MIN_OPTS\""
-      retest_macosx_linking=yes
+    AC_MSG_CHECKING([SDK deployment version])
+    AC_MSG_RESULT([$ax_USE_MACOSX_VERSION_MIN])
+    MACOSX_VERSION_MIN_OPTS="-mmacosx-version-min=$ax_USE_MACOSX_VERSION_MIN"
+    eval "CC=\"$CC $MACOSX_VERSION_MIN_OPTS\""
+    eval "CXX=\"$CXX $MACOSX_VERSION_MIN_OPTS\""
+    eval "LD=\"$LD $MACOSX_VERSION_MIN_OPTS\""
+    retest_macosx_linking=yes
   fi
 
   dnl If either an SDK or a version option was added, make sure that we can
   dnl still compile and link both C and C++.  If we didn't do this, then most
   dnl of the remaining tests would fail.
-  if test x"$retest_macosx_linking" = x"yes"; then
-      AC_LANG_PUSH(C)
-      AC_MSG_CHECKING([if C compiler works with SDK/version options])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
-      AC_LANG_POP()
 
-      AC_LANG_PUSH(C++)
-      AC_MSG_CHECKING([if C++ compiler works with SDK/version options])
-      AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[]])],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
-      AC_LANG_POP()
+  if test x"$retest_macosx_linking" = x"yes"; then
+    AC_LANG_PUSH(C)
+    AC_MSG_CHECKING([if C compiler works with SDK/version options])
+    AC_LINK_IFELSE([],[],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
+    AC_LANG_POP()
+
+    AC_LANG_PUSH(C++)
+    AC_MSG_CHECKING([if C++ compiler works with SDK/version options])
+    AC_LINK_IFELSE([],[],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
+    AC_LANG_POP()
+    propagate_settings=yes
   fi
 fi
 
@@ -1440,21 +1447,6 @@ AC_RUN_IFELSE([
   AC_MSG_RESULT([cross-compiling])  # FIXME
 ])
 
-
-###############################################################################
-
-# If we get here, SUBDIR libraries/sdl2 will be configured
-
-AM_COND_IF([USE_SDL2],
-  [
-AC_MSG_RESULT([
-Configuring SDL2 built-in library
------------------------------------])
-
-  # Call SDL2 ./configure script recursively.
-  AC_CONFIG_SUBDIRS([libraries/sdl2])
-  ],[])
-
 ###############################################################################
 
 
@@ -1470,7 +1462,11 @@ AC_CONFIG_FILES([\
   unix/Makefile \
 ])
 
+# configure SDL2 built-in library
+AM_COND_IF([USE_SDL2], [AC_CONFIG_SUBDIRS([libraries/sdl2])])
+
 ###############################################################################
+
 
 if test x"$enable_io_restrictions" = x"no"; then
   pov_io_msg="disabled"

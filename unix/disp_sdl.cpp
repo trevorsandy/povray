@@ -232,7 +232,7 @@ namespace pov_frontend
 			//SDL_GetRendererOutputSize() to get the real client area size in pixels.
 
 			// get the real client area size in pixels.
-			SDL_GL_GetDrawableSize(m_window, width, height);
+			SDL_GL_GetDrawableSize(m_window, &width, &height);
 #endif
 
             // Initialize the display
