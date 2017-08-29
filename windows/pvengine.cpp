@@ -9,7 +9,7 @@
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
 /// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
@@ -1443,7 +1443,7 @@ bool copy37NoBetaEditSettings(void)
     return (false) ;
   }
 
-  if (RegOpenKeyEx (HKEY_CURRENT_USER, "Software\\" REGKEY "\\" REGVER, 0, KEY_READ, &hKeySrc) != ERROR_SUCCESS)
+  if (RegOpenKeyEx (HKEY_CURRENT_USER, "Software\\" REGKEY "\\v" POV_RAY_GENERATION, 0, KEY_READ, &hKeySrc) != ERROR_SUCCESS)
   {
     FreeLibrary (hLib) ;
     return (false) ;
@@ -1482,7 +1482,7 @@ bool checkEditKey37NoBeta (void)
 {
   HKEY        key ;
 
-  if (RegOpenKeyEx (HKEY_CURRENT_USER, "Software\\" REGKEY "\\" REGVER "\\POV-Edit", 0, KEY_READ, &key) == ERROR_SUCCESS)
+  if (RegOpenKeyEx (HKEY_CURRENT_USER, "Software\\" REGKEY "\\v" POV_RAY_GENERATION "\\POV-Edit", 0, KEY_READ, &key) == ERROR_SUCCESS)
   {
     RegCloseKey (key) ;
     return (true) ;
@@ -5622,7 +5622,7 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
   splitpath (str, modulePath, NULL) ;
   validatePath (modulePath) ;
 
-  sprintf (engineHelpPath, "%shelp\\povray37.chm", BinariesPath) ;
+  sprintf (engineHelpPath, "%shelp\\povray.chm", BinariesPath) ;
   HtmlHelp (NULL, NULL, HH_INITIALIZE, (DWORD_PTR) &help_cookie) ;
   memset (&hh_aklink, 0, sizeof (hh_aklink)) ;
   hh_aklink.cbStruct = sizeof (hh_aklink) ;
@@ -5870,19 +5870,41 @@ int PASCAL WinMain (HINSTANCE hInst, HINSTANCE hPrev, LPSTR szCmdLine, int sw)
   {
     if (EditDLLPath != NULL)
     {
-      sprintf (str, "%s" EDITDLLNAME, EditDLLPath) ;
-      if (!LoadEditorDLL (str, false))
-        use_editors = false ;
+#ifdef _DEBUG
+      // Prefer debug DLL, but don't complain if it's not available.
+      sprintf(str, "%s" EDITDLLNAME_DEBUG, EditDLLPath);
+      if (!LoadEditorDLL(str, true))
+      {
+#endif
+        sprintf(str, "%s" EDITDLLNAME, EditDLLPath);
+        if (!LoadEditorDLL (str, false))
+          use_editors = false ;
+#ifdef _DEBUG
+      }
+#endif
     }
     else
     {
-      sprintf (str, "%s\\" EDITDLLNAME, modulePath) ;
-      if (!LoadEditorDLL (str, true))
+#ifdef _DEBUG
+      // Prefer debug DLL, but don't complain if it's not available.
+      sprintf (str, "%s\\" EDITDLLNAME_DEBUG, modulePath);
+      if (!LoadEditorDLL(str, true))
       {
-        sprintf (str, "%sbin\\" EDITDLLNAME, BinariesPath) ;
-        if (!LoadEditorDLL (str, false))
-          use_editors = false ;
+        sprintf (str, "%sbin\\" EDITDLLNAME_DEBUG, BinariesPath) ;
+        if (!LoadEditorDLL (str, true))
+        {
+#endif
+          sprintf (str, "%s\\" EDITDLLNAME, modulePath) ;
+          if (!LoadEditorDLL (str, true))
+          {
+            sprintf (str, "%sbin\\" EDITDLLNAME, BinariesPath) ;
+            if (!LoadEditorDLL (str, false))
+              use_editors = false ;
+          }
+#ifdef _DEBUG
+        }
       }
+#endif
     }
   }
   else

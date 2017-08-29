@@ -13,7 +13,7 @@
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
 /// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
@@ -2411,11 +2411,18 @@ void Parser::Parse_Directive(int After_Hash)
 
                             sceneData->languageVersion = (int)(Parse_Float() * 100 + 0.5);
 
-                            if ((sceneData->languageVersionLate) && sceneData->languageVersion >= 371)
+                            if (sceneData->languageVersion == 371)
                             {
-                                // As of POV-Ray 3.7, all scene files are supposed to begin with a `#version` directive.
-                                // As of POV-Ray 3.71, We no longer tolerate violation of that rule if the main scene
-                                // file claims to be compatible with POV-Ray 3.71 anywhere further down the road.
+                                Warning("The version of POV-Ray originally developed as v3.7.1 was ultimately "
+                                        "released as v3.8.0; '#version 3.71' will probably not work as expected. "
+                                        "Use '#version 3.8' instead.");
+                            }
+
+                            if ((sceneData->languageVersionLate) && sceneData->languageVersion >= 380)
+                            {
+                                // As of POV-Ray v3.7, all scene files are supposed to begin with a `#version` directive.
+                                // As of POV-Ray v3.8, we no longer tolerate violation of that rule if the main scene
+                                // file claims to be compatible with POV-Ray v3.8 anywhere further down the road.
                                 // (We need to be more lax with include files though, as they may just as well be
                                 // standard include files that happens to have been updated since the scene was
                                 // originally designed.)
@@ -2455,7 +2462,7 @@ void Parser::Parse_Directive(int After_Hash)
                             }
                             Parse_Semi_Colon(false);
 
-                            if (sceneData->EffectiveLanguageVersion() > OFFICIAL_VERSION_NUMBER)
+                            if (sceneData->EffectiveLanguageVersion() > POV_RAY_VERSION_INT)
                             {
                                 Error("Your scene file requires POV-Ray version %g or later!\n", (DBL)(sceneData->EffectiveLanguageVersion() / 100.0));
                             }
@@ -2693,6 +2700,14 @@ void Parser::Parse_Directive(int After_Hash)
             Skip_Tokens(DECLARING_MACRO_COND);
             EXIT
         END_CASE
+
+#if POV_DEBUG
+        CASE(BREAKPOINT_TOKEN)
+            // This statement does nothing, except allow you to set a debug breakpoint here
+            // so that you can effectively trigger the debugger via an SDL command.
+            EXIT
+        END_CASE
+#endif
 
         OTHERWISE
             Parsing_Directive = false;
