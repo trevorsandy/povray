@@ -7,7 +7,7 @@
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
 /// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
@@ -335,7 +335,7 @@ void Parser::Run()
         (sceneData->bspChildAccessCost != 0.0f) || (sceneData->bspMissChance != 0.0f))
     {
         Warning("You have overridden a default BSP tree cost constant. Note that these "
-                "INI settings may be removed or changed prior to the final 3.7 release.\n");
+                "INI settings may be removed or changed without notice in future versions.\n");
     }
 
     // TODO FIXME - review whole if-statement and line after it below [trf]
@@ -3011,9 +3011,9 @@ ObjectPtr Parser::Parse_Lathe()
 
               if (Points[i][X] < 0.0)
               {
-                 if ((sceneData->EffectiveLanguageVersion() < 371) && ((i == 0) || (i == Object->Number - 1)))
+                 if ((sceneData->EffectiveLanguageVersion() < 380) && ((i == 0) || (i == Object->Number - 1)))
                      Warning("Lathe with linear spline has a first or last point with an x value < 0.0.\n"
-                             "Leads to artifacts and an error in #version 3.71 onward.");
+                             "Leads to artifacts, and would be considered an error in v3.8 and later scenes.");
                  else
                      Error("Lathe with linear spline has a point with an x value < 0.0.");
               }
@@ -3024,9 +3024,9 @@ ObjectPtr Parser::Parse_Lathe()
 
               if ((i > 0) && (Points[i][X] < 0.0))
               {
-                 if ((sceneData->EffectiveLanguageVersion() < 371) && (i == Object->Number - 1))
+                 if ((sceneData->EffectiveLanguageVersion() < 380) && (i == Object->Number - 1))
                      Warning("Lathe with quadratic spline has last point with an x value < 0.0.\n"
-                             "Leads to artifacts and an error in #version 3.71 onward.");
+                             "Leads to artifacts, and would be considered an error in v3.8 and later scenes.");
                  else
                      Error("Lathe with quadratic spline has a point with an x value < 0.0.");
               }
@@ -3046,9 +3046,9 @@ ObjectPtr Parser::Parse_Lathe()
 
               if (((i%4 == 0) || (i%4 == 3)) && (Points[i][X] < 0.0))
               {
-                 if ((sceneData->EffectiveLanguageVersion() < 371) && ((i == 0) || (i == Object->Number - 1)))
+                 if ((sceneData->EffectiveLanguageVersion() < 380) && ((i == 0) || (i == Object->Number - 1)))
                      Warning("Lathe with Bezier spline has a first or last point with an x value < 0.0.\n"
-                             "Leads to artifacts and an error in #version 3.71 onward.");
+                             "Leads to artifacts, and would be considered an error in v3.8 and later scenes.");
                  else
                      Error("Lathe with Bezier spline has a point with an x value < 0.0.");
               }
@@ -3387,7 +3387,7 @@ ObjectPtr Parser::Parse_Light_Source ()
         /* NK phmap */
         CASE (COLOUR_MAP_TOKEN)
             // TODO - apparently this undocumented syntax was once intended to do something related to dispersion,
-            //        but in 3.7 is dysfunctional, doing nothing except provide an undocumented means of averaging
+            //        but is currently dysfunctional, doing nothing except provide an undocumented means of averaging
             //        different colours. Can we safely drop it?
             Warning("Undocumented syntax ignored (colour_map in light_source);"
                     " future versions of POV-Ray may drop support for it entirely.");
@@ -3646,9 +3646,9 @@ ObjectPtr Parser::Parse_Light_Source ()
         END_CASE
     END_EXPECT
 
-    if ((Object->Fade_Power != 0) && (fabs(Object->Fade_Distance) < EPSILON) && (sceneData->EffectiveLanguageVersion() < 371))
+    if ((Object->Fade_Power != 0) && (fabs(Object->Fade_Distance) < EPSILON) && (sceneData->EffectiveLanguageVersion() < 380))
     {
-        Warning("fade_power with fade_distance 0 is not supported in legacy (pre-3.71) scenes; fade_power is ignored.");
+        Warning("fade_power with fade_distance 0 is not supported in legacy (pre-v3.8) scenes; fade_power is ignored.");
         Object->Fade_Power    = 0;
         Object->Fade_Distance = 0;
     }
@@ -9277,9 +9277,9 @@ bool Parser::Parse_RValue (int Previous, int *NumberPtr, void **DataPtr, SYM_ENT
             // Reason: Code like this would be unreadable but possible. Is it
             // a recursive function or not? - It is not recursive because the
             // foo in the second line refers to the first function, which is
-            // not logical. Further, recursion is not supported in POV-Ray 3.5
+            // not logical. Further, recursion is not supported in current POV-Ray
             // anyway. However, allowing such code now would cause problems
-            // implementing recursive functions after POV-Ray 3.5!
+            // implementing recursive functions in future versions!
             if(sym != NULL)
                 Temp_Data  = reinterpret_cast<void *>(Parse_DeclareFunction(NumberPtr, sym->Token_Name, is_local));
             else
