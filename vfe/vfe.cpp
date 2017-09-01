@@ -55,11 +55,6 @@ using namespace pov_base;
 using namespace pov_frontend;
 using boost::format;
 
-static int Allow_File_Read(const UCS2 *Filename, const unsigned int FileType);
-static int Allow_File_Write(const UCS2 *Filename, const unsigned int FileType);
-static FILE *vfeFOpen(const UCS2String& name, const char *mode);
-static bool vfeRemove(const UCS2String& name);
-
 ////////////////////////////////////////////////////////////////////////////////////////
 //
 // class POVMSMessageDetails

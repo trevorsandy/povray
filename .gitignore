@@ -155,6 +155,12 @@ $RECYCLE.BIN/
 /libraries/png/pnglibconf.h
 /libraries/tiff/libtiff/tif_config.h
 /libraries/tiff/libtiff/tiffconf.h
+/libraries/sdl2/include/SDL2
+/libraries/sdl2/include/SDL_config.h
+/libraries/sdl2/Makefile.in
+/libraries/sdl2/Makefile.rules
+/libraries/sdl2/sdl2-config.cmake
+/libraries/sdl2/sdl2.pc
 
 # ===============================
 # POV-Ray Windows build artefacts
