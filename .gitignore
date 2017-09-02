@@ -196,6 +196,7 @@ $RECYCLE.BIN/
 /povray.1
 /povray.conf
 /povray.ini.in
+/povray.conf.in
 # Files created by unix/prebuild.sh script in specific subdirectories
 /platform/Makefile.am
 /platform/Makefile.in
@@ -209,6 +210,7 @@ $RECYCLE.BIN/
 /unix/config/depcomp
 /unix/config/install-sh
 /unix/config/missing
+/unix/config/ar-lib
 /vfe/Makefile.am
 /vfe/Makefile.in
 # Subdirectories created by unix/prebuild.sh script
@@ -272,3 +274,5 @@ $RECYCLE.BIN/
 /.cproject
 /.project
 /.settings/*
+/unix/build.sh
+/unix/restore.sh

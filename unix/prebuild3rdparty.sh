@@ -108,7 +108,6 @@ if test x"$1" = x""; then
 	fi
 fi
 
-
 ###############################################################################
 # Copying and generating standard/additional files
 ###############################################################################
@@ -367,15 +366,6 @@ echo "make maintainer-clean" 1>&2  &&  make maintainer-clean 1>&2 ; \
 
 	# special cases:
 
-	# povray.conf
-	osname=`uname`
-	echo "Create ../povray.conf"
-	if test x$osname = x"Darwin"; then
-		$cp_u -f povray-macos.conf ../povray.conf || echo "povray.conf not copied !"
-	else
-		$cp_u -f povray-linux.conf ../povray.conf || echo "povray.conf not copied !"
-	fi
-
 	# INSTALL
 	echo "Create ../INSTALL"
 	$cp_u -f install.txt ../INSTALL  ||  echo "INSTALL not copied !"
@@ -513,7 +503,6 @@ case "$1" in
 # LPub3D-Trace $pov_version_base - Unix source version - KDE install script
 # ==================================================================
 # written July 2003 - March 2004 by Christoph Hormann
-# updated August 2017 by Trevor SANDY
 # Based on parts of the Linux binary version install script
 # This file is part of LPub3D-Trace and subject to the LPub3D-Trace licence
 # see POVLEGAL.DOC for details.
@@ -577,6 +566,63 @@ pbEOF
 	;;
 esac
 
+###
+### ../povray.conf.in (template for ../povray.conf)
+###
+
+conf="../povray.conf"
+
+case "$1" in
+  clean)
+  for file in $conf $conf.in; do
+    rm $file 2> /dev/null  &&  echo "Cleanup $file"
+  done
+  ;;
+
+  doc*)
+  ;;
+
+  *)
+  # __HOME__, __POVUSER__, __POVUSERDIR__ and __POVSYSDIR__ will be updated at make time.
+  echo "Create $conf.in"
+  cat povray.conf | sed \
+    's/C:.POVRAY3 drive and/__POVSYSDIR__/' > $conf.in
+  cat << pbEOF >> $conf.in
+
+; Default (hard coded) paths:
+; HOME        = __HOME__
+; INSTALLDIR  = __POVSYSDIR__
+; SYSCONF     = __POVSYSDIR__/resources/config/povray.conf
+; SYSINI      = __POVSYSDIR__/resources/config/povray.ini
+; USERCONF    = %HOME%/__POVUSERDIR__/config/povray.conf
+; USERINI     = %HOME%/__POVUSERDIR__/config/povray.ini
+
+; This example shows how to qualify path names containing space(s):
+; read = "%HOME%/this/directory/contains space characters"
+
+; You can use %HOME%, %INSTALLDIR% and $PWD (working directory) as the origin to define permitted paths:
+
+; %HOME% is hard-coded to the $USER environment variable.
+read* = "%HOME%/__POVUSERDIR__/config"
+
+read* = "__POVSYSDIR__/resources/include"
+read* = "__POVSYSDIR__/resources/ini"
+read* = "%HOME%/LDraw/lgeo/ar"
+read* = "%HOME%/LDraw/lgeo/lg"
+read* = "%HOME%/LDraw/lgeo/stl"
+
+; %INSTALLDIR% is hard-coded to the default LPub3D installation path - see default paths above.
+
+; The $PWD (working directory) is where LPub3D-Trace is called from.
+; read* = "../../distribution/ini"
+; read* = "../../distribution/include"
+; read* = "../../distribution/scenes"
+
+read+write* = .
+pbEOF
+  ;;
+esac
+
 
 ###
 ### ../Makefile.am
@@ -620,6 +666,19 @@ povbin = \$(povbinbase)/@build_cpu@
 povinstall = \$(top_builddir)/install.log
 povowner = @povowner@
 povgroup = @povgroup@
+
+# Povray conf and ini paths
+if MACOS_BUILD
+datapath = /Library/Application\ Support/LPub3D\ Software/LPub3D/3rdParty
+sysapppath = /Applications/LPub3D.app/Contents/3rdParty
+else
+datapath = /.local/share/LPub3D\ Software/LPub3D/3rdParty
+sysapppath = /usr/share/lpub3d/3rdParty
+endif
+userdatapath = \$(HOME)\$(datapath)
+lpub3duserdir = \$(datapath)/@PACKAGE@-@VERSION_BASE@
+lpub3dsysdir = \$(sysapppath)/@PACKAGE@-@VERSION_BASE@
+lpub3dlibdir = \$(lpub3dsysdir)/resources
 
 # Directories to build.
 SUBDIRS = source vfe platform unix 
@@ -666,10 +725,11 @@ povdoc_DATA = AUTHORS ChangeLog NEWS CUI_README
 # Install configuration and INI files in povconfdir.
 dist_povconf_DATA = povray.conf
 povray.conf:
+	cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(top_builddir)/povray.conf
 
 povconf_DATA = povray.ini
 povray.ini:
-	cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(povlibdir),g" > \$(top_builddir)/povray.ini
+	cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > \$(top_builddir)/povray.ini
 
 # Install man page in povmandir.
 dist_povman_DATA = povray.1
@@ -694,8 +754,8 @@ install-data-local:
 	dirlist=\`find \$\$list -type d | sed s,\$(top_srcdir)/,,\`; \\
 	for p in "" \$\$dirlist ; do \\
 		\$(mkdir_p) \$(DESTDIR)\$(povlibdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povlibdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
-	done
-	@echo "Copying data files..."; \\
+	done; \\
+	echo "Copying data files..."; \\
 	filelist=\`find \$\$list -type f | sed s,\$(top_srcdir)/,,\`; \\
 	for f in \$\$filelist ; do \\
 		\$(INSTALL_DATA) \$(top_srcdir)/\$\$f \$(DESTDIR)\$(povlibdir)/\$\$f && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$f && echo "\$(DESTDIR)\$(povlibdir)/\$\$f" >> \$(povinstall); \\
@@ -1659,9 +1719,9 @@ endif
 # They cannot be placed in config.h since they indirectly rely on \$prefix.
 DEFS = \\
 	@DEFS@ \\
-	-DPOVLIBDIR=\"\$(prefix)/@PACKAGE@-@VERSION_BASE@/resources\" \\
-	-DPOVCONFDIR=\"\$(prefix)/@PACKAGE@-@VERSION_BASE@/resources/config\" \\
-	-DPOVCONFDIR_BACKWARD=\"\$(prefix)/@PACKAGE@-@VERSION_BASE@/resources/config\"
+	-DPOVLIBDIR=\"\$(sysuserdatapath)/@PACKAGE@-@VERSION_BASE@/resources\" \\
+	-DPOVCONFDIR=\"\$(userdatapath)/@PACKAGE@-@VERSION_BASE@/resources/config\" \\
+	-DPOVCONFDIR_BACKWARD=\"\$(userdatapath)/@PACKAGE@-@VERSION_BASE@/resources/config\"
 pbEOF
 	;;
 esac
@@ -1751,9 +1811,9 @@ AM_CPPFLAGS = \\
 # They cannot be placed in config.h since they indirectly rely on \$prefix.
 DEFS = \\
 	@DEFS@ \\
-	-DPOVLIBDIR=\"\$(prefix)/@PACKAGE@-@VERSION_BASE@/resources\" \\
-	-DPOVCONFDIR=\"\$(prefix)/@PACKAGE@-@VERSION_BASE@/resources/config\" \\
-	-DPOVCONFDIR_BACKWARD=\"\$(prefix)/@PACKAGE@-@VERSION_BASE@/resources/config\"
+	-DPOVLIBDIR=\"\$(sysapppath)/@PACKAGE@-@VERSION_BASE@/resources\" \\
+	-DPOVCONFDIR=\"\$(userdatapath)/@PACKAGE@-@VERSION_BASE@/resources/config\" \\
+	-DPOVCONFDIR_BACKWARD=\"\$(userdatapath)/@PACKAGE@-@VERSION_BASE@/resources/config\"
 pbEOF
 	;;
 esac
