@@ -276,7 +276,7 @@ namespace pov_base
 /* Name of package */
 #define PACKAGE "lpub3d_trace_cui"
 /* Define to the full name of this package. */
-#define PACKAGE_NAME "LPub3D-Trace"
+#define PACKAGE_NAME "LPub3D-Trace CUI"
 /* Supported image formats. */
 #define BUILTIN_IMG_FORMATS "gif tga iff ppm pgm hdr png jpeg tiff"
 /* Unsupported image formats. */
@@ -285,18 +285,15 @@ namespace pov_base
 #define BUILTIN_IO_RESTRICTIONS "enabled"
 /* I/O restrictions. */
 #define IO_RESTRICTIONS_DISABLED 0
-/* Base version number of package. */
-#include "..\..\source\base\version.h"
-#define VERSION_BASE OFFICIAL_GENERATION_STRING
 /* SDL display library */
 #define HAVE_LIBSDL
 
 /* Distribution strings */
 #define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE_NAME " is a modified, unofficial distribution of"
-#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 " Persistence of Vision Ray Tracer ('POV-Ray') version 3.8 compiled by:"
+#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 " Persistence of Vision Ray Tracer ('POV-Ray') version " VERSION_BASE " compiled by:"
 /* Description strings */
-#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE_NAME " provides a rich Windows console user interface mirroring"
-#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 " most of the POV-Ray Unix console user inferface functionality."
+#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE_NAME " provides a rich Windows console user interface (CUI)"
+#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 " mirroring the POV-Ray Unix console functionality."
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE_NAME " is developed by maintained by Trevor SANDY."
 /* Copyright string. */
 #define LPUB3D_TRACE_COPYRIGHT "Copyright 2017 Trevor SANDY"

@@ -56,18 +56,13 @@
 // version details
 #include "base/version_info.h"
 
-// from syspovconfig
+// from directory "vfe"
+#include "vfe.h"
+
+// from command line
 #ifndef _CONSOLE
 #error "You must define _CONSOLE in windows/povconfig/syspovconfig.h prior to building the console version, otherwise you will get link errors."
 #endif
-
-#ifdef HAVE_LIBSDL
-// from libraries directory SDL include
-#include <SDL.h>
-#endif
-
-// from directory "vfe"
-#include "vfe.h"
 
 // from directory "windows"
 #include "disp.h"
@@ -76,6 +71,9 @@
 
 #include "backend/povray.h"
 #include "backend/control/benchmark.h"
+
+using namespace vfe;
+using namespace vfePlatform;
 
 namespace pov_frontend
 {
@@ -88,14 +86,11 @@ namespace pov_frontend
   bool ShelloutsPermitted(void) { return false; } // TODO
 }
 
-using namespace vfe;
-using namespace vfePlatform;
-
 enum DispMode
 {
-	DISP_MODE_NONE,
-	DISP_MODE_TEXT,
-	DISP_MODE_SDL
+  DISP_MODE_NONE,
+  DISP_MODE_TEXT,
+  DISP_MODE_SDL
 };
 
 static DispMode gDisplayMode;
@@ -116,151 +111,151 @@ DWORD fdwSaveOldMode;
 
 BOOL WINAPI ConsoleHandler(DWORD CEvent)
 {
-    switch(CEvent)
-    {
-    case CTRL_C_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_C_EVENT: CTRL+C; requested render cancel\n", PACKAGE_NAME);
-        gCancelRender = true;
-        break;
-    case CTRL_BREAK_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_BREAK_EVENT: CTRL+BREAK; requested render cancel\n", PACKAGE_NAME);
-        gCancelRender = true;
-        break;
-    case CTRL_CLOSE_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_CLOSE_EVENT: Program being closed; requested render cancel\n", PACKAGE_NAME);
-        gCancelRender = true;
-        break;
-    case CTRL_LOGOFF_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_LOGOFF_EVENT: User is logging off; requested render cancel\n", PACKAGE_NAME);
-        gCancelRender = true;
-        break;
-    case CTRL_SHUTDOWN_EVENT:
-        fprintf(stderr, "\n%s: received CTRL_SHUTDOWN_EVENT: User shutting down; requested render cancel\n", PACKAGE_NAME);
-        gCancelRender = true;
-        break;
-    default:
-        gCancelRender = false;
-    }
-    return TRUE;
+  switch(CEvent)
+  {
+  case CTRL_C_EVENT:
+    fprintf(stderr, "\n%s: received CTRL_C_EVENT: CTRL+C; requested render cancel\n", PACKAGE_NAME);
+    gCancelRender = true;
+    break;
+  case CTRL_BREAK_EVENT:
+    fprintf(stderr, "\n%s: received CTRL_BREAK_EVENT: CTRL+BREAK; requested render cancel\n", PACKAGE_NAME);
+    gCancelRender = true;
+    break;
+  case CTRL_CLOSE_EVENT:
+    fprintf(stderr, "\n%s: received CTRL_CLOSE_EVENT: Program being closed; requested render cancel\n", PACKAGE_NAME);
+    gCancelRender = true;
+    break;
+  case CTRL_LOGOFF_EVENT:
+    fprintf(stderr, "\n%s: received CTRL_LOGOFF_EVENT: User is logging off; requested render cancel\n", PACKAGE_NAME);
+    gCancelRender = true;
+    break;
+  case CTRL_SHUTDOWN_EVENT:
+    fprintf(stderr, "\n%s: received CTRL_SHUTDOWN_EVENT: User shutting down; requested render cancel\n", PACKAGE_NAME);
+    gCancelRender = true;
+    break;
+  default:
+      gCancelRender = false;
+  }
+  return TRUE;
 }
 
 static vfeDisplay *WinConDisplayCreator(unsigned int width, unsigned int height, GammaCurvePtr gamma, vfeSession *session, bool visible)
 {
-	WinConDisplay *display = GetRenderWindow();
-	switch (gDisplayMode)
-	{
+  WinConDisplay *display = GetRenderWindow();
+  switch (gDisplayMode)
+  {
 #ifdef HAVE_LIBSDL
-	case DISP_MODE_SDL:
-		if (display != NULL && display->GetWidth() == width && display->GetHeight() == height)
-		{
-			WinConDisplay *p = new WinConSDLDisplay(width, height, gamma, session, false);
-			if (p->TakeOver(display))
-				return p;
-			delete p;
-		}
-		return new WinConSDLDisplay(width, height, gamma, session, visible);
-		break;
+  case DISP_MODE_SDL:
+    if (display != NULL && display->GetWidth() == width && display->GetHeight() == height)
+    {
+      WinConDisplay *p = new WinConSDLDisplay(width, height, gamma, session, false);
+      if (p->TakeOver(display))
+        return p;
+      delete p;
+    }
+    return new WinConSDLDisplay(width, height, gamma, session, visible);
+    break;
 #endif
-	case DISP_MODE_TEXT:
-		return new WinConTextDisplay(width, height, gamma, session, visible);
-		break;
-	default:
-		return NULL;
-	}
+  case DISP_MODE_TEXT:
+    return new WinConTextDisplay(width, height, gamma, session, visible);
+    break;
+  default:
+    return NULL;
+  }
 }
 
 /* Show a message */
 static void PrintMessage(const char *title, const char *message)
 {
-	fprintf(stderr, "%s: %s\n", title, message);
+  fprintf(stderr, "%s: %s\n", title, message);
 }
 
 void PrintStatus(vfeSession *session)
 {
-	string str;
-	vfeSession::MessageType type;
-	static vfeSession::MessageType lastType = vfeSession::mUnclassified;
+  string str;
+  vfeSession::MessageType type;
+  static vfeSession::MessageType lastType = vfeSession::mUnclassified;
 
-	while (session->GetNextCombinedMessage(type, str))
-	{
-		if (type != vfeSession::mGenericStatus)
-		{
-			if (lastType == vfeSession::mGenericStatus)
-				fprintf(stderr, "\n");
-			fprintf(stderr, "%s\n", str.c_str());
-		}
-		else
-			fprintf(stderr, "%s\r", str.c_str());
-		lastType = type;
-	}
+  while (session->GetNextCombinedMessage(type, str))
+  {
+    if (type != vfeSession::mGenericStatus)
+    {
+      if (lastType == vfeSession::mGenericStatus)
+       fprintf(stderr, "\n");
+      fprintf(stderr, "%s\n", str.c_str());
+    }
+    else
+      fprintf(stderr, "%s\r", str.c_str());
+    lastType = type;
+  }
 }
 
 static void PrintStatusChanged (vfeSession *session, State force = kUnknown)
 {
   if (force == kUnknown)
-      force = session->GetBackendState();
+    force = session->GetBackendState();
   switch (force)
   {
-      case kParsing:
-          fprintf (stderr, "==== [Parsing...] ==========================================================\n");
-          break;
-      case kRendering:
+    case kParsing:
+      fprintf (stderr, "==== [Parsing...] ==========================================================\n");
+      break;
+    case kRendering:
 #ifdef HAVE_LIBSDL
-            if ((gDisplay != NULL) && (gDisplayMode == DISP_MODE_SDL))
-            {
-                fprintf (stderr, "==== [Rendering... Press p to pause, q to quit] ============================\n");
-            }
-            else
-            {
-                fprintf (stderr, "==== [Rendering...] ========================================================\n");
-            }
+      if ((gDisplay != NULL) && (gDisplayMode == DISP_MODE_SDL))
+      {
+          fprintf (stderr, "==== [Rendering... Press p to pause, q to quit] ============================\n");
+      }
+      else
+      {
+          fprintf (stderr, "==== [Rendering...] ========================================================\n");
+      }
 #else
-            fprintf (stderr, "==== [Rendering...] ========================================================\n");
+      fprintf (stderr, "==== [Rendering...] ========================================================\n");
 #endif
-          break;
-      case kPausedRendering:
+      break;
+    case kPausedRendering:
 #ifdef HAVE_LIBSDL
-            if ((gDisplay != NULL) && (gDisplayMode == DISP_MODE_SDL))
-            {
-                fprintf (stderr, "==== [Paused... Press p to resume] =========================================\n");
-            }
-            else
-            {
-                fprintf (stderr, "==== [Paused...] ===========================================================\n");
-            }
+      if ((gDisplay != NULL) && (gDisplayMode == DISP_MODE_SDL))
+      {
+          fprintf (stderr, "==== [Paused... Press p to resume] =========================================\n");
+      }
+      else
+      {
+          fprintf (stderr, "==== [Paused...] ===========================================================\n");
+      }
 #else
-            fprintf (stderr, "==== [Paused...] ===========================================================\n");
+      fprintf (stderr, "==== [Paused...] ===========================================================\n");
 #endif
-          break;
+      break;
   }
 }
 
 static void PrintVersion(void)
 {
   fprintf(stderr,
-      "%s %s\n\n"
-      "%s\n%s\n%s\n%s\n"
-	  "%s\n%s\n%s\n\n"
-      "%s\n%s\n%s\n\n",
-      PACKAGE_NAME, POV_RAY_VERSION,
-      DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1, DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2, DISTRIBUTION_MESSAGE_2, DISTRIBUTION_MESSAGE_3,
-	  DESCRIPTION_MESSAGE_LPUB3D_TRACE_1, DESCRIPTION_MESSAGE_LPUB3D_TRACE_2, DESCRIPTION_MESSAGE_LPUB3D_TRACE_3,
-      LPUB3D_TRACE_COPYRIGHT, DISCLAIMER_MESSAGE_1, DISCLAIMER_MESSAGE_2
+    "%s %s\n\n"
+    "%s\n%s\n%s\n%s\n"
+    "%s\n%s\n%s\n\n"
+    "%s\n%s\n%s\n\n",
+    PACKAGE_NAME, POV_RAY_VERSION,
+    DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1, DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2, DISTRIBUTION_MESSAGE_2, DISTRIBUTION_MESSAGE_3,
+    DESCRIPTION_MESSAGE_LPUB3D_TRACE_1, DESCRIPTION_MESSAGE_LPUB3D_TRACE_2, DESCRIPTION_MESSAGE_LPUB3D_TRACE_3,
+    LPUB3D_TRACE_COPYRIGHT, DISCLAIMER_MESSAGE_1, DISCLAIMER_MESSAGE_2
   );
   fprintf(stderr,
-      "Built-in features:\n"
-      "  I/O restrictions:          %s\n"
-      "  Supported image formats:   %s\n"
-      "  Unsupported image formats: %s\n\n",
-      BUILTIN_IO_RESTRICTIONS, BUILTIN_IMG_FORMATS, MISSING_IMG_FORMATS
+    "Built-in features:\n"
+    "  I/O restrictions:          %s\n"
+    "  Supported image formats:   %s\n"
+    "  Unsupported image formats: %s\n\n",
+    BUILTIN_IO_RESTRICTIONS, BUILTIN_IMG_FORMATS, MISSING_IMG_FORMATS
   );
   fprintf(stderr,
-      "Compilation settings:\n"
-      "  Build architecture:  %s\n"
-      "  Built/Optimized for: %s\n"
-      "  Compiler vendor:     %s\n"
-      "  Compiler version:    %d\n",
-      BUILD_ARCH, BUILT_FOR, COMPILER_VENDOR, COMPILER_VERSION
+    "Compilation settings:\n"
+    "  Build architecture:  %s\n"
+    "  Built/Optimized for: %s\n"
+    "  Compiler vendor:     %s\n"
+    "  Compiler version:    %d\n",
+    BUILD_ARCH, BUILT_FOR, COMPILER_VENDOR, COMPILER_VERSION
   );
 }
 
@@ -274,10 +269,10 @@ void ErrorExit(vfeSession *session)
 
 void BenchMarkErrorExit(LPSTR lpszMessage)
 {
-	fprintf(stderr, "%s\n", lpszMessage);
-	// Restore input mode on exit.
-	SetConsoleMode(hStdin, fdwSaveOldMode);
-	ExitProcess(0);
+  fprintf(stderr, "%s\n", lpszMessage);
+  // Restore input mode on exit.
+  SetConsoleMode(hStdin, fdwSaveOldMode);
+  ExitProcess(0);
 }
 
 static void CancelRender(vfeSession *session)
@@ -285,22 +280,22 @@ static void CancelRender(vfeSession *session)
   session->CancelRender();  // request the backend to cancel
   PrintStatus (session);
   while (session->GetBackendState() != kReady)  // wait for the render to effectively shut down
-      Delay(10);
+    Delay(10);
   PrintStatus (session);
 }
 
 static void PauseWhenDone(vfeSession *session)
 {
-	GetRenderWindow()->UpdateScreen(true);
-	GetRenderWindow()->PauseWhenDoneNotifyStart();
-	while (GetRenderWindow()->PauseWhenDoneResumeIsRequested() == false)
-	{
-		if (gCancelRender)
-			break;
-		else
-			Delay(10);
-	}
-	GetRenderWindow()->PauseWhenDoneNotifyEnd();
+  GetRenderWindow()->UpdateScreen(true);
+  GetRenderWindow()->PauseWhenDoneNotifyStart();
+  while (GetRenderWindow()->PauseWhenDoneResumeIsRequested() == false)
+  {
+    if (gCancelRender)
+      break;
+    else
+      Delay(10);
+  }
+  GetRenderWindow()->PauseWhenDoneNotifyEnd();
 }
 
 static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts, string& ini, string& pov, int argc, char **argv)
@@ -309,43 +304,43 @@ static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts,
   // parse command-line options
   while (*++argv)
   {
-      string s = string(*argv);
-      boost::algorithm::to_lower(s);
-      // set number of threads to run the benchmark
-      if (boost::starts_with(s, "+wt") || boost::starts_with(s, "-wt"))
-      {
-          s.erase(0, 3);
-          int n = atoi(s.c_str());
-          if (n)
-              opts.SetThreadCount(n);
-          else
-              fprintf(stderr, "%s: ignoring malformed '%s' command-line option\n", PACKAGE_NAME, *argv);
-      }
-      // add library path
-      else if (boost::starts_with(s, "+l") || boost::starts_with(s, "-l"))
-      {
-          s.erase(0, 2);
-          opts.AddLibraryPath(s);
-      }
+    string s = string(*argv);
+    boost::algorithm::to_lower(s);
+    // set number of threads to run the benchmark
+    if (boost::starts_with(s, "+wt") || boost::starts_with(s, "-wt"))
+    {
+      s.erase(0, 3);
+      int n = atoi(s.c_str());
+      if (n)
+        opts.SetThreadCount(n);
+      else
+        fprintf(stderr, "%s: ignoring malformed '%s' command-line option\n", PACKAGE_NAME, *argv);
+    }
+    // add library path
+    else if (boost::starts_with(s, "+l") || boost::starts_with(s, "-l"))
+    {
+      s.erase(0, 2);
+      opts.AddLibraryPath(s);
+    }
   }
 
   int benchversion = pov::Get_Benchmark_Version();
   fprintf(stderr, "\
-%s %s\n\n\
-Entering the standard " PACKAGE_NAME " %s benchmark version %x.%02x.\n\n\
-This built-in benchmark requires " PACKAGE_NAME " to be installed on your system\n\
-before running it.  There will be neither display nor file output, and\n\
-any additional command-line option except setting the number of render\n\
-threads (+wtN for N threads) and library paths (+Lpath) will be ignored.\n\
-To get an accurate benchmark result you might consider running  " PACKAGE_NAME "\n\
-with the Win 'time' command (e.g. 'time povray -benchmark').\n\n\
-The benchmark will run using %d render thread(s).\n\
-Press <Enter> to continue or <Ctrl-C> to abort.\n\
-",
-      PACKAGE_NAME, POV_RAY_VERSION_INFO,
-      VERSION_BASE, benchversion / 256, benchversion % 256,
-      opts.GetThreadCount()
-  );
+    %s %s\n\n\
+    Entering the standard " PACKAGE_NAME " %s benchmark version %x.%02x.\n\n\
+    This built-in benchmark requires " PACKAGE_NAME " to be installed on your system\n\
+    before running it.  There will be neither display nor file output, and\n\
+    any additional command-line option except setting the number of render\n\
+    threads (+wtN for N threads) and library paths (+Lpath) will be ignored.\n\
+    To get an accurate benchmark result you might consider running  " PACKAGE_NAME "\n\
+    with the Win 'time' command (e.g. 'time povray -benchmark').\n\n\
+    The benchmark will run using %d render thread(s).\n\
+    Press <Enter> to continue or <Ctrl-C> to abort.\n\
+    ",
+    PACKAGE_NAME, POV_RAY_VERSION_INFO,
+    VERSION_BASE, benchversion / 256, benchversion % 256,
+    opts.GetThreadCount()
+    );
 
   DWORD cNumRead, fdwMode, i;
   INPUT_RECORD irInBuf[128];
@@ -354,45 +349,45 @@ Press <Enter> to continue or <Ctrl-C> to abort.\n\
   // Get the standard input handle.
   hStdin = GetStdHandle(STD_INPUT_HANDLE);
   if (hStdin == INVALID_HANDLE_VALUE)
-	  BenchMarkErrorExit("Invalid standard input handle.");
+    BenchMarkErrorExit("Invalid standard input handle.");
 
   // Save the current input mode, to be restored on exit.
 
   if (!GetConsoleMode(hStdin, &fdwSaveOldMode))
-	  BenchMarkErrorExit("Unable to get current console mode.");
+    BenchMarkErrorExit("Unable to get current console mode.");
 
   // Enable the window and mouse input events.
 
   fdwMode = ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT;
   if (!SetConsoleMode(hStdin, fdwMode))
-	  BenchMarkErrorExit("Unable to set console mode with window and mouse input.");
+    BenchMarkErrorExit("Unable to set console mode with window and mouse input.");
 
   // wait for user input from stdin (including abort signals)
   while (true)
   {
-	  if (gCancelRender)
-	  {
-		  fprintf(stderr, "Render cancelled by user\n");
-		  return RETURN_USER_ABORT;
-	  }
+    if (gCancelRender)
+    {
+      fprintf(stderr, "Render cancelled by user\n");
+      return RETURN_USER_ABORT;
+    }
 
-	  // Wait for user input events.
-	  if (!ReadConsoleInput(
-		  hStdin,      // input buffer handle
-		  irInBuf,     // buffer to read into
-		  128,         // size of read buffer
-		  &cNumRead))  // number of records read
-		  BenchMarkErrorExit("ReadConsoleInput");
+    // Wait for user input events.
+    if (!ReadConsoleInput(
+      hStdin,      // input buffer handle
+      irInBuf,     // buffer to read into
+      128,         // size of read buffer
+      &cNumRead))  // number of records read
+    BenchMarkErrorExit("ReadConsoleInput");
 
-	  if (cNumRead > 0)  // user input is available
-	  {
-		  for (i = 0; i < cNumRead; i++)     // read till <ENTER> is hit
-		  {
-			  if (irInBuf[i].EventType == KEY_EVENT && irInBuf[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
-				  break;
-		  }
-	  }
-	  Delay(20);
+    if (cNumRead > 0)  // user input is available
+    {
+      for (i = 0; i < cNumRead; i++)     // read till <ENTER> is hit
+      {
+        if (irInBuf[i].EventType == KEY_EVENT && irInBuf[i].Event.KeyEvent.wVirtualKeyCode == VK_RETURN)
+          break;
+      }
+    }
+    Delay(20);
   }
 
   string basename = UCS2toASCIIString(session->CreateTemporaryFile());
@@ -400,14 +395,14 @@ Press <Enter> to continue or <Ctrl-C> to abort.\n\
   pov = basename + ".pov";
   if (pov::Write_Benchmark_File(pov.c_str(), ini.c_str()))
   {
-      fprintf(stderr, "%s: creating %s\n", PACKAGE_NAME, ini.c_str());
-      fprintf(stderr, "%s: creating %s\n", PACKAGE_NAME, pov.c_str());
-      fprintf(stderr, "Running standard " PACKAGE_NAME " benchmark version %x.%02x\n", benchversion / 256, benchversion % 256);
+    fprintf(stderr, "%s: creating %s\n", PACKAGE_NAME, ini.c_str());
+    fprintf(stderr, "%s: creating %s\n", PACKAGE_NAME, pov.c_str());
+    fprintf(stderr, "Running standard " PACKAGE_NAME " benchmark version %x.%02x\n", benchversion / 256, benchversion % 256);
   }
   else
   {
-      fprintf(stderr, "%s: failed to write temporary files for benchmark\n", PACKAGE_NAME);
-      return RETURN_ERROR;
+    fprintf(stderr, "%s: failed to write temporary files for benchmark\n", PACKAGE_NAME);
+    return RETURN_ERROR;
   }
 
   // Restore input mode on exit.
@@ -418,10 +413,10 @@ Press <Enter> to continue or <Ctrl-C> to abort.\n\
 
 static void CleanupBenchmark(vfeWinSession *session, string& ini, string& pov)
 {
-    fprintf(stderr, "%s: removing %s\n", PACKAGE_NAME, ini.c_str());
-    session->DeleteTemporaryFile(ASCIItoUCS2String(ini.c_str()));
-    fprintf(stderr, "%s: removing %s\n", PACKAGE_NAME, pov.c_str());
-    session->DeleteTemporaryFile(ASCIItoUCS2String(pov.c_str()));
+  fprintf(stderr, "%s: removing %s\n", PACKAGE_NAME, ini.c_str());
+  session->DeleteTemporaryFile(ASCIItoUCS2String(ini.c_str()));
+  fprintf(stderr, "%s: removing %s\n", PACKAGE_NAME, pov.c_str());
+  session->DeleteTemporaryFile(ASCIItoUCS2String(pov.c_str()));
 }
 
 // This is the console user interface build of LPub3D-Trace under Windows
@@ -447,24 +442,24 @@ extern "C" int main(int argc, char **argv)
   int               argc_copy=argc; /* because it might also be updated */
 
   fprintf(stderr,
-          "\n" PACKAGE_NAME " for Windows.\n\n"
-          PACKAGE_NAME " Ray Tracer Version " POV_RAY_VERSION_INFO ".\n\n"
-          DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 "\n"
-		  DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 "\n"
-          DISTRIBUTION_MESSAGE_2 ".\n"
-          DISTRIBUTION_MESSAGE_3 "\n"
-		  DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 "\n"
-		  DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 "\n"
-		  DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 "\n\n"
-          LPUB3D_TRACE_COPYRIGHT "\n"
-          DISCLAIMER_MESSAGE_1 "\n"
-          DISCLAIMER_MESSAGE_2 "\n\n");
+    "\n" PACKAGE_NAME " for Windows.\n\n"
+    PACKAGE_NAME " Ray Tracer Version " POV_RAY_VERSION_INFO ".\n\n"
+    DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 "\n"
+    DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 "\n"
+    DISTRIBUTION_MESSAGE_2 ".\n"
+    DISTRIBUTION_MESSAGE_3 "\n"
+    DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 "\n"
+    DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 "\n"
+    DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 "\n\n"
+    LPUB3D_TRACE_COPYRIGHT "\n"
+    DISCLAIMER_MESSAGE_1 "\n"
+    DISCLAIMER_MESSAGE_2 "\n\n");
 
   // create handler to manage console signals
   if (!SetConsoleCtrlHandler((PHANDLER_ROUTINE)ConsoleHandler,TRUE))
   {
-     fprintf(stderr, "Unable to install console control handler!\n");
-     return RETURN_ERROR;
+   fprintf(stderr, "Unable to install console control handler!\n");
+   return RETURN_ERROR;
   }
 
   // create display session
@@ -474,34 +469,34 @@ extern "C" int main(int argc, char **argv)
 
   // display mode registration
 #ifdef HAVE_LIBSDL
-	if (WinConSDLDisplay::Register(session))
-	{
-		gDisplayMode = DISP_MODE_SDL;
+  if (WinConSDLDisplay::Register(session))
+  {
+      gDisplayMode = DISP_MODE_SDL;
 #ifdef WIN_DEBUG
-		PrintMessage("--INFO", "Display Mode: SDL.\n");
+      PrintMessage("--INFO", "Display Mode: SDL.\n");
 #endif
-	}
-	else
+  }
+  else
 #endif
-	if (WinConTextDisplay::Register(session))
-	{
-		gDisplayMode = DISP_MODE_TEXT;
+  if (WinConTextDisplay::Register(session))
+  {
+      gDisplayMode = DISP_MODE_TEXT;
 #ifdef WIN_DEBUG
-		PrintMessage("--INFO", "Display Mode: Text.\n");
+      PrintMessage("--INFO", "Display Mode: Text.\n");
 #endif
-	}
-	else
-	{
-		gDisplayMode = DISP_MODE_NONE;
+  }
+  else
+  {
+      gDisplayMode = DISP_MODE_NONE;
 #ifdef WIN_DEBUG
-		PrintMessage("--INFO", "Display Mode: None.\n");
+      PrintMessage("--INFO", "Display Mode: None.\n");
 #endif
-	}
+  }
 
   // default number of work threads: number of CPUs or 4
   int nthreads = boost::thread::hardware_concurrency();
   if (nthreads < 2)
-	  nthreads = 4;
+      nthreads = 4;
   opts.SetThreadCount(nthreads);
 
   // process command-line options
@@ -546,7 +541,7 @@ extern "C" int main(int argc, char **argv)
   else
   {
     s = getenv ("POVINC");
-	session->SetDisplayCreator(WinConDisplayCreator);
+    session->SetDisplayCreator(WinConDisplayCreator);
     session->GetWinConOptions()->Process_povray_ini(opts);
     if (s != NULL)
       opts.AddLibraryPath (s);
@@ -576,48 +571,48 @@ extern "C" int main(int argc, char **argv)
 
   while (((flags = session->GetStatus(true, 200)) & stRenderShutdown) == 0)
   {
-	  if (gCancelRender)
-	  {
-		  CancelRender(session);
-		  break;
-	  }
+    if (gCancelRender)
+    {
+      CancelRender(session);
+      break;
+    }
 
-	  if (flags & stAnimationStatus)
-		  fprintf(stderr, "\nRendering frame %d of %d (#%d)\n", session->GetCurrentFrame(), session->GetTotalFrames(), session->GetCurrentFrameId());
-	  if (flags & stAnyMessage)
-		  PrintStatus(session);
-	  if (flags & stBackendStateChanged)
-		  PrintStatusChanged(session);
+    if (flags & stAnimationStatus)
+      fprintf(stderr, "\nRendering frame %d of %d (#%d)\n", session->GetCurrentFrame(), session->GetTotalFrames(), session->GetCurrentFrameId());
+    if (flags & stAnyMessage)
+      PrintStatus(session);
+    if (flags & stBackendStateChanged)
+      PrintStatusChanged(session);
 
-	  if (GetRenderWindow() != NULL)
-	  {
-		  // early exit
-		  if (GetRenderWindow()->HandleEvents())
-		  {
-			  gCancelRender = true;  // will set proper return value
-			  CancelRender(session);
-			  break;
-		  }
+    if (GetRenderWindow() != NULL)
+    {
+      // early exit
+      if (GetRenderWindow()->HandleEvents())
+      {
+        gCancelRender = true;  // will set proper return value
+        CancelRender(session);
+        break;
+      }
 
-		  GetRenderWindow()->UpdateScreen();
+      GetRenderWindow()->UpdateScreen();
 
-		  // inter-frame pause
-		  if (session->GetCurrentFrame() < session->GetTotalFrames()
-			  && session->GetPauseWhenDone()
-			  && (flags & stAnimationFrameCompleted) != 0
-			  && session->Failed() == false)
-		  {
-			  PauseWhenDone(session);
-			  if (!gCancelRender)
-				  session->Resume();
-		  }
-	  }
+      // inter-frame pause
+      if (session->GetCurrentFrame() < session->GetTotalFrames()
+        && session->GetPauseWhenDone()
+        && (flags & stAnimationFrameCompleted) != 0
+        && session->Failed() == false)
+      {
+        PauseWhenDone(session);
+        if (!gCancelRender)
+          session->Resume();
+      }
+    }
   }
 
   // pause when done for single or last frame of an animation
   if (session->Failed() == false && GetRenderWindow() != NULL && session->GetBoolOption("Pause_When_Done", false))
   {
-	PrintStatusChanged(session, kPausedRendering);
+    PrintStatusChanged(session, kPausedRendering);
     PauseWhenDone(session);
     gCancelRender = false;
   }

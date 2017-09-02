@@ -10,7 +10,7 @@ Title LPub3D-Trace on Windows auto build script
 :: This script is requires autobuild_defs.cmd
 :: --
 ::  Trevor SANDY <trevor.sandy@gmail.com>
-::  Last Update: August 07, 2017
+::  Last Update: September 03, 2017
 ::  Copyright (c) 2017 by Trevor SANDY
 :: --
 :: This script is distributed in the hope that it will be useful,
@@ -21,10 +21,11 @@ Title LPub3D-Trace on Windows auto build script
 
 :: Variables
 SET DEBUG=0
-SET APPNAME=lpub3d_trace_cui
+SET PACKAGE=lpub3d_trace_cui
 SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
 
-SET VERSION=3.7
+SET VERSION_BASE=3.8
+SET DEFAULT_PLATFORM=x64
 
 :: Build checks settings - set according to your check requirements
 :: Check 01
@@ -34,17 +35,17 @@ rem SET BUILD_CHK_WH_PARMS=+w320 +h240
 rem SET BUILD_CHK_MY_PARMS=-f +d +p +v +a0.3 +UA +A
 rem SET BUILD_CHK_MY_INCLUDES=
 rem :: Check 01
-rem SET BUILD_CHK_MY_OUTPUT=
-rem SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
-rem SET BUILD_CHK_WH_PARMS=+w320 +h240
-rem SET BUILD_CHK_MY_PARMS=+d +p +a0.3 +UA +A
-rem SET BUILD_CHK_MY_INCLUDES=
-:: Check 02
 SET BUILD_CHK_MY_OUTPUT=
-SET BUILD_CHK_POV_FILE=tests\csi.ldr.pov
-SET BUILD_CHK_WH_PARMS=+w2549 +h1650
-SET BUILD_CHK_MY_PARMS=+d +a0.3 +UA +A
-SET BUILD_CHK_MY_INCLUDES=+L"%USERPROFILE%\LDraw\lgeo\ar" +L"%USERPROFILE%\LDraw\lgeo\lg" +L"%USERPROFILE%\LDraw\lgeo\stl"
+SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
+SET BUILD_CHK_WH_PARMS=+w320 +h240
+SET BUILD_CHK_MY_PARMS=+d -p +a0.3 +UA +A
+SET BUILD_CHK_MY_INCLUDES=
+:: Check 02
+rem SET BUILD_CHK_MY_OUTPUT=
+rem SET BUILD_CHK_POV_FILE=tests\csi.ldr.pov
+rem SET BUILD_CHK_WH_PARMS=+w2549 +h1650
+rem SET BUILD_CHK_MY_PARMS=+d +a0.3 +UA +A
+rem SET BUILD_CHK_MY_INCLUDES=+L"%USERPROFILE%\LDraw\lgeo\ar" +L"%USERPROFILE%\LDraw\lgeo\lg" +L"%USERPROFILE%\LDraw\lgeo\stl"
 
 :: Build check static settings - don't change these.
 SET BUILD_CHK_INCLUDE=+L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
@@ -58,11 +59,14 @@ SET CONFIGURATION=unknown
 SET PROJECT=unknown
 SET CONSOLE=unknown
 SET VERBOSE=unknown
+SET REBUILD=unknown
 SET CHECK=unknown
 IF %DEBUG%==1 (
 	SET d=d
+	SET DEFAULT_CONFIGURATION=Debug
 ) ELSE (
   SET d=
+  SET DEFAULT_CONFIGURATION=Release
 )
 
 :: Check if invalid platform flag
@@ -71,8 +75,10 @@ IF NOT [%1]==[] (
 		IF NOT "%1"=="x86_64" (
 			IF NOT "%1"=="-allcui" (
 				IF NOT "%1"=="-run" (
-					IF NOT "%1"=="-verbose" (
-						IF NOT "%1"=="-help" GOTO :PLATFORM_ERROR
+					IF NOT "%1"=="-rbld" (
+						IF NOT "%1"=="-verbose" (
+							IF NOT "%1"=="-help" GOTO :PLATFORM_ERROR
+						)
 					)
 				)
 			)
@@ -97,13 +103,13 @@ IF /I "%1"=="-allcui" (
 	GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-run" (
-	SET PLATFORM=x64
-	::SET PLATFORM=Win32
+	GOTO :SET_CONFIGURATION
+)
+IF /I "%1"=="-rbld" (
+	SET PLATFORM=-allcui
 	GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-verbose" (
-	::SET PLATFORM=x64
-	SET PLATFORM=Win32
 	GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-help" (
@@ -116,12 +122,16 @@ GOTO :COMMAND_ERROR
 :: Check if invalid configuration flag
 IF NOT [%2]==[] (
 	IF NOT "%2"=="-rel" (
-		IF NOT "%2"=="-avx" (
-			IF NOT "%2"=="-ins" (
-				IF NOT "%2"=="-allins" (
-					IF NOT "%2"=="-chk" (
-						IF NOT "%2"=="-run" (
-							IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+		IF NOT "%2"=="-dbg" (
+			IF NOT "%2"=="-avx" (
+				IF NOT "%2"=="-ins" (
+					IF NOT "%2"=="-allins" (
+						IF NOT "%2"=="-chk" (
+							IF NOT "%2"=="-run" (
+								IF NOT "%2"=="-rbld" (
+									IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+								)
+							)
 						)
 					)
 				)
@@ -129,9 +139,11 @@ IF NOT [%2]==[] (
 		)
 	)
 )
-
+::  Set the default platform
+IF "%PLATFORM%"=="unknown" (
+	SET PLATFORM=%DEFAULT_PLATFORM%
+)
 :: Run a render check without building
-:: Enable verbose tracing (useful for debugging)
 IF /I "%1"=="-run" SET RUN_CHK=true
 IF /I "%2"=="-run" SET RUN_CHK=true
 IF /I "%RUN_CHK%"=="true" (
@@ -140,26 +152,63 @@ IF /I "%RUN_CHK%"=="true" (
 	:: Finish
 	EXIT /b
 )
-
-:: Parse configuration input flag
-IF [%2]==[] (
-	SET CHECK=1
-	SET THIRD_INSTALL=1
-	SET INSTALL_ALL=0
-	SET CONFIGURATION=Release
-	GOTO :BUILD
-)
 :: Perform verbose (debug) build
 IF "%1"=="-verbose" (
 	SET CHECK=1
 	SET THIRD_INSTALL=0
 	SET INSTALL_ALL=0
+	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+	GOTO :BUILD
+)
+:: Parse configuration input flag
+IF /I "%1"=="-rbld" SET REBUILD_CHK=true
+IF /I "%2"=="-rbld" SET REBUILD_CHK=true
+IF /I "%REBUILD_CHK%"=="true" (
+	SET REBUILD=1
+	SET CHECK=1
+	SET THIRD_INSTALL=1
+	SET INSTALL_ALL=0
+	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+	GOTO :BUILD
+)
+:: Check if release build
+IF /I "%2"=="-rel" (
 	SET CONFIGURATION=Release
 	GOTO :BUILD
 )
-:: Check if no extension release build
-IF /I "%2"=="-rel" (
-	SET CONFIGURATION=Release
+:: Check if debug build
+IF /I "%2"=="-dbg" (
+	SET CONFIGURATION=Debug
+	GOTO :BUILD
+)
+:: Check if install - reset configuration
+IF /I "%2"=="-ins" (
+	:: 3rd party install
+	SET THIRD_INSTALL=1
+	SET INSTALL_ALL=0
+	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+	GOTO :BUILD
+)
+:: Install all content
+IF /I "%2"=="-allins" (
+	:: 3rd party install
+	SET THIRD_INSTALL=1
+	SET INSTALL_ALL=1
+	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+	GOTO :BUILD
+)
+:: Build and run an image render check
+IF /I "%2"=="-chk" (
+	SET CHECK=1
+	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+	GOTO :BUILD
+)
+:: Parse configuration input flag
+IF [%2]==[] (
+	SET CHECK=1
+	SET THIRD_INSTALL=1
+	SET INSTALL_ALL=0
+	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
 :: Check if x86_64 and AVX
@@ -177,31 +226,6 @@ IF "%PLATFORM%"=="Win32" (
 IF "%PLATFORM%"=="x64" (
 	IF /I "%2"=="-sse2" GOTO :SSE2_ERROR
 )
-
-:: Check if install - reset configuration
-IF /I "%2"=="-ins" (
-	:: 3rd party install
-	SET THIRD_INSTALL=1
-	SET INSTALL_ALL=0
-	SET CONFIGURATION=Release
-	GOTO :BUILD
-)
-
-IF /I "%2"=="-allins" (
-	:: 3rd party install
-	SET THIRD_INSTALL=1
-	SET INSTALL_ALL=1
-	SET CONFIGURATION=Release
-	GOTO :BUILD
-)
-
-:: Build and run an image render check
-IF /I "%2"=="-chk" (
-	SET CHECK=1
-	SET CONFIGURATION=Release
-	GOTO :BUILD
-)
-
 :: If we get here display invalid command message
 GOTO :COMMAND_ERROR
 
@@ -216,17 +240,19 @@ SET CONFIGURATION=Release-SSE2
 GOTO :BUILD
 
 :BUILD
-:: Initialize the Visual Studio command line development environment
-:: Note you can change this line to your specific environment - I am using VS2017 here.
-CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
-
+:: Configure build parameters
+SET DO_REBUILD=
+SET BUILD_LBL=Building
+IF %REBUILD%==1 (
+	SET DO_REBUILD=/t:Rebuild
+	SET BUILD_LBL=Rebuilding
+)
 :: Check if invalid console flag
 IF NOT [%3]==[] (
 	IF NOT "%3"=="-gui" (
 		IF NOT "%3"=="-cui" GOTO :PROJECT_ERROR
 	)
 )
-
 :: Build CUI or GUI project - CUI is default
 :: Parse configuration input flag
 IF [%3]==[] (
@@ -241,7 +267,6 @@ IF /I "%3"=="-cui" (
 	SET CONSOLE=1
 	SET PROJECT=console.vcxproj
 )
-
 :: Check if invalid verbose flag
 IF NOT [%4]==[] (
 	IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
@@ -249,6 +274,7 @@ IF NOT [%4]==[] (
 :: Enable verbose tracing (useful for debugging)
 IF /I "%1"=="-verbose" SET VERBOSE_CHK=true
 IF /I "%4"=="-verbose" SET VERBOSE_CHK=true
+IF "%CONFIGURATION%"=="Debug" SET VERBOSE_CHK=true
 IF /I "%VERBOSE_CHK%"=="true" (
 	:: Check if CUI or allCUI project build
 	IF NOT %CONSOLE%==1 (
@@ -258,12 +284,14 @@ IF /I "%VERBOSE_CHK%"=="true" (
 ) ELSE (
 	SET VERBOSE=0
 )
-
-:: Check if build all platforms
-IF /I "%PLATFORM%"=="-allcui" (
-	SET CONFIGURATION=Release
-	GOTO :BUILD_ALL_CUI
-)
+:: Initialize the Visual Studio command line development environment
+:: Note you can change this line to your specific environment - I am using VS2017 here.
+CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
+:: Set the LPub3D-Trace auto-build pre-processor defines
+CALL autobuild_defs.cmd
+:: Display the defines set (as environment variable 'PovBuildDefs') for MSbuild
+ECHO.
+ECHO   BUILD_DEFINES.....[%PovBuildDefs%]
 
 :: Display build project message
 CALL :PROJECT_MESSAGE %CONSOLE%
@@ -271,50 +299,50 @@ CALL :PROJECT_MESSAGE %CONSOLE%
 :: Display verbosity message
 CALL :VERBOSE_MESSAGE %VERBOSE%
 
-:: Set the LPub3D-Trace auto-build pre-processor defines
-CALL autobuild_defs.cmd
+:: Console logging flags (see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference)
+SET LOGGING=/clp:ErrorsOnly /nologo
 
-:: Display the defines set (as environment variables) for MSbuild
-ECHO.
-ECHO   BUILD_DEFINES.....[%PovBuildDefs%]
+:: Check if build all platforms
+IF /I "%PLATFORM%"=="-allcui" (
+	SET CONSOLE=1
+	SET PROJECT=console.vcxproj
+	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+	GOTO :BUILD_ALL_CUI
+)
+
+:: Assemble command line
+SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT% %LOGGING% %DO_REBUILD%
+ECHO   BUILD_COMMAND.....[%COMMAND_LINE%]
 :: Display the build configuration and platform settings
 ECHO.
-ECHO -Building %CONFIGURATION% Configuration for %PLATFORM% Platform...
+ECHO -%BUILD_LBL% %CONFIGURATION% Configuration for %PLATFORM% Platform...
 ECHO.
-
 :: Launch msbuild
-msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT%
+%COMMAND_LINE%
 :: Perform build check if specified
 IF %CHECK%==1 CALL :CHECK_BUILD %PLATFORM%
 :: Finish
 EXIT /b
 
 :BUILD_ALL_CUI
-:: Set CUI statically
-SET CONSOLE=1
-SET PROJECT=console.vcxproj
-
-:: Display build project message
-CALL :PROJECT_MESSAGE %CONSOLE%
-
-:: Display verbosity message
-CALL :VERBOSE_MESSAGE %VERBOSE%
-
-:: Set the LPub3D-Trace auto-build pre-processor defines
-CALL autobuild_defs.cmd
-
-:: Display the defines set (as environment variables) for MSbuild
+:: Display the build configuration and platform settings
 ECHO.
-ECHO   BUILD_DEFINES.....[%PovBuildDefs%]
-
+ECHO -%BUILD_LBL% all CUI Platforms for %CONFIGURATION% Configuration...
 :: Launch msbuild across all CUI platform builds
 FOR %%P IN ( Win32, x64 ) DO (
+	SETLOCAL ENABLEDELAYEDEXPANSION
+	:: Assemble command line
+	SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING% %DO_REBUILD%
 	ECHO.
-	ECHO --All CUI Platforms: Building %CONFIGURATION% Configuration for %%P Platform...
+	ECHO --%BUILD_LBL% %%P Platform...
 	ECHO.
-	msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT%
+	ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
+	ECHO.
+	:: Launch msbuild
+	!COMMAND_LINE!
 	:: Perform build check if specified
 	IF %CHECK%==1 CALL :CHECK_BUILD %%P
+	ENDLOCAL
 )
 :: Perform 3rd party install if specified
 IF %THIRD_INSTALL%==1 GOTO :3RD_PARTY_INSTALL
@@ -322,27 +350,29 @@ IF %THIRD_INSTALL%==1 GOTO :3RD_PARTY_INSTALL
 EXIT /b
 
 :3RD_PARTY_INSTALL
+:: Version major and minor pulled in from autobuild_defs
+SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 ECHO.
 ECHO -Copying 3rd party distribution files...
 ECHO.
-ECHO -Copying 32bit exe...
-IF NOT EXIST "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\i386\" (
-	MKDIR "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\i386\"
+ECHO -Copying %PACKAGE%32%d%.exe...
+IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
+	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
 )
-COPY /V /Y "bin32\%APPNAME%32%d%.exe" "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\i386\" /B
+COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
 
-ECHO -Copying 64bit exe...
-IF NOT EXIST "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\x86_64\" (
-	MKDIR "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\x86_64\"
+ECHO -Copying %PACKAGE%64%d%.exe...
+IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
+	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
 )
-COPY /V /Y "bin64\%APPNAME%64%d%.exe" "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\bin\x86_64\" /B
+COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
 
-ECHO -Copying Documentaton...
-IF NOT EXIST "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\docs\" (
-	IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\docs\"
+IF  %INSTALL_ALL% == 1  ECHO -Copying Documentaton...
+IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs\" (
+	IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs\"
 )
-SET DIST_DIR="%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\docs"
-SET DIST_SRC="..\..\distribution\platform-specific\windows"
+IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs
+IF  %INSTALL_ALL% == 1  SET DIST_SRC="..\..\distribution\platform-specific\windows"
 IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "%DIST_SRC%\Help" "%DIST_DIR%\help"
 IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\doc\html" "%DIST_DIR%\html"
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\CUI_README.txt" "%DIST_DIR%" /A
@@ -350,33 +380,155 @@ IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\LICENSE" "%DIST_DIR%\LICENSE.txt" /A
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\changes.txt" "%DIST_DIR%\ChangeLog.txt" /A
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\unix\AUTHORS" "%DIST_DIR%\AUTHORS.txt" /A
 
-ECHO -Copying Resources...
-IF NOT EXIST "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\resources\" (
-	IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\resources\"
+IF  %INSTALL_ALL% == 1  ECHO -Copying Resources...
+IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\" (
+	IF  %INSTALL_ALL% == 1  MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\"
 )
-SET DIST_DIR="%DIST_DIR_ROOT%\%APPNAME%-%VERSION%\resources"
+IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources
 IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
 IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
 IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
 IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
-IF NOT EXIST "%DIST_DIR%\config\" (
-	MKDIR "%DIST_DIR%\config\"
+
+SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
+SET __HOME__=%USERPROFILE%
+
+ECHO -Copying 64bit .Conf and .Ini files...
+IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\x86_64\" (
+	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\x86_64\"
 )
-COPY /V /Y "..\povray-win.conf" "%DIST_DIR%\config\povray.conf" /A
-COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\config\povray.ini" /A
+SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\x86_64
+SET __POVSYSDIR__=C:\Program Files\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
+COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
+SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
+:GENERATE x86_64 povray.conf settings file
+>>%genConfigFile%.
+>>%genConfigFile%  ; Default (hard coded) paths:
+>>%genConfigFile%  ; HOME        = %__HOME__%
+>>%genConfigFile%  ; INSTALLDIR  = %__POVSYSDIR__%
+>>%genConfigFile%  ; SYSCONF     = %__POVSYSDIR__%\resources\config\povray.conf
+>>%genConfigFile%  ; SYSINI      = %__POVSYSDIR__%\resources\config\povray.ini
+>>%genConfigFile%  ; USERCONF    = %%HOME%%\%__POVUSERDIR__%\config\povray.conf
+>>%genConfigFile%  ; USERINI     = %%HOME%%\%__POVUSERDIR__%\config\povray.ini
+>>%genConfigFile%.
+>>%genConfigFile%  ; This example shows how to qualify path names containing space(s):
+>>%genConfigFile%  ; read = "%%HOME%%\this\directory\contains space characters"
+>>%genConfigFile%.
+>>%genConfigFile%  ; You can use %%HOME%%, %%INSTALLDIR%% and $PWD (working directory) as the origin to define permitted paths:
+>>%genConfigFile%.
+>>%genConfigFile%  ; %%HOME%% is hard-coded to the $USER environment variable.
+>>%genConfigFile%  read* = "%%HOME%%\%__POVUSERDIR__%\config"
+>>%genConfigFile%.
+>>%genConfigFile%  read* = "%__POVSYSDIR__%\resources\include"
+>>%genConfigFile%  read* = "%__POVSYSDIR__%\resources\ini"
+>>%genConfigFile%  read* = "%%HOME%%\LDraw\lgeo\ar"
+>>%genConfigFile%  read* = "%%HOME%%\LDraw\lgeo\lg"
+>>%genConfigFile%  read* = "%%HOME%%\LDraw\lgeo\stl"
+>>%genConfigFile%.
+>>%genConfigFile%  ; %%INSTALLDIR%% is hard-coded to the default LPub3D installation path - see default paths above.
+>>%genConfigFile%.
+>>%genConfigFile%  ; The $PWD (working directory) is where LPub3D-Trace is called from.
+>>%genConfigFile%  read* = "..\..\distribution\ini"
+>>%genConfigFile%  read* = "..\..\distribution\include"
+>>%genConfigFile%  read* = "..\..\distribution\scenes"
+>>%genConfigFile%.
+>>%genConfigFile%  read+write* = .
+COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
+SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
+:GENERATE x86_64 povray.ini settings file
+>>%genConfigFile%.
+>>%genConfigFile%  ; Search path for #include source files or command line ini files not
+>>%genConfigFile%  ; found in the current directory.  New directories are added to the
+>>%genConfigFile%  ; search path, up to a maximum of 25.
+>>%genConfigFile%.
+>>%genConfigFile%  Library_Path="%__POVSYSDIR__%\resources"
+>>%genConfigFile%  Library_Path="%__POVSYSDIR__%\resources\ini"
+>>%genConfigFile%  Library_Path="%__POVSYSDIR__%\resources\include"
+>>%genConfigFile%.
+>>%genConfigFile%  ; File output type control.
+>>%genConfigFile%  ;     T    Uncompressed Targa-24
+>>%genConfigFile%  ;     C    Compressed Targa-24
+>>%genConfigFile%  ;     P    UNIX PPM
+>>%genConfigFile%  ;     N    PNG (8-bits per colour RGB)
+>>%genConfigFile%  ;     Nc   PNG ('c' bit per colour RGB where 5 ^<= c ^<= 16)
+>>%genConfigFile%.
+>>%genConfigFile%  Output_to_File=true
+>>%genConfigFile%  Output_File_Type=N8             ; (+/-Ftype)
+
+ECHO -Copying 32bit .Conf and .Ini files...
+IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\i386\" (
+	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\i386\"
+)
+SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\i386
+SET __POVSYSDIR__=C:\Program Files (x86)\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
+COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
+SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
+:GENERATE i386 povray.conf settings file
+>>%genConfigFile%.
+>>%genConfigFile%  ; Default (hard coded) paths:
+>>%genConfigFile%  ; HOME        = %__HOME__%
+>>%genConfigFile%  ; INSTALLDIR  = %__POVSYSDIR__%
+>>%genConfigFile%  ; SYSCONF     = %__POVSYSDIR__%\resources\config\povray.conf
+>>%genConfigFile%  ; SYSINI      = %__POVSYSDIR__%\resources\config\povray.ini
+>>%genConfigFile%  ; USERCONF    = %%HOME%%\%__POVUSERDIR__%\config\povray.conf
+>>%genConfigFile%  ; USERINI     = %%HOME%%\%__POVUSERDIR__%\config\povray.ini
+>>%genConfigFile%.
+>>%genConfigFile%  ; This example shows how to qualify path names containing space(s):
+>>%genConfigFile%  ; read = "%%HOME%%\this\directory\contains space characters"
+>>%genConfigFile%.
+>>%genConfigFile%  ; You can use %%HOME%%, %%INSTALLDIR%% and $PWD (working directory) as the origin to define permitted paths:
+>>%genConfigFile%.
+>>%genConfigFile%  ; %%HOME%% is hard-coded to the $USER environment variable.
+>>%genConfigFile%  read* = "%%HOME%%\%__POVUSERDIR__%\config"
+>>%genConfigFile%.
+>>%genConfigFile%  read* = "%__POVSYSDIR__%\resources\include"
+>>%genConfigFile%  read* = "%__POVSYSDIR__%\resources\ini"
+>>%genConfigFile%  read* = "%%HOME%%\LDraw\lgeo\ar"
+>>%genConfigFile%  read* = "%%HOME%%\LDraw\lgeo\lg"
+>>%genConfigFile%  read* = "%%HOME%%\LDraw\lgeo\stl"
+>>%genConfigFile%.
+>>%genConfigFile%  ; %%INSTALLDIR%% is hard-coded to the default LPub3D installation path - see default paths above.
+>>%genConfigFile%.
+>>%genConfigFile%  ; The $PWD (working directory) is where LPub3D-Trace is called from.
+>>%genConfigFile%  read* = "..\..\distribution\ini"
+>>%genConfigFile%  read* = "..\..\distribution\include"
+>>%genConfigFile%  read* = "..\..\distribution\scenes"
+>>%genConfigFile%.
+>>%genConfigFile%  read+write* = .
+COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
+SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
+:GENERATE i386 povray.ini settings file
+>>%genConfigFile%.
+>>%genConfigFile%  ; Search path for #include source files or command line ini files not
+>>%genConfigFile%  ; found in the current directory.  New directories are added to the
+>>%genConfigFile%  ; search path, up to a maximum of 25.
+>>%genConfigFile%.
+>>%genConfigFile%  Library_Path="%__POVSYSDIR__%\resources"
+>>%genConfigFile%  Library_Path="%__POVSYSDIR__%\resources\ini"
+>>%genConfigFile%  Library_Path="%__POVSYSDIR__%\resources\include"
+>>%genConfigFile%.
+>>%genConfigFile%  ; File output type control.
+>>%genConfigFile%  ;     T    Uncompressed Targa-24
+>>%genConfigFile%  ;     C    Compressed Targa-24
+>>%genConfigFile%  ;     P    UNIX PPM
+>>%genConfigFile%  ;     N    PNG (8-bits per colour RGB)
+>>%genConfigFile%  ;     Nc   PNG ('c' bit per colour RGB where 5 ^<= c ^<= 16)
+>>%genConfigFile%.
+>>%genConfigFile%  Output_to_File=true
+>>%genConfigFile%  Output_File_Type=N8             ; (+/-Ftype)
 :: Finish
 EXIT /b
 
 :PROJECT_MESSAGE
-SET OPTION=Build Graphic User Interface (GUI) solution...
-IF %1==1 SET OPTION=Build Console User Interface (CUI) project - Default...
+SET OPTION=%BUILD_LBL% Graphic User Interface (GUI) solution...
+IF %1==1 SET OPTION=%BUILD_LBL% Console User Interface (CUI) project - Default...
 ECHO.
 ECHO -%OPTION%
 EXIT /b
 
 :VERBOSE_MESSAGE
-SET STATE=Verbose (Debug) tracing is OFF - Default
-IF %1==1 SET STATE=Verbose (Debug) tracing is ON
+SET STATE=Verbose (%CONFIGURATION%) tracing is OFF - Default
+IF %1==1 SET STATE=Verbose (%CONFIGURATION%) tracing is ON
 ECHO.
 ECHO -%STATE%
 EXIT /b
@@ -393,12 +545,12 @@ IF NOT [%BUILD_CHK_MY_OUTPUT%]==[] (
 	SET BUILD_CHK_OUTPUT=%BUILD_CHK_POV_FILE%.%PL%bit.png
 )
 SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%" %BUILD_CHK_PARAMS%
-ECHO --Command: %APPNAME%%PL%%d%.exe %BUILD_CHK_COMMAND%
+ECHO   RUN_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
 ECHO.
 IF EXIST "%BUILD_CHK_OUTPUT%" (
 	DEL /Q "%BUILD_CHK_OUTPUT%"
 )
-bin%PL%\%APPNAME%%PL%%d%.exe %BUILD_CHK_COMMAND%
+bin%PL%\%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%
 EXIT /b
 
 :PLATFORM_ERROR
@@ -457,8 +609,18 @@ ECHO     - Local POV-Ray git repository
 ECHO However, you are free to reconfigue this script to use different components.
 ECHO.
 ECHO Usage:
+ECHO.
+ECHO Help...
 ECHO autobuild [ -help ]
-ECHO autobuild [ -allcui ^| x86 ^| x86_64 ^| ] [ -allins ^| -run ^| -rel ^| -avx ^| sse2 ^| -ins ^| -chk ] [-cui ^| -gui] [ -verbose ]
+ECHO.
+ECHO First position flags...
+ECHO autobuild [ x86 ^| x86_64 ^| -allcui ^| -run ^| -rbld ^| -verbose ^| -help]
+ECHO.
+ECHO All flags, 1st, 2nd, 3rd and 4th...
+ECHO autobuild [ x86 ^| x86_64 ^| -allcui ^| -run ^| -rbld ^| -verbose ^| -help]
+ECHO           [ -rel ^| -dgb ^|-ins ^| -allins ^| -chk ^| -run ^| -rbld ^| -avx ^| sse2]
+ECHO           [-cui ^| -gui]
+ECHO           [ -verbose ]
 ECHO.
 ECHO Build all CUI projects and deploy all artefacts as a 3rd party installation bundle
 ECHO autobuild -allcui -allins
@@ -491,8 +653,10 @@ ECHO  x86_64.....1.....Platform flag      [Default=On ] Build 64bit architecture
 ECHO  -allcui....1.....Project flag       [Default=On ] Build and install 32bit, 64bit, CUI configurations.
 ECHO  -allins....2.....Project flag       [Default=Off] Install all distribution artefacts as LPub3D 3rd party installation.
 ECHO  -ins.......2.....Project flag       [Default=On ] Install subset of distribution artefacts as LPub3D 3rd party installation.
-ECHO  -run.......2,1...Project flag       [Default=Off] Run an image redering check - must be preceded by x86 or x86_64 flag
-EChO  -rel.......2.....Configuration flag [Default=On ] Release, no extensions (must be preceded by platform flag).
+ECHO  -run.......2,1...Project flag       [Default=Off] Run an image redering check - must be preceded by x86 or x86_64 flag.
+ECHO  -rbld......2,1...Project flag       [Default=Off] Rebuild project - clane and rebuild all project components.
+EChO  -rel.......2.....Configuration flag [Default=On ] Release build.
+EChO  -dgb.......2.....Configuration flag [Default=Off] Debug build.
 ECHO  -avx.......2.....Configuraiton flag [Default=Off] AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
 ECHO  -sse2......2.....Configuration flag [Default=Off] SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
 ECHO  -chk.......2.....Project flag       [Default=On ] Build and run an image redering check.
@@ -506,4 +670,5 @@ ECHO If no flag is supplied, 32bit platform, Release Configuration, CUI project 
 EXIT /b
 
 :END
+EXIT /b
 :: Done
