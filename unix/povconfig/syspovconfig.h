@@ -350,7 +350,7 @@ const int NULL=0;
 
 /* Distribution strings */
 #define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE " is a modified, unofficial distribution of"
-#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 " Persistence of Vision Ray Tracer ('POV-Ray') version 3.8 compiled by:"
+#define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 " Persistence of Vision Ray Tracer ('POV-Ray') version " VERSION_BASE " compiled by:"
 /* Description strings */
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE " is developed by maintained by Trevor SANDY."
 /* Copyright string. */

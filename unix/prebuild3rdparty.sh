@@ -545,26 +545,27 @@ case "$1" in
 		's/C:.POVRAY3 drive and/__POVLIBDIR__/' > $ini.in
 	cat << pbEOF >> $ini.in
 
-;; Search path for #include source files or command line ini files not
-;; found in the current directory.  New directories are added to the
-;; search path, up to a maximum of 25.
+; Search path for #include source files or command line ini files not
+; found in the current directory.  New directories are added to the
+; search path, up to a maximum of 25.
 
 Library_Path="__POVLIBDIR__"
 Library_Path="__POVLIBDIR__/ini"
 Library_Path="__POVLIBDIR__/include"
 
-;; File output type control.
-;;     T    Uncompressed Targa-24
-;;     C    Compressed Targa-24
-;;     P    UNIX PPM
-;;     N    PNG (8-bits per colour RGB)
-;;     Nc   PNG ('c' bit per colour RGB where 5 <= c <= 16)
+; File output type control.
+;     T    Uncompressed Targa-24
+;     C    Compressed Targa-24
+;     P    UNIX PPM
+;     N    PNG (8-bits per colour RGB)
+;     Nc   PNG ('c' bit per colour RGB where 5 <= c <= 16)
 
 Output_to_File=true
-Output_File_Type=N8             ;; (+/-Ftype)
+Output_File_Type=N8             ; (+/-Ftype)
 pbEOF
 	;;
 esac
+
 
 ###
 ### ../povray.conf.in (template for ../povray.conf)
@@ -585,7 +586,7 @@ case "$1" in
   *)
   # __HOME__, __POVUSER__, __POVUSERDIR__ and __POVSYSDIR__ will be updated at make time.
   echo "Create $conf.in"
-  cat povray.conf | sed \
+  cat ../distribution/povray.conf | sed \
     's/C:.POVRAY3 drive and/__POVSYSDIR__/' > $conf.in
   cat << pbEOF >> $conf.in
 

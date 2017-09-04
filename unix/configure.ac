@@ -47,8 +47,7 @@ AC_PREREQ([2.69])
 # Inits.
 
 # The file VERSION must contain only the version string MAJOR.MINOR(.PATCHLEVEL)(-PRERELEASE)
-#AC_INIT([LPub3D-Trace],[m4_normalize(m4_include(VERSION))],[https://github.com/trevorsandy/povray/issues],[lpub3d_trace_cui])
-AC_INIT([LPub3D-Trace],[m4_esyscmd_s([cat VERSION])],[https://github.com/trevorsandy/povray/issues],[lpub3d_trace_cui])
+AC_INIT([LPub3D-Trace CUI],[m4_esyscmd_s([cat VERSION])],[https://github.com/trevorsandy/povray/issues],[lpub3d_trace_cui])
 
 # VERSION_BASE is then defined as MAJOR.MINOR
 VERSION_BASE=`echo $PACKAGE_VERSION | sed 's,\([[0-9]]*.[[0-9]]*\).*,\1,g'`
