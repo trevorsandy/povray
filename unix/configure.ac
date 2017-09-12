@@ -4,7 +4,7 @@
 # Process this file with autoconf to produce the configure script.
 #
 # ---------------------------------------------------------------------------
-# LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+# LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 # specially for LPub3D - An LDraw Building Instruction Editor.
 # Copyright 2017 by Trevor SANDY.
 #
@@ -21,7 +21,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #---------------------------------------------------------------------------
-# LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+# LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
 # Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
 # in turn, based on the popular DKB raytracer version 2.12.
 # DKBTrace was originally written by David K. Buck.
@@ -35,7 +35,7 @@
 # $Log$
 ##############################################################################
 
-# configure.ac for the source distribution of LPub3D-Trace 3.7 for UNIX
+# configure.ac for the source distribution of LPub3D-Trace 3.8 for UNIX
 # Written by Nicolas Calimet <nicolas.calimet@povray.org>
 # Modified by Trevor SANDY <trevor.sandy@gmail.com>
 # Report bugs via https://github.com/trevorsandy/povray/issues/
@@ -192,6 +192,39 @@ case "$build" in
   ;;
 esac
 AM_CONDITIONAL([MACOS_BUILD], [test x"$ax_MacOS_build" = x"yes"])
+
+# Enable 32 or 64 bit build - except MacOS
+if ! test x"$ax_MacOS_build" = x"yes"; then
+  AC_ARG_ENABLE([32-bit],
+      [AS_HELP_STRING([--enable-32-bit],
+          [build 32-bit libraries @<:@default=auto@:>@])],
+      [enable_32bit="$enableval"],
+      [enable_32bit=auto]
+  )
+  if test "x$enable_32bit" = xyes; then
+      if test "x$GCC" = xyes; then
+          CFLAGS="$CFLAGS -m32"
+          ARCH_FLAGS="$ARCH_FLAGS -m32"
+      fi
+      if test "x$GXX" = xyes; then
+          CXXFLAGS="$CXXFLAGS -m32"
+      fi
+  fi
+  AC_ARG_ENABLE([64-bit],
+      [AS_HELP_STRING([--enable-64-bit],
+          [build 64-bit libraries @<:@default=auto@:>@])],
+      [enable_64bit="$enableval"],
+      [enable_64bit=auto]
+  )
+  if test "x$enable_64bit" = xyes; then
+      if test "x$GCC" = xyes; then
+          CFLAGS="$CFLAGS -m64"
+      fi
+      if test "x$GXX" = xyes; then
+          CXXFLAGS="$CXXFLAGS -m64"
+      fi
+  fi
+fi
 
 ###############################################################################
 
@@ -1560,7 +1593,13 @@ Compilation settings:
   Built/Optimized for: $pov_built_for
   Compiler vendor:     $pov_compiler_vendor
   Compiler version:    $pov_compiler_version
-  Compiler flags:      $CXXFLAGS
+  CXX Compiler flags:  $CXXFLAGS
+  CPP Compiler flags:  $CPPFLAGS
+  C Compiler flags:    $CFLAGS
+  Linker flags:        $LDFLAGS
+  CC parameters:       $CC
+  CXX parameters:      $CXX
+  LD parameters:       $LD
 
 Type 'make' to build $PACKAGE_NAME
 Type 'make check' to build $PACKAGE_NAME and run a test render.
@@ -1592,6 +1631,12 @@ Compilation settings:
   Compiler vendor:     $pov_compiler_vendor
   Compiler version:    $pov_compiler_version
   Compiler flags:      $CXXFLAGS
+  CPP Compiler flags:  $CPPFLAGS
+  C Compiler flags:    $CFLAGS
+  Linker flags:        $LDFLAGS
+  CC parameters:       $CC
+  CXX parameters:      $CXX
+  LD parameters:       $LD
 
 Type 'make' to build $PACKAGE_NAME
 Type 'make check' to build $PACKAGE_NAME and run a test render.
