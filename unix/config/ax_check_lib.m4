@@ -62,7 +62,21 @@ int main (void)
               ax_check_lib="unknown"
               AC_MSG_RESULT([$ax_check_lib])
             ],
-            [AC_MSG_RESULT([cross-compiling, forced])]
+            [
+              if test x"$1" = x"z"; then
+                ax_config_lib=$1lib
+              else
+                ax_config_lib=lib$1
+              fi
+              ax_check_lib_version=`pkg-config --modversion $ax_config_lib 2>&1 | tail -1 | grep -v "No package"`
+              if test x"$ax_check_lib_version" != x""; then
+                AX_COMPARE_VERSION([$ax_check_lib_version], [ge], [$2], [ax_check_lib="ok"], [ax_check_lib="bad"])
+                AC_MSG_RESULT([cross-compiling... $ax_check_lib_version, $ax_check_lib])
+              else
+                ax_check_lib="unknown"
+                AC_MSG_RESULT([cross-compiling... $ax_check_lib])
+              fi
+            ]
           )  # AC_RUN_IFELSE
         ],
         [ax_check_lib="no headers"]

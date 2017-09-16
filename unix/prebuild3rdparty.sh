@@ -454,14 +454,17 @@ AM_CPPFLAGS = \\
 	-I\$(top_srcdir)/vfe/unix
 
 LDADD =
-if USE_SDL2
-# Set SDL2 lib and cflags arguments
+if USE_SDL2_SRC
+# Set SDL2 static lib and cflags arguments
+sdl2_builddir = \$(top_builddir)/libraries/sdl2
 sdl2_srcdir = \$(top_srcdir)/libraries/sdl2
-AM_CPPFLAGS += \$(shell \$(sdl2_srcdir)/sdl2-config --cflags 2> /dev/null)
-LIBS += \$(shell \$(sdl2_srcdir)/sdl2-config --static-libs 2> /dev/null)
+sdl2_libs_cfg_in := \$(shell \$(sdl2_builddir)/sdl2-config --static-libs 2> /dev/null)
+sdl2_libs_config := \$(filter-out -lSDL2,\$(sdl2_libs_cfg_in))
+AM_CPPFLAGS += -I\$(sdl2_builddir)/include -I\$(sdl2_srcdir)/include -D_REENTRANT
+LIBS += \$(sdl2_libs_config)
 LDADD += \\
-	\$(sdl2_srcdir)/build/lib/libSDL2.a \\
-	\$(sdl2_srcdir)/build/lib/libSDL2main.a
+	\$(sdl2_builddir)/build/lib/libSDL2.a \\
+	\$(sdl2_builddir)/build/lib/libSDL2main.a
 endif
 
 # Libraries to link with.
@@ -651,9 +654,6 @@ case "$1" in
 # Makefile.am for the source distribution of LPub3D-Trace $pov_version_base for UNIX
 # Please report bugs to $pov_config_bugreport
 
-# Build OS from configure
-pov_build_os = @build_os@
-
 # Directories.
 povbase = \$(prefix)/@PACKAGE@-@VERSION_BASE@
 povlibdir = \$(povbase)/resources
@@ -663,7 +663,7 @@ povmandir = \$(povlibdir)/man
 povuser = \$(povlibdir)
 povconfuser = \$(povuser)/config
 povbinbase = \$(povbase)/bin
-povbin = \$(povbinbase)/@build_cpu@
+povbin = \$(povbinbase)/@host_platform@
 povinstall = \$(top_builddir)/install.log
 povowner = @povowner@
 povgroup = @povgroup@
@@ -682,7 +682,7 @@ lpub3dsysdir = \$(sysapppath)/@PACKAGE@-@VERSION_BASE@
 lpub3dlibdir = \$(lpub3dsysdir)/resources
 
 # Directories to build.
-SUBDIRS = source vfe platform unix 
+SUBDIRS = source vfe platform unix
 
 # Additional files to distribute.
 EXTRA_DIST = \\
@@ -701,19 +701,13 @@ pov_xwin_msg = @pov_xwin_msg@
 # This is meant to run before 'make install'.
 check: all
 	@echo "Executing render output file check..."; \\
-	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A
+	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\
+	+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes
 	@echo "Executing the render display window check..."; \\
 	case "\$(pov_xwin_msg)" in \\
 		*enabled*) \\
-			case "\$(pov_build_os)" in \\
-				*darwin*) \\
-					echo "SDL display window not working on MacOS, render display is disabled"; \\
-					\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f -d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include; \\
-				;; \\
-				*) \\
-					\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/include; \\
-				;; \\
-			esac \\
+		\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 \\
+		+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes; \\
 		;; \\
 	esac
 
@@ -779,7 +773,7 @@ install-data-local:
 	\$(INSTALL_DATA) \$(top_srcdir)/povray.conf \$(DESTDIR)\$(povconfuser)/povray.conf && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.conf && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.conf && echo "\$(DESTDIR)\$(povconfuser)/povray.conf" >> \$(povinstall); \\
 	\$(INSTALL_DATA) \$(top_builddir)/povray.ini \$(DESTDIR)\$(povconfuser)/povray.ini && chown \$(povowner) \$(DESTDIR)\$(povconfuser)/povray.ini && chgrp \$(povgroup) \$(DESTDIR)\$(povconfuser)/povray.ini && echo "\$(DESTDIR)\$(povconfuser)/povray.ini" >> \$(povinstall)
 
-# Move executable to 3rd party bin location 
+# Move executable to 3rd party bin location
 # Set doc, man, conf and script file permissions.
 install-data-hook:
 	@echo "Creating 3rdParty distribution bin directory..."; \\
@@ -1079,15 +1073,21 @@ case "$1" in
 	cat << pbEOF > $makefile.in
 # Makefile to build and setup the SDL library
 
+# This configuration uses custom libdir and includedir paths
+# filled during make e.g. "make exec_prefix=/foo" or
+# using AM_MAKEFLAGS = "exec_prefix=/foo" when calling from
+# another makefile.
 top_builddir = .
 srcdir  = @srcdir@
 objects = build
-gen = gen
-prefix  = @srcdir@/\$(objects)
-exec_prefix = \$(prefix)
-libdir  = \$(exec_prefix)/lib
-includedir = \$(exec_prefix)/include
+gen     = gen
+prefix  = @prefix@
+exec_prefix =  @exec_prefix@
+libdir  = \${exec_prefix}/\$(objects)/lib
+includedir = \${exec_prefix}/\$(objects)/include
 auxdir  = @ac_aux_dir@
+
+
 
 @SET_MAKE@
 SHELL   = @SHELL@
@@ -1099,7 +1099,7 @@ LDFLAGS = @BUILD_LDFLAGS@
 EXTRA_LDFLAGS = @EXTRA_LDFLAGS@
 LIBTOOL = @LIBTOOL@
 INSTALL = @INSTALL@
-AR  = @AR@
+AR      = @AR@
 RANLIB  = @RANLIB@
 WINDRES = @WINDRES@
 LN_S    = @LN_S@
@@ -1256,7 +1256,6 @@ distclean: clean
 pbEOF
 	;;
 esac
-
 
 
 ##### Supporting libraries: PNG ###############################################
@@ -1702,18 +1701,25 @@ AM_CPPFLAGS = \\
 	-I\$(top_srcdir)/unix \\
 	-I\$(top_srcdir)/source
 
-if SDL2_MACOS_BUILD
-# Update AM_MAKEFLAGS/CC with MACOS SDK options
-AM_MAKEFLAGS = "CC=@CC@"
+if USE_SDL2_SRC
+# Build the SDL2 library - if specified - before unix subdir.
+AM_MAKEFLAGS =
+
+sdl2_builddir = \$(top_builddir)/libraries/sdl2
+sdl2_abs_builddir = \$(abs_top_builddir)/libraries/sdl2
+
+if USE_SDL2_SRC_MACOS
+# Update AM_MAKEFLAGS/CC with MACOS SDK options as required
+AM_MAKEFLAGS += "CC=@CC@"
 endif
 
-if USE_SDL2
-# Build the SDL2 library - if specified - before unix subdir.
-sdl2_srcdir = \$(top_srcdir)/libraries/sdl2
-all-am: sdlmacosbuild-local
-sdlmacosbuild-local:
-	@echo "Building SDL at \$(sdl2_srcdir)..."
-	cd \$(sdl2_srcdir) && \$(MAKE) \$(AM_MAKEFLAGS)
+# Install where built to enable cross-compiling
+AM_MAKEFLAGS += "exec_prefix=\$(sdl2_abs_builddir)"
+
+all-am: sdl-build-from-source-local
+sdl-build-from-source-local:
+	@echo "Building SDL from source at \$(sdl2_abs_builddir)..."
+	cd \$(sdl2_builddir) && \$(MAKE) \$(AM_MAKEFLAGS)
 endif
 
 # Extra definitions for compiling.

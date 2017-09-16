@@ -70,7 +70,23 @@ int main (void)
               ax_check_libtiff="unknown"
               AC_MSG_RESULT([$ax_check_libtiff])
             ],
-            [AC_MSG_RESULT([cross-compiling, forced])]
+            [
+              ax_check_libtiff_version=""
+              for ax_config_lib in "libtiff" "libtiff-4"
+              do
+                ax_check_libtiff_version=`pkg-config --modversion $ax_config_lib 2>&1 | tail -1 | grep -v "No package"`
+                if test x"$ax_check_libtiff_version" != x""; then
+                  AX_COMPARE_VERSION([$ax_check_libtiff_version], [ge], [$2], [ax_check_libtiff="ok"], [ax_check_libtiff="bad"])
+                  AC_MSG_RESULT([cross-compiling... $ax_check_libtiff_version, $ax_check_libtiff])
+                  break
+                else
+                  ax_check_libtiff="unknown"
+                fi
+              done
+              if test x"$ax_check_libtiff" = x"unknown"; then
+                AC_MSG_RESULT([cross-compiling... $ax_check_libtiff])
+              fi
+            ]
           )  # AC_RUN_IFELSE
         ],
         [ax_check_libtiff="no headers"]

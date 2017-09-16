@@ -244,6 +244,12 @@ $RECYCLE.BIN/
 # Files created by make in various subdirectories
 .dirstamp
 
+# =========================================
+# POV-Ray Cross-compile generated artefacts
+# =========================================
+
+/build_32bit/*
+
 # =====================
 # POV-Ray Miscellaneous
 # =====================
@@ -276,3 +282,4 @@ $RECYCLE.BIN/
 /.settings/*
 /unix/build.sh
 /unix/restore.sh
+

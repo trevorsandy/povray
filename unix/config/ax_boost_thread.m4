@@ -95,7 +95,6 @@ AC_DEFUN([AX_BOOST_THREAD],
 
 			AC_DEFINE(HAVE_BOOST_THREAD,,[define if the Boost::Thread library is available])
             BOOSTLIBDIR=`echo $BOOST_LDFLAGS | sed -e 's/@<:@^\/@:>@*//'`
-
 			LDFLAGS_SAVE=$LDFLAGS
                         case "x$host_os" in
                           *bsd* )
@@ -108,7 +107,7 @@ AC_DEFUN([AX_BOOST_THREAD],
                      ax_lib=${libextension}
 				    AC_CHECK_LIB($ax_lib, exit,
                                  [BOOST_THREAD_LIB="-l$ax_lib"; AC_SUBST(BOOST_THREAD_LIB) link_thread="yes"; break],
-                                 [link_thread="no"])
+                                 [link_thread="no"])          
 				done
                 if test "x$link_thread" != "xyes"; then
                 for libextension in `ls -r $BOOSTLIBDIR/boost_thread* 2>/dev/null | sed 's,.*/,,' | sed 's,\..*,,'`; do

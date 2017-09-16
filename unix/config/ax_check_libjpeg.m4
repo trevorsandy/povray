@@ -66,7 +66,25 @@ int main (void)
               ax_check_libjpeg="unknown"
               AC_MSG_RESULT([$ax_check_libjpeg])
             ],
-            [AC_MSG_RESULT([cross-compiling, forced])]
+            [
+              AC_COMPILE_IFELSE(
+                [
+                  AC_LANG_PROGRAM([[
+#include <stdio.h>
+#include "jpeglib.h"
+                  ]],
+                  [[
+	                fprintf (stderr, "%d\n", JPEG_LIB_VERSION);
+	                return 0;
+                  ]])
+                ],
+                ax_check_libjpeg_version=`eval $ac_try 2>&1`
+                AX_COMPARE_VERSION([$ax_check_libjpeg_version], [ge], [$2], [ax_check_libjpeg="ok"], [ax_check_libjpeg="bad"])
+                AC_MSG_RESULT([cross-compiling... $ax_check_libjpeg_version $ax_check_libjpeg]),
+                ax_check_libjpeg="unknown"
+                AC_MSG_RESULT([cross-compiling... $ax_check_libjpeg])
+              ) # AC_COMPILE_IFELSE
+            ]
           )  # AC_RUN_IFELSE
         ],
         [ax_check_libjpeg="no headers"]

@@ -84,8 +84,11 @@ required_libz_version="1.2.1"
 required_libpng_version="1.2.5"
 required_libjpeg_version="6b"
 required_libtiff_version="3.6.1"
-required_libsdl_version="2.0.5"
+required_libsdl_version="2.0.4"
 required_openexr_version="1.2"
+
+# Built-in libsdl2 source version
+libsdl_source_version="2.0.5"
 
 # Supported options.
 # AX_ARG_ENABLE([--enable-avx2],             [enable AVX2 features and compiler optmization])
@@ -193,38 +196,11 @@ case "$build" in
 esac
 AM_CONDITIONAL([MACOS_BUILD], [test x"$ax_MacOS_build" = x"yes"])
 
-# Enable 32 or 64 bit build - except MacOS
-if ! test x"$ax_MacOS_build" = x"yes"; then
-  AC_ARG_ENABLE([32-bit],
-      [AS_HELP_STRING([--enable-32-bit],
-          [build 32-bit libraries @<:@default=auto@:>@])],
-      [enable_32bit="$enableval"],
-      [enable_32bit=auto]
-  )
-  if test "x$enable_32bit" = xyes; then
-      if test "x$GCC" = xyes; then
-          CFLAGS="$CFLAGS -m32"
-          ARCH_FLAGS="$ARCH_FLAGS -m32"
-      fi
-      if test "x$GXX" = xyes; then
-          CXXFLAGS="$CXXFLAGS -m32"
-      fi
-  fi
-  AC_ARG_ENABLE([64-bit],
-      [AS_HELP_STRING([--enable-64-bit],
-          [build 64-bit libraries @<:@default=auto@:>@])],
-      [enable_64bit="$enableval"],
-      [enable_64bit=auto]
-  )
-  if test "x$enable_64bit" = xyes; then
-      if test "x$GCC" = xyes; then
-          CFLAGS="$CFLAGS -m64"
-      fi
-      if test "x$GXX" = xyes; then
-          CXXFLAGS="$CXXFLAGS -m64"
-      fi
-  fi
-fi
+# propagate the host platform
+AS_IF([ test x"$host_cpu" = x"i686" ],
+[ host_platform="i386"],
+[ host_platform="$host_cpu"])
+AC_SUBST([host_platform])
 
 ###############################################################################
 
@@ -362,8 +338,9 @@ ACX_PTHREAD
 CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"  # append
 LIBS="$LIBS $PTHREAD_CFLAGS $PTHREAD_LIBS"  # append
 
-# Boost; required library
-# the following macro stops with error when boost is not found
+# Boost; required libraries
+# the following macro stops with error when boost is not found.
+# also force boost_system lib when cross-compiling b/c test passes without it
 AX_BOOST_BASE([$required_libboost_version])
 AX_BOOST_THREAD
 if test x"$ax_cv_boost_thread" != x"yes"; then
@@ -390,7 +367,23 @@ AC_RUN_IFELSE(
     BOOST_THREAD_LIB="$BOOST_THREAD_LIB $extralib"
     boost_thread_links=1
   ],,
-  [AC_MSG_RESULT([cross-compiling])]  # FIXME
+  [
+  	LIBS="$LIBS -lboost_system"
+    AC_COMPILE_IFELSE(
+      [AC_LANG_PROGRAM([[
+#include <boost/thread/thread.hpp>
+        ]],
+        [[boost::defer_lock_t(); return 0;]])],
+      [
+        AC_MSG_RESULT([cross-compiling... yes])
+        BOOST_THREAD_LIB="$BOOST_THREAD_LIB -lboost_system"
+        boost_thread_links=1
+      ],
+      [
+        AC_MSG_RESULT([cross-compiling... no])
+      ]
+    )
+  ]
 )
   if test $boost_thread_links = '1'; then
     break
@@ -624,53 +617,45 @@ else
     if test x"$with_libsdl" = x"no"; then
       AC_MSG_RESULT([no])
 
-    elif test x"$with_libsdl" = x"yes"; then # libsdl built from source
-      AC_MSG_RESULT([yes])
+    elif test x"$with_libsdl" = x"yes"; then # build libsdl from source
+      AC_MSG_RESULT([yes, build from source])
+      pov_sdl_version=$libsdl_source_version
 
-      pov_save_cppflags="$CPPFLAGS"					  # save
-      CPPFLAGS="-I./libraries/sdl2/include $CPPFLAGS"  # append
+      if test x"$build" = x"$host"; then
+	    pov_sdl_h="./libraries/sdl2/include/SDL.h"
+	  else
+	    pov_sdl_h="../libraries/sdl2/include/SDL.h"  # (cross compiling)
+	  fi
 
-      AC_CHECK_HEADERS([SDL.h],
-      [
-        AS_IF([test x"$ac_cv_header_SDL_h" = x"yes"],
-        [
-          AC_MSG_CHECKING([for SDL v$required_libsdl_version])
-          AC_EGREP_CPP([version_confirmed],
-          [
-#include <SDL.h>
-#if defined(SDL_COMPILEDVERSION) && SDL_COMPILEDVERSION == 2005
-version_confirmed
-#endif
-          ],
-          [
-            AC_MSG_RESULT([yes])
-            pov_check_libsdl="ok"
-          ],
-          [
-            AC_MSG_RESULT([no])
-            pov_check_libsdl="ko"
-          ])
-        ])
-      ])
+      AC_MSG_CHECKING([for SDL $pov_sdl_version source files])
+      AS_IF([ test -f "$pov_sdl_h" ],
+	  [
+	    AC_MSG_RESULT([SDL.h found])
+	    pov_check_libsdl_src="ok"
+	  ],
+	  [
+	    AC_MSG_RESULT([SDL.h not found])
+	    pov_check_libsdl_src="ko"
+	  ])
 
-      if test x"$pov_check_libsdl" = x"ok"; then
+      if test x"$pov_check_libsdl_src" = x"ok"; then
         AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
       fi
 
-    else                        # check if libsdl is installed
-      AC_MSG_RESULT([yes])
+    else                        # use pre-compiled libsdl
+      AC_MSG_RESULT([yes, use binary package])
+      pov_sdl_version=$required_libsdl_version
 
-      AX_CHECK_LIBSDL([$required_libsdl_version])
+      AX_CHECK_LIBSDL([$pov_sdl_version])
 
     fi  # check libsdl
 
-    if test x"$ax_check_libsdl" != x"ok" && test x"$pov_check_libsdl" != x"ok"; then
+    if test x"$ax_check_libsdl" != x"ok" && test x"$pov_check_libsdl_src" != x"ok"; then
       AC_MSG_WARN([the preview display is disabled])
       AC_DEFINE([LIBSDL_MISSING], [], [Don't use SDL.])
-      CPPFLAGS="$pov_save_cppflags" # restore
       pov_xwin_msg="disabled"
     else
-      pov_xwin_msg="$pov_xwin_msg (using SDL v$required_libsdl_version)"
+      pov_xwin_msg="$pov_xwin_msg (using SDL v$pov_sdl_version)"
     fi
 
   fi
@@ -678,9 +663,9 @@ version_confirmed
 fi  # with_cygwin_dll
 
 # build libsdl from source conditionals
-AM_CONDITIONAL([USE_SDL2], [test x"$pov_check_libsdl" = x"ok"])
-AM_CONDITIONAL([SDL2_MACOS_BUILD], [test x"$ax_MacOS_build" = x"yes" && test x"$pov_check_libsdl" = x"ok"])
-AM_COND_IF([SDL2_MACOS_BUILD], [AM_EXTRA_RECURSIVE_TARGETS([sdlmacosbuild])], [])
+AM_CONDITIONAL([USE_SDL2_SRC], [test x"$pov_check_libsdl_src" = x"ok"])
+AM_CONDITIONAL([USE_SDL2_SRC_MACOS], [test x"$ax_MacOS_build" = x"yes" && test x"$pov_check_libsdl_src" = x"ok"])
+AM_COND_IF([USE_SDL2_SRC], [AM_EXTRA_RECURSIVE_TARGETS([sdl-build-from-source])], [])
 
 # MacOS SDK
 
@@ -1495,7 +1480,7 @@ AC_CONFIG_FILES([\
 ])
 
 # configure SDL2 built-in library
-AM_COND_IF([USE_SDL2], [AC_CONFIG_SUBDIRS([libraries/sdl2])])
+AM_COND_IF([USE_SDL2_SRC], [AC_CONFIG_SUBDIRS([libraries/sdl2])])
 
 ###############################################################################
 
@@ -1599,7 +1584,6 @@ Compilation settings:
   Linker flags:        $LDFLAGS
   CC parameters:       $CC
   CXX parameters:      $CXX
-  LD parameters:       $LD
 
 Type 'make' to build $PACKAGE_NAME
 Type 'make check' to build $PACKAGE_NAME and run a test render.
@@ -1608,7 +1592,7 @@ Type 'make install' to install $PACKAGE_NAME on your system.
 $PACKAGE_NAME will be packaged for an LPub3D 3rd party installation.
 
 The $PACKAGE_NAME components will be installed in the following directories.
-  Program (executable):       ${povbindir}/$PACKAGE-$VERSION_BASE/bin/$build_cpu
+  Program (executable):       ${povbindir}/$PACKAGE-$VERSION_BASE/bin/$host_platform
   System configuration files: ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/config
   User configuration files:   ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/config
   Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/include
@@ -1636,7 +1620,6 @@ Compilation settings:
   Linker flags:        $LDFLAGS
   CC parameters:       $CC
   CXX parameters:      $CXX
-  LD parameters:       $LD
 
 Type 'make' to build $PACKAGE_NAME
 Type 'make check' to build $PACKAGE_NAME and run a test render.
