@@ -60,11 +60,12 @@ namespace vfePlatform
         UnixOptionsProcessor::Option_Info("general", "help", "off", false, "--help|-help|-h|-?", "", "display usage information"),
         UnixOptionsProcessor::Option_Info("general", "temppath", "", true, "", "POV_TEMP_DIR", "directory for temporary files"),
         UnixOptionsProcessor::Option_Info("general", "version", "off", false, "--version|-version|--V", "", "display program version"),
-        UnixOptionsProcessor::Option_Info("general", "benchmark", "off", false, "--benchmark|-benchmark", "", "run the standard " PACKAGE " benchmark"),
+        UnixOptionsProcessor::Option_Info("general", "generation", "off", false, "--generation", "", "display program generation (short version number)"),
+        UnixOptionsProcessor::Option_Info("general", "benchmark", "off", false, "--benchmark|-benchmark", "", "run the standard POV-Ray benchmark"),
         UnixOptionsProcessor::Option_Info("", "", "", false, "", "", "") // has to be last
     };
 
-    // based on 3.6 unix_create_globals()
+    // based on v3.6 unix_create_globals()
     UnixOptionsProcessor::UnixOptionsProcessor(vfeSession *session) :
         m_Session(session)
     {
@@ -163,6 +164,8 @@ namespace vfePlatform
 
     void UnixOptionsProcessor::PrintOptions(void)
     {
+        // TODO -- GNU/Linux customs would be to print to stdout (among other differences).
+
         cerr << endl;
         cerr << "Platform specific command line options:" << endl;
 
@@ -308,7 +311,7 @@ namespace vfePlatform
             }
 
             // command line options:
-            // based on 3.6 XWIN_init_povray()
+            // based on v3.6 XWIN_init_povray()
             if ((*iter).CmdOption != "")
             {
                 int oargc = *argc;
@@ -379,7 +382,7 @@ namespace vfePlatform
         (*argc)--;
     }
 
-    // based on 3.6 UNIX_getcwd()
+    // based on v3.6 UNIX_getcwd()
     string UnixOptionsProcessor::unix_getcwd(void)
     {
 #ifdef HAVE_GETCWD
@@ -421,7 +424,7 @@ namespace vfePlatform
         return s;
     }
 
-    // based on 3.6 unix_basename()
+    // based on v3.6 unix_basename()
     string UnixOptionsProcessor::basename(const string &path)
     {
         if(path.length() < 2) // less than two characters
@@ -437,7 +440,7 @@ namespace vfePlatform
         return s;
     }
 
-    // based on 3.6 unix_dirname()
+    // based on v3.6 unix_dirname()
     string UnixOptionsProcessor::dirname(const string &path)
     {
         if(path.length() < 2)  // less than two characters
@@ -453,7 +456,7 @@ namespace vfePlatform
         return s;
     }
 
-    // based on 3.6 unix_readlink()
+    // based on v3.6 unix_readlink()
     string UnixOptionsProcessor::unix_readlink(const string &path)
     {
 #ifdef HAVE_READLINK
@@ -502,7 +505,7 @@ namespace vfePlatform
 #endif
     }
 
-    // based on 3.6 UNIX_canonicalize_path()
+    // based on v3.6 UNIX_canonicalize_path()
     string UnixOptionsProcessor::CanonicalizePath(const string &path)
     {
         int   i;
@@ -606,7 +609,7 @@ namespace vfePlatform
         return s;
     }
 
-    // based on 3.6 pre_process_conf_line()
+    // based on v3.6 pre_process_conf_line()
     string UnixOptionsProcessor::pre_process_conf_line(const string &input)
     {
         string s = boost::trim_copy(input);
@@ -622,7 +625,7 @@ namespace vfePlatform
         return s;
     }
 
-    // based on 3.6 add_permitted_path()
+    // based on v3.6 add_permitted_path()
     void UnixOptionsProcessor::add_permitted_path(list<UnixPath> &paths, const string &input, const string &conf_name, unsigned long line_number)
     {
         char quote = 0;
@@ -697,7 +700,7 @@ namespace vfePlatform
             );
     }
 
-    // based on 3.6 unix_parse_conf_file()
+    // based on v3.6 unix_parse_conf_file()
     void UnixOptionsProcessor::parse_conf_file(std::istream &Stream, const string &conf_name, bool user_mode)
     {
         list<UnixPath> paths;
@@ -991,7 +994,7 @@ namespace vfePlatform
         }
     }
 
-    // based on 3.6 unix_process_povray_conf()
+    // based on v3.6 unix_process_povray_conf()
     void UnixOptionsProcessor::process_povray_conf(void)
     {
         m_Session->ClearPaths();
@@ -1070,7 +1073,7 @@ namespace vfePlatform
         return true;
     }
 
-    // based on 3.6 unix_process_povray_ini()
+    // based on v3.6 unix_process_povray_ini()
     void UnixOptionsProcessor::Process_povray_ini(vfeRenderOptions &opts)
     {
         // try the file pointed to by POVINI
@@ -1129,7 +1132,7 @@ namespace vfePlatform
     }
 
 #if 0
-    // based on 3.6 unix_subdir()
+    // based on v3.6 unix_subdir()
     static bool UnixOptionsProcessor::file_in_permitted_paths (const string &Filename, bool write)
     {
         // NOTE: Filename must be already canonicalized

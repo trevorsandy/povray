@@ -179,6 +179,9 @@ static vfeDisplay *UnixDisplayCreator (unsigned int width, unsigned int height, 
 
 static void PrintStatus (vfeSession *session)
 {
+    // TODO -- when invoked while processing "--help" command-line switch,
+    //         GNU/Linux customs would be to print to stdout (among other differences).
+
     string str;
     vfeSession::MessageType type;
     static vfeSession::MessageType lastType = vfeSession::mUnclassified;
@@ -239,6 +242,8 @@ static void PrintStatusChanged (vfeSession *session, State force = kUnknown)
 
 static void PrintVersion(void)
 {
+    // TODO -- GNU/Linux customs would be to print to stdout (among other differences).
+
     fprintf(stderr,
         "%s %s\n\n"
         "%s\n%s\n%s\n%s\n"
@@ -266,6 +271,11 @@ static void PrintVersion(void)
         "  Compiler flags:      %s\n",
         BUILD_ARCH, BUILT_FOR, COMPILER_VENDOR, COMPILER_VERSION, CXXFLAGS
     );
+}
+
+static void PrintGeneration(void)
+{
+    fprintf(stdout, "%s\n", POV_RAY_GENERATION POV_RAY_BETA_SUFFIX);
 }
 
 static void ErrorExit(vfeSession *session)
@@ -490,6 +500,14 @@ int main (int argc, char **argv)
     {
         session->Shutdown() ;
         PrintVersion();
+        delete sigthread;
+        delete session;
+        return RETURN_OK;
+    }
+    else if (session->GetUnixOptions()->isOptionSet("general", "generation"))
+    {
+        session->Shutdown();
+        PrintGeneration();
         delete sigthread;
         delete session;
         return RETURN_OK;
