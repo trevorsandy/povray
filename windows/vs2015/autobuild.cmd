@@ -10,7 +10,7 @@ Title LPub3D-Trace on Windows auto build script
 :: This script is requires autobuild_defs.cmd
 :: --
 ::  Trevor SANDY <trevor.sandy@gmail.com>
-::  Last Update: September 03, 2017
+::  Last Update: September 23, 2017
 ::  Copyright (c) 2017 by Trevor SANDY
 :: --
 :: This script is distributed in the hope that it will be useful,
@@ -20,12 +20,13 @@ Title LPub3D-Trace on Windows auto build script
 :: It is expected that this script will reside in .\windows\vs2015
 
 :: Variables
-SET DEBUG=0
-SET PACKAGE=lpub3d_trace_cui
-SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
-
 SET VERSION_BASE=3.8
+
+:: Static defaults
+SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
 SET DEFAULT_PLATFORM=x64
+SET PACKAGE=lpub3d_trace_cui
+SET DEBUG=0
 
 :: Build checks settings - set according to your check requirements
 :: Check 01
@@ -34,13 +35,13 @@ rem SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
 rem SET BUILD_CHK_WH_PARMS=+w320 +h240
 rem SET BUILD_CHK_MY_PARMS=-f +d +p +v +a0.3 +UA +A
 rem SET BUILD_CHK_MY_INCLUDES=
-rem :: Check 01
+:: Check 01
 SET BUILD_CHK_MY_OUTPUT=
 SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
 SET BUILD_CHK_WH_PARMS=+w320 +h240
 SET BUILD_CHK_MY_PARMS=+d -p +a0.3 +UA +A
 SET BUILD_CHK_MY_INCLUDES=
-:: Check 02
+:: Check 03
 rem SET BUILD_CHK_MY_OUTPUT=
 rem SET BUILD_CHK_POV_FILE=tests\csi.ldr.pov
 rem SET BUILD_CHK_WH_PARMS=+w2549 +h1650
@@ -54,13 +55,14 @@ SET BUILD_CHK_PARAMS=%BUILD_CHK_WH_PARMS% %BUILD_CHK_MY_PARMS% %BUILD_CHK_INCLUD
 
 :: VS Command Argument: +d +UA +A +W2549 +H1650 +I"$(ProjectDir)\tests\cli.ldr.pov" +O"$(ProjectDir)\tests\cli.ldr.pov.png" +L"$(ProjectDir)\..\..\distribution\ini" +L"$(ProjectDir)\..\..\distribution\include" +L"$(ProjectDir)\..\..\distribution\scenes" +L"$(USERPROFILE%\LDraw\lgeo\ar)" +L"$(USERPROFILE%\LDraw\lgeo\lg)" +L"$(USERPROFILE%\LDraw\lgeo\stl)"
 
-SET PLATFORM=unknown
 SET CONFIGURATION=unknown
+SET PLATFORM=unknown
 SET PROJECT=unknown
 SET CONSOLE=unknown
 SET VERBOSE=unknown
 SET REBUILD=unknown
 SET CHECK=unknown
+
 IF %DEBUG%==1 (
 	SET d=d
 	SET DEFAULT_CONFIGURATION=Debug
@@ -300,7 +302,8 @@ CALL :PROJECT_MESSAGE %CONSOLE%
 CALL :VERBOSE_MESSAGE %VERBOSE%
 
 :: Console logging flags (see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference)
-SET LOGGING=/clp:ErrorsOnly /nologo
+:: SET LOGGING=/clp:ErrorsOnly /nologo
+SET LOGGING=
 
 :: Check if build all platforms
 IF /I "%PLATFORM%"=="-allcui" (

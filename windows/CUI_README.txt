@@ -3,7 +3,7 @@
 	/// @author Trevor SANDY <trevor.sandy@gmail.com>
 	/// May 20, 2017
 	///
-	/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+	/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 	/// specially for LPub3D - An LDraw Building Instruction Editor.
 	///
 	/// LPub3D-Trace is free software: you can redistribute it and/or modify
@@ -21,7 +21,7 @@
 	///
 	/// ----------------------------------------------------------------------------
 	///
-	/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+	/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
 	/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
 	/// in turn, based on the popular DKB raytracer version 2.12.
 	/// DKBTrace was originally written by David K. Buck.
@@ -89,7 +89,7 @@
 	architecture similar to that of the Unix build. The default 
 	locations for the povray conf, INI, scene, and include files are:
 	
-	- System Location:  C:\Program Files (86)\LPub3D\3rdParty\lpub3d-trace-3.7
+	- System Location:  C:\Program Files (86)\LPub3D\3rdParty\lpub3d-trace-3.8
 	- User Location:    %USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d-trace
 	
 	There is no default location for the povray binary itself. 
@@ -129,7 +129,7 @@
 
 	;                         LPUB3D_TRACE RAY TRACER
 	;
-	;                         LPub3d_Trace VERSION 3.7
+	;                         LPub3d_Trace VERSION 3.8
 	;                             POVRAY.CONF FILE
 	;                       FOR I/O RESTRICTIONS SETTINGS
 	;	
@@ -197,11 +197,11 @@
 
 	; Default (hard coded) paths:
 	; HOME        = C:\Users\<user> (%USERPROFILE%)
-	; INSTALLDIR  = C:\Program Files (x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.7
-	; SYSCONF     = C:\Program Files (x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.7\config\povray.conf
-	; USERCONF    = %HOME%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.7\config\povray.conf
-	; SYSINI      = C:\Program Files (x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.7\config\povray.ini
-	; USERINI     = %HOME%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.7\config\povray.ini
+	; INSTALLDIR  = C:\Program Files (x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.8
+	; SYSCONF     = C:\Program Files (x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.8\config\povray.conf
+	; USERCONF    = %HOME%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.8\config\povray.conf
+	; SYSINI      = C:\Program Files (x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.8\config\povray.ini
+	; USERINI     = %HOME%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.8\config\povray.ini
 	;
 
 	; This example shows how to qualify path names containing space(s):
@@ -210,10 +210,10 @@
 	; You can use %HOME%, %INSTALLDIR% and the current working directory as the origin to define permitted paths:
 
 	; %HOME% is hard-coded to the %USERPROFILE% environment variable.
-	read* = "%HOME%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.7\config"
+	read* = "%HOME%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.8\config"
 
-	read* = "%HOME%\Projects\build-LPub3D-Desktop_Qt_5_7_1_MinGW_32bit-Debug\mainApp\debug\3rdParty\lpub3d_trace_cui-3.7\resources\include"
-	read* = "%HOME%\Projects\build-LPub3D-Desktop_Qt_5_7_1_MinGW_32bit-Debug\mainApp\debug\3rdParty\lpub3d_trace_cui-3.7\resources\ini"
+	read* = "%HOME%\Projects\build-LPub3D-Desktop_Qt_5_7_1_MinGW_32bit-Debug\mainApp\debug\3rdParty\lpub3d_trace_cui-3.8\resources\include"
+	read* = "%HOME%\Projects\build-LPub3D-Desktop_Qt_5_7_1_MinGW_32bit-Debug\mainApp\debug\3rdParty\lpub3d_trace_cui-3.8\resources\ini"
 	read* = "%HOME%\LDraw\lgeo\ar"
 	read* = "%HOME%\LDraw\lgeo\lg"
 	read* = "%HOME%\LDraw\lgeo\stl"

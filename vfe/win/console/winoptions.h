@@ -11,7 +11,7 @@
 /// @copyright
 /// @parblock
 ///
-/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 /// specially for LPub3D - An LDraw Building Instruction Editor.
 /// Copyright 2017 by Trevor SANDY.
 ///
