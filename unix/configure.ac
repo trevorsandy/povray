@@ -769,7 +769,6 @@ if test x"$ax_MacOS_build" = x"yes"; then
     AC_MSG_CHECKING([if C++ compiler works with SDK/version options])
     AC_LINK_IFELSE([],[],[AC_MSG_RESULT([yes])],[AC_MSG_FAILURE([no.  Try a different SDK]); exit 1])
     AC_LANG_POP()
-    propagate_settings=yes
   fi
 fi
 

@@ -715,7 +715,7 @@ check: all
 nobase_povlib_SCRIPTS = `echo $scriptfiles`
 
 # Install documentation in povdocdir.
-povdoc_DATA = AUTHORS ChangeLog NEWS CUI_README
+povdoc_DATA = AUTHORS ChangeLog NEWS CUI_README LICENSE
 
 # Install configuration and INI files in povconfdir.
 dist_povconf_DATA = povray.conf
@@ -788,7 +788,7 @@ install-data-hook:
 	rm -f \$(bindir)/\$(PACKAGE) && echo "\$(bindir)/\$(PACKAGE)" >> \$(povinstall); \\
 	chown \$(povowner) \$(DESTDIR)\$(povbase) && chgrp \$(povgroup) \$(DESTDIR)\$(povbase) && echo "\$(DESTDIR)\$(povbase)" >> \$(povinstall)
 	@echo "Setting doc files ownership..."; \\
-	for f in AUTHORS ChangeLog NEWS CUI_README ; do \\
+	for f in AUTHORS ChangeLog NEWS CUI_README LICENSE; do \\
 		chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$f && echo "\$(DESTDIR)\$(povdocdir)/\$\$f" >> \$(povinstall); \\
 	done
 	@echo "Setting config, man and script files ownership..."; \\
@@ -1852,6 +1852,7 @@ case "$1" in
 		sed "s,$file,,g" ./Makefile.in > ./Makefile.in.tmp
 		mv -f ./Makefile.in.tmp ./Makefile.in
 	done
+	echo "Finished."
 	;;
 esac
 
