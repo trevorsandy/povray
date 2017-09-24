@@ -720,7 +720,7 @@ povdoc_DATA = AUTHORS ChangeLog NEWS CUI_README LICENSE
 # Install configuration and INI files in povconfdir.
 dist_povconf_DATA = povray.conf
 povray.conf:
-	cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(top_builddir)/povray.conf
+	cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(top_builddir)/povray.conf
 
 povconf_DATA = povray.ini
 povray.ini:

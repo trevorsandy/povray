@@ -394,7 +394,7 @@ IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR
 IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
-SET __HOME__=%USERPROFILE%
+SET __HOME__=%%USERPROFILE%%
 
 ECHO -Copying 64bit .Conf and .Ini files...
 IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\x86_64\" (
