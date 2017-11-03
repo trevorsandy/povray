@@ -1051,7 +1051,6 @@ makefile="$sdlPrefix/Makefile"
 
 case "$1" in
 	clean)
-	{ set +x; } 2>/dev/null
 	for file in $makefile $makefile.in $makefile.rules ; do
 		rm $file 2> /dev/null  &&  echo "Cleanup $file"
 	done
@@ -1059,16 +1058,21 @@ case "$1" in
 				"$sdlPrefix/sdl2-config" "$sdlPrefix/sdl2.pc" "$sdlPrefix/config.log" "$sdlPrefix/libtool"; do
 		rm $file 2> /dev/null  &&  echo "Cleanup $file"
 	done
-	if test -d include/SDL2; then
-		rm -f include/SDL2 2> /dev/null && echo "Cleanup $sdlPrefix/include/SDL2 (symbolic link)";
+	if test -d "$sdlPrefix/include/SDL2"; then
+		rm -f "$sdlPrefix/include/SDL2" 2> /dev/null && echo "Cleanup $sdlPrefix/include/SDL2 (symbolic link)";
 	fi
-	{ set -x; } 2>/dev/null
 	;;
 
 	doc*)
 	;;
 
 	*)
+	# add SDL2 SimLink
+	if ! test -d "$sdlPrefix/include/SDL2"; then
+		cd "$sdlPrefix/include" && ln -s . ./SDL2 2> /dev/null && echo "Create $sdlPrefix/include/SDL2 symbolic link.";
+	else
+		echo "Create $sdlPrefix/include/SDL2 symbolic link ignored - link exist.";
+	fi
 	echo "Create $makefile.in"
 	cat << pbEOF > $makefile.in
 # Makefile to build and setup the SDL library
@@ -1227,14 +1231,7 @@ build-setup:
 		-name '*.dylib' -o \\
 		-name '.#*' \\) \\
 	-exec rm -f {} \\;
-	@echo "Creating SDL2 include symbolic link..."
-	@if test ! -d include/SDL2; then \\
-		cd include; \\
-		\$(LN_S) . ./SDL2 2> /dev/null && echo "Symbolic link \$(DESTDIR)\$(includedir)/SDL2 created."; \\
-		cd ../; \\
-	else \\
-		echo "Ignored - SDL2 symbolic link exist."; \\
-	fi
+	@echo "Done."
 
 clean:
 	rm -rf \$(objects)
