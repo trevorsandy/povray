@@ -1705,6 +1705,11 @@ if USE_SDL2_SRC
 # Build the SDL2 library - if specified - before unix subdir.
 AM_MAKEFLAGS =
 
+# Include paths for headers.
+AM_CPPFLAGS += \\
+  -I\$(top_srcdir)/libraries/sdl2/include \\
+  -I\$(top_srcdir)/libraries/sdl2/include/SDL2
+
 sdl2_builddir = \$(top_builddir)/libraries/sdl2
 sdl2_abs_builddir = \$(abs_top_builddir)/libraries/sdl2
 
