@@ -577,21 +577,21 @@ esac
 conf="../povray.conf"
 
 case "$1" in
-  clean)
-  for file in $conf $conf.in; do
-    rm $file 2> /dev/null  &&  echo "Cleanup $file"
-  done
-  ;;
+	clean)
+	for file in $conf $conf.in; do
+		rm $file 2> /dev/null  &&  echo "Cleanup $file"
+	done
+	;;
 
-  doc*)
-  ;;
+	doc*)
+	;;
 
-  *)
-  # __HOME__, __POVUSER__, __POVUSERDIR__ and __POVSYSDIR__ will be updated at make time.
-  echo "Create $conf.in"
-  cat ../distribution/povray.conf | sed \
-    's/C:.POVRAY3 drive and/__POVSYSDIR__/' > $conf.in
-  cat << pbEOF >> $conf.in
+	*)
+	# __HOME__, __POVUSER__, __POVUSERDIR__ and __POVSYSDIR__ will be updated at make time.
+	echo "Create $conf.in"
+	cat ../distribution/povray.conf | sed \
+		's/C:.POVRAY3 drive and/__POVSYSDIR__/' > $conf.in
+	cat << pbEOF >> $conf.in
 
 ; Default (hard coded) paths:
 ; HOME        = __HOME__
@@ -624,7 +624,7 @@ read* = "%HOME%/LDraw/lgeo/stl"
 
 read+write* = .
 pbEOF
-  ;;
+	;;
 esac
 
 
@@ -1069,7 +1069,8 @@ case "$1" in
 	*)
 	# add SDL2 SimLink
 	if ! test -d "$sdlPrefix/include/SDL2"; then
-		cd "$sdlPrefix/include" && ln -s . ./SDL2 2> /dev/null && echo "Create $sdlPrefix/include/SDL2 symbolic link.";
+		here=$PWD
+		cd "$sdlPrefix/include" && ln -s . ./SDL2 2> /dev/null && cd "$here" && echo "Create $sdlPrefix/include/SDL2 symbolic link.";
 	else
 		echo "Create $sdlPrefix/include/SDL2 symbolic link ignored - link exist.";
 	fi
@@ -1704,8 +1705,8 @@ AM_MAKEFLAGS =
 
 # Include paths for headers -added when building at command line.
 AM_CPPFLAGS += \\
-  -I\$(top_srcdir)/libraries/sdl2/include \\
-  -I\$(top_srcdir)/libraries/sdl2/include/SDL2
+	-I\$(top_srcdir)/libraries/sdl2/include \\
+	-I\$(top_srcdir)/libraries/sdl2/include/SDL2
 
 sdl2_builddir = \$(top_builddir)/libraries/sdl2
 sdl2_abs_builddir = \$(abs_top_builddir)/libraries/sdl2
