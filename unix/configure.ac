@@ -66,7 +66,7 @@ m4_include([unix/config/ax_test_compiler_flags.m4])
 m4_include([unix/config/ax_check_compile_flag.m4])
 m4_include([unix/config/ax_check_lib.m4])
 m4_include([unix/config/ax_check_libjpeg.m4])
-m4_include([unix/config/ax_check_libsdl.m4])
+m4_include([unix/config/ax_check_libsdl2.m4])
 m4_include([unix/config/ax_check_libtiff.m4])
 m4_include([unix/config/ax_check_openexr.m4])
 m4_include([unix/config/ax_compare_version.m4])
@@ -84,11 +84,11 @@ required_libz_version="1.2.1"
 required_libpng_version="1.2.5"
 required_libjpeg_version="6b"
 required_libtiff_version="3.6.1"
-required_libsdl_version="2.0.4"
+required_libsdl2_version="2.0.2"
 required_openexr_version="1.2"
 
 # Built-in libsdl2 source version
-libsdl_source_version="2.0.5"
+libsdl2_source_version="2.0.5"
 
 # Supported options.
 # AX_ARG_ENABLE([--enable-avx2],             [enable AVX2 features and compiler optmization])
@@ -108,7 +108,7 @@ AX_ARG_WITH([--with-zlib],                [DIR], [use the ZLIB library (in direc
 AX_ARG_WITH([--with-libpng],              [DIR], [use the PNG library (in directory DIR)])
 AX_ARG_WITH([--with-libjpeg],             [DIR], [use the JPEG library (in directory DIR)])
 AX_ARG_WITH([--with-libtiff],             [DIR], [use the TIFF library (in directory DIR)])
-AX_ARG_WITH([--with-libsdl],              [from-src/DIR], [use the SDL library built from source, system installed, or (in directory DIR)])
+AX_ARG_WITH([--with-libsdl2],             [from-src/DIR], [use the SDL2 library built from source, system installed, or (in directory DIR)])
 AX_ARG_WITH([--with-libmkl],              [DIR], [use the Intel(R) Math Kernel Library (in directory DIR)])
 AX_ARG_WITH([--with-openexr],             [DIR], [use the OpenEXR library (in directory DIR)])
 AX_ARG_WITH([--with-macosx-sdk],          [DIR], [use the MacOS SDK (in directory DIR)])
@@ -613,61 +613,61 @@ else
   # libSDL - including option to use built-in SDL2
 
   if test x"$pov_xwin_msg" = x"enabled"; then
-    AC_MSG_CHECKING([whether to use SDL library])
+    AC_MSG_CHECKING([whether to use SDL2])
 
-    if test x"$with_libsdl" = x"no"; then
+    if test x"$with_libsdl2" = x"no"; then
       AC_MSG_RESULT([no])
 
-    elif test x"$with_libsdl" = x"from-src"; then # build libsdl from source
+    elif test x"$with_libsdl2" = x"from-src"; then # build libsdl from source
       # AC_MSG_RESULT([yes, build from source])
-      pov_sdl_version=$libsdl_source_version
+      pov_sdl2_version=$libsdl2_source_version
 
       if test x"$build" = x"$host"; then
-	    pov_sdl_h="./libraries/sdl2/include/SDL.h"
+	    pov_sdl2_h="./libraries/sdl2/include/SDL.h"
 	  else
-	    pov_sdl_h="../libraries/sdl2/include/SDL.h"  # cross compiling
+	    pov_sdl2_h="../libraries/sdl2/include/SDL.h"  # cross compiling
 	  fi
 
-      # AC_MSG_CHECKING([for SDL $pov_sdl_version source files])
-      AS_IF([ test -f "$pov_sdl_h" ],
+      # AC_MSG_CHECKING([for SDL $pov_sdl2_version source files])
+      AS_IF([ test -f "$pov_sdl2_h" ],
 	  [
 	    #  AC_MSG_RESULT([SDL.h found])
-	    pov_check_libsdl_src=“ok”
-	    AC_MSG_RESULT([yes, using SDL v$pov_sdl_version built from source])
+	    pov_check_libsdl2_src=“ok”
+	    AC_MSG_RESULT([yes, using SDL2 v$pov_sdl2_version built from source])
 	    AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
 	  ],
 	  [
 	    AC_MSG_RESULT([no, SDL.h header not found])
-	    pov_check_libsdl_src="ko"
+	    pov_check_libsdl2_src="ko"
 	  ])
 
-      #if test x"$pov_check_libsdl_src" = x"ok"; then
+      #if test x"$pov_check_libsdl2_src" = x"ok"; then
       #  AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
       #fi
-    
-    else                                          # check for system libsdl
-      AC_MSG_RESULT([checking for system SDL >= v$pov_sdl_version...])
-      pov_sdl_version=$required_libsdl_version
 
-      AX_CHECK_LIBSDL([$pov_sdl_version])
-      
+    else                                          # check for system libsdl
+      pov_sdl2_version=$required_libsdl2_version
+      AC_MSG_RESULT([checking system SDL2...])
+
+      AX_CHECK_LIBSDL2([$pov_sdl2_version])
+
     fi  # check libsdl
 
-    if test x"$ax_check_libsdl" != x"ok" && test x"$pov_check_libsdl_src" != x"ok"; then
+    if test x"$ax_check_libsdl2" != x"ok" && test x"$pov_check_libsdl2_src" != x"ok"; then
       AC_MSG_WARN([the preview display is disabled])
-      AC_DEFINE([LIBSDL_MISSING], [], [Don't use SDL.])
+      AC_DEFINE([LIBSDL_MISSING], [], [Don't use SDL2.])
       pov_xwin_msg="disabled"
     else
-      pov_xwin_msg="$pov_xwin_msg (using SDL v$pov_sdl_version)"
+      pov_xwin_msg="$pov_xwin_msg (using SDL2 v$pov_sdl2_version)"
     fi
-    
+
   fi
 
 fi  # with_cygwin_dll
 
 # build libsdl from source conditionals
-AM_CONDITIONAL([USE_SDL2_SRC], [test x"$pov_check_libsdl_src" = x"ok"])
-AM_CONDITIONAL([USE_SDL2_SRC_MACOS], [test x"$ax_MacOS_build" = x"yes" && test x"$pov_check_libsdl_src" = x"ok"])
+AM_CONDITIONAL([USE_SDL2_SRC], [test x"$pov_check_libsdl2_src" = x"ok"])
+AM_CONDITIONAL([USE_SDL2_SRC_MACOS], [test x"$ax_MacOS_build" = x"yes" && test x"$pov_check_libsdl2_src" = x"ok"])
 AM_COND_IF([USE_SDL2_SRC], [AM_EXTRA_RECURSIVE_TARGETS([sdl-build-from-source])], [])
 
 # MacOS SDK
