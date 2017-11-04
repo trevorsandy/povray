@@ -50,7 +50,7 @@ AC_DEFUN([AX_CHECK_LIBSDL],
 
       # check include file
       AC_CHECK_HEADER(
-        [SDL/SDL.h],
+        [SDL2/SDL.h],
         [AC_CHECK_LIB([SDL], [SDL_Quit], [], [ax_check_libsdl="not found"])],
         [ax_check_libsdl="no headers"]
       )

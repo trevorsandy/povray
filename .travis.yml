@@ -29,6 +29,7 @@ addons:
     - libopenexr-dev
     - libpng12-dev
     - libtiff4-dev
+    - libsdl2-dev
     - zlib1g-dev
 
 install:

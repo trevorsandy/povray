@@ -108,7 +108,7 @@ AX_ARG_WITH([--with-zlib],                [DIR], [use the ZLIB library (in direc
 AX_ARG_WITH([--with-libpng],              [DIR], [use the PNG library (in directory DIR)])
 AX_ARG_WITH([--with-libjpeg],             [DIR], [use the JPEG library (in directory DIR)])
 AX_ARG_WITH([--with-libtiff],             [DIR], [use the TIFF library (in directory DIR)])
-AX_ARG_WITH([--with-libsdl],              [DIR], [use the SDL library built-in, system installed, or (in directory DIR)])
+AX_ARG_WITH([--with-libsdl],              [from-src/DIR], [use the SDL library built from source, system installed, or (in directory DIR)])
 AX_ARG_WITH([--with-libmkl],              [DIR], [use the Intel(R) Math Kernel Library (in directory DIR)])
 AX_ARG_WITH([--with-openexr],             [DIR], [use the OpenEXR library (in directory DIR)])
 AX_ARG_WITH([--with-macosx-sdk],          [DIR], [use the MacOS SDK (in directory DIR)])
@@ -618,37 +618,39 @@ else
     if test x"$with_libsdl" = x"no"; then
       AC_MSG_RESULT([no])
 
-    elif test x"$with_libsdl" = x"yes"; then # build libsdl from source
-      AC_MSG_RESULT([yes, build from source])
+    elif test x"$with_libsdl" = x"from-src"; then # build libsdl from source
+      # AC_MSG_RESULT([yes, build from source])
       pov_sdl_version=$libsdl_source_version
 
       if test x"$build" = x"$host"; then
 	    pov_sdl_h="./libraries/sdl2/include/SDL.h"
 	  else
-	    pov_sdl_h="../libraries/sdl2/include/SDL.h"  # (cross compiling)
+	    pov_sdl_h="../libraries/sdl2/include/SDL.h"  # cross compiling
 	  fi
 
-      AC_MSG_CHECKING([for SDL $pov_sdl_version source files])
+      # AC_MSG_CHECKING([for SDL $pov_sdl_version source files])
       AS_IF([ test -f "$pov_sdl_h" ],
 	  [
-	    AC_MSG_RESULT([SDL.h found])
-	    pov_check_libsdl_src="ok"
+	    #  AC_MSG_RESULT([SDL.h found])
+	    pov_check_libsdl_src=“ok”
+	    AC_MSG_RESULT([yes, using SDL v$pov_sdl_version built from source])
+	    AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
 	  ],
 	  [
-	    AC_MSG_RESULT([SDL.h not found])
+	    AC_MSG_RESULT([no, SDL.h header not found])
 	    pov_check_libsdl_src="ko"
 	  ])
 
-      if test x"$pov_check_libsdl_src" = x"ok"; then
-        AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
-      fi
-
-    else                        # use pre-compiled libsdl
-      AC_MSG_RESULT([yes, use binary package])
+      #if test x"$pov_check_libsdl_src" = x"ok"; then
+      #  AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
+      #fi
+    
+    else                                          # check for system libsdl
+      AC_MSG_RESULT([checking for system SDL >= v$pov_sdl_version...])
       pov_sdl_version=$required_libsdl_version
 
       AX_CHECK_LIBSDL([$pov_sdl_version])
-
+      
     fi  # check libsdl
 
     if test x"$ax_check_libsdl" != x"ok" && test x"$pov_check_libsdl_src" != x"ok"; then
@@ -658,7 +660,7 @@ else
     else
       pov_xwin_msg="$pov_xwin_msg (using SDL v$pov_sdl_version)"
     fi
-
+    
   fi
 
 fi  # with_cygwin_dll
