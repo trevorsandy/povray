@@ -16,7 +16,7 @@ matrix:
   - os: osx
     compiler: clang
 
-sudo: false
+sudo: required
 dist: trusty
 
 addons:
@@ -34,7 +34,7 @@ addons:
 
 install:
 - cd unix
-- chmod +x prebuild3rdparty.sh && ./prebuild3rdparty.sh
+- ./prebuild3rdparty.sh
 - cd ..
 - ./configure COMPILED_BY="Travis CI by Trevor SANDY <trevor.sandy@gmail.com> for LPub3D." --prefix="$(pwd)/lpub3d_linux_3rdparty" LPUB3D_3RD_PARTY="yes" --with-libsdl --enable-watch-cursor
 - make check
