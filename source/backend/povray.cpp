@@ -115,6 +115,10 @@
     // in creating an entire new classification for it right now.
     #include <boost/version.hpp>
 
+    #ifndef LIBSDL_MISSING
+        #include <SDL_version.h>
+    #endif
+
 #endif
 
 // this must be the last file included
@@ -483,6 +487,27 @@ void BuildInitInfo(POVMSObjectPtr msg)
         }
     }
 #endif  // OPENEXR_MISSING
+
+#ifndef LIBSDL_MISSING
+    // SDL2 version and copyright notice
+    if(err == kNoErr)
+    {
+        err = POVMSAttr_New(&attr);
+        if(err == kNoErr)
+        {
+            SDL_version sdl_linked_version;
+            SDL_GetVersion(&sdl_linked_version);
+            const char *tempstr = pov_tsprintf("SDL2 %d.%d.%d, Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>",
+            sdl_linked_version.major, sdl_linked_version.minor, sdl_linked_version.patch);
+
+            err = POVMSAttr_Set(&attr, kPOVMSType_CString, reinterpret_cast<const void *>(tempstr), (int) strlen(tempstr) + 1);
+            if(err == kNoErr)
+                err = POVMSAttrList_Append(&attrlist, &attr);
+            else
+                err = POVMSAttr_Delete(&attr);
+        }
+    }
+#endif  // LIBSDL_MISSING
 
 #endif  // DONT_SHOW_IMAGE_LIB_VERSIONS
     if(err == kNoErr)
