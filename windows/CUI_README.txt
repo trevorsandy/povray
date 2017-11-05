@@ -1,7 +1,7 @@
     ///
     /// LPub3D-Trace Windows Console User Interface (CUI) build
 	/// @author Trevor SANDY <trevor.sandy@gmail.com>
-	/// May 20, 2017
+	/// November 05, 2017
 	///
 	/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 	/// specially for LPub3D - An LDraw Building Instruction Editor.
@@ -29,21 +29,35 @@
 	///
 	//////////////////////////////////////////////////////
 	
+	/// Application Updates
+	//////////////////////////////////////////////////////
 	Updated Windows Console User Interface (CUI) LPub3D-Trace build, including:
+	- Rename to LPub3D-Trace (respect license terms)
 	- Port Unix CUI functionality to Windows project
-	- SDL2 image display window (Using SDL2 v2.0.5)
+	- SDL2 image display window (Using SDL2 v2.0.5 built from source)
+	- Integrate SDL2 v2.0.5 library source to enable build from source
 	- Options processor class
 	- Benchmark, help and version options
 	- Detailed console output_iterator 
 	- Uses povray.conf just as Unix build 
 	- Console signal management
-	- GUI and CUI AppVeyor CI
-	- Build LPub3D-Trace CUI and POV-Ray GUI projects from the command line
-	- Additional features...
+	- GUI and CUI AppVeyor CI build check
+	- Build CUI and GUI projects from the command line
+	- Modify confa and ini file default directory locations
+	- Additional little features...
+	Updated Unix Console User Interface (CUI) LPub3D-Trace build, including:
+	- Rename to LPub3D-Trace (respect license terms)
+	- Quoted command line arguments allowign spaces in path names
+	- Updated SDL library (Using SDL2 v2.0.5 built from source or system SDL2)
+	- Integrate SDL2 v2.0.5 library source to enable build from source option
+	- Cross compile i386 target on x86_64 host
+	- Modify conf and ini file default directory locations
+	- Travis CI CUI build check
+	- Additional little features...
 	
 	/// Building the Console User Interface (VS2017 GUI)
 	//////////////////////////////////////////////////////
-	See README.md for comprehensive details on building POV-Ray/LPub3D-Trace. 
+	See README.md for comprehensive details on building POV-Ray. 
 	
 	1. Open `windows\vs2015\povray.sln` in Visual Studio
 	
@@ -80,20 +94,52 @@
     executable. All 32-bit binaries should end up in
     `windows\vs2015\bin32`, and the 64-bit ones are in
     `windows\vs2015\bin64`. 
+
+	/// Building LPub3D-Trace from the command line (GCC Unix)
+	//////////////////////////////////////////////////////
+	See README.md for comprehensive details on building POV-Ray.
 	
 	/// File locations
     /////////////////////////////////////////////////////
 	All Files
+
+	The default locations for the povray conf, and INI, files are in the User Location.
+	The default location for the scene, and include files are in the System Location
 	
     The Windows Console User Interface build uses a file location 
-	architecture similar to that of the Unix build. The default 
+	architecture similar to that of the Unix build. 
+	
+	- User Location:          %USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d_trace_cui-3.8\config
+	- System Location x86_64: C:\Program Files\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.8\config
+	- System Location x86:    C:\Program Files(x86)\LPub3D\3rdParty\resources\lpub3d_trace_cui-3.8\config
+	
+	Note: The system location is actually the install path for LPub3D, therefore the drive letter
+	and even te path name may be different on your installation. The value presented here shows
+	the default LPub3D installation path.
+
+    The Unix Console User Interface build uses a file location 
+	architecture similar to that of the POV-Ray build. The default 
 	locations for the povray conf, INI, scene, and include files are:
 	
-	- System Location:  C:\Program Files (86)\LPub3D\3rdParty\lpub3d-trace-3.8
-	- User Location:    %USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\lpub3d-trace
-	
+	- User Location MacOS:    $HOME/Library/Application Support/LPub3D Software/LPub3D/3rdParty/lpub3d_trace_cui-3.8/config
+	- System Location MacOS:  /Applications/LPub3D.app/Contents/3rdParty/resources/lpub3d_trace_cui-3.8/config
+
+	- User Location Linux:    $HOME/.local/share/LPub3D Software/LPub3D/3rdParty/lpub3d_trace_cui-3.8/config
+	- System Location Linux:  /usr/share/lpub3d/3rdParty/resources/lpub3d_trace_cui-3.8/config
+
 	There is no default location for the povray binary itself. 
-	At this moment, the default	locations are fixed (hard-coded) only.
+	However the LPub3D installation places the povray executable
+	at the following locations:
+	
+	- MacOS:          /Applications/LPub3D.app/Contents/3rdParty/bin
+	- Linux:          /opt/lpub3d/3rdParty/lpub3d_trace_cui-3.8/bin
+	- Windows x86:    C:\Program Files(x86)\LPub3D\3rdParty\bin
+	- Windows x86_64: C:\Program Files\LPub3D\3rdParty\bin
+	
+	Documentation and other resource files are places at the 
+	{System Location}/docs and {System Location}/resources respectively.
+	
+	At this moment default locations are fixed (hard-coded).
 	However all locations, except that for povray.conf, can be defined
 	in the povray.conf file and; therefore, can be placed wherever
 	you like as long as their path is defined in povray.conf
@@ -125,6 +171,68 @@
 	restrictive than the system-level settings. The administrator must take
 	responsibility to secure the system location as appropriate.
 	
+	/// Updated source files
+    /////////////////////////////////////////////////////
+	1.  .gitignore.............../
+	2.  povray.conf............../distribution......(New)
+	3.  povray.ini.............../distribution/ini..(New)
+	Windows
+	4.  appveyor.yml............./	
+	5.  console.vcxproj........../windows/vs2015
+	6.  console.vcxproj.filters../windows/vs2015
+	7.  vfewin.vcxproj.........../windows/vs2015
+	8.  vfewin.vcxproj.filters.../windows/vs2015
+	9.  openexr_eLut.vcxproj...../windows/vs2015
+	10. openexr_toFloat.vcxproj../windows/vs2015
+	11. povray.sln.............../windows/vs2015
+	12. syspovconfig.h.........../windows/povconfig
+	13. vfeplatform.cpp........../vfe/win
+	14. vfeplatform.h............/vfe/win
+	15. disp.h.................../windows...........(New) 
+	16. disp_sdl.cpp............./windows...........(New) 
+	17. disp_sdl.h.............../windows...........(New) 
+	18. disp_text.h............../windows...........(New) 
+	19. disp_text.cpp............/windows...........(New) 
+	20. winconsole.cpp.........../vfe/win/console
+	21. winoptions.cpp.........../vfe/win/console...(New)
+	22. winoptions.h............./vfe/win/console...(New)
+	23. CUI_README.txt.........../windows...........(New)
+	24. autobuild.cmd............/windows/vs2015....(New)
+	25. autobuild_defs.cmd......./windows/vs2015....(New)
+	26. SDL2.vcxproj............./windows/vs2015....(New)
+	27. SDL2_vcxproj.filters...../windows/vs2015....(New)
+	28. SDL2Main.vcxproj........./windows/vs2015....(New)
+	Unix
+	29. travis.yml.............../	
+	30. prebuild3rdparty.sh....../unix..............(New) replaces prebuild.sh	
+	31. configure.ac............./unix
+	32. install................../unix
+	33. syspovconfig.h.........../unix 
+	34. disp_sdl.cpp............./unix
+	35. disp_sdl.h.............../unix 	
+	36. acx_pthread.m4.........../unix/config	
+	37. ax_check_lib.m4........../unix/config
+	38. ax_check_libjpeg.m4....../unix/config
+	39. ax_check_libtiff.m4....../unix/config
+	40. ax_check_libsdl2.m4....../unix/config.......(New) replaces ax_check_libsdl.m4	
+	41. unixconsole.cpp........../vfe/unix 
+	42. unixoptions.cpp........../vfe/unix 
+	43. unixoptions.h............/vfe/unix
+
+	Note: Although I used VS2017 to develop the Windows Console User Interface build
+	components described here. I do not believe there is any material difference 
+	between VS2017 and VS2015 so you can substitute VS2017 for 2015.
+	
+	Please send any comments or corrections to Trevor SANDY <trevor.sandy@gmail.com>
+
+	/// Sample povray.conf and povray.ini files
+    /////////////////////////////////////////////////////
+	The sample files below are configured for Windows x86_64. You may
+	substitute the {System Location} and {User Location} paths above to 
+	configure for MacOS or Linux targets.
+	
+	/// Sample conf file
+    /////////////////////////////////////////////////////
 	Here are the conf file options (cut and paste to create your povray.conf file):
 
 	;                         LPUB3D_TRACE RAY TRACER
@@ -229,8 +337,50 @@
 
 	; End povray conf file
 
+	/// Sample ini file
+    /////////////////////////////////////////////////////
 	Here are the INI file options for the conf file above (cut and paste to create your povray.ini file(s)):
 
+	;                         LPUB3D-TRACE RAY TRACER
+	;
+	;                         LPUB3D-TRACE VERSION 3.8
+	;
+	;                          LPUB3D-TRACE.INI FILE
+	;
+	;  The general form of the options is "Variable=value".  Everything
+	;  between the equals sign and the end of the line is considered part
+	;  of the value.  The spacing and layout is free-form but only one option
+	;  per line is allowed.  Variables and values are not case-sensitive.
+	;
+	;  Note: characters after a semi-colon are treated as a comment
+	;
+	;  Traditional POV-Ray switches beginning with + or - are also allowed
+	;  and they may be given with more than one switch per line.
+	;
+	;  Add your own options at the bottom and/or edit these to suit. See the
+	;  general documentation for full instructions on how to use INI options.
+	;
+	; Width of image in pixels.  Accepts integer values.
+	;
+	Width = 800
+	;
+	;
+	; Height of image in pixels.  Accepts integer values.
+	;
+	Height = 600
+	;
+	; Sets minimum number of objects before auto bounding kicks in.
+	;
+	Bounding_Threshold = 3
+	;
+	;
+	; Turn display on
+	Display=On
+	;
+	; Turn verbose mode on
+	Verbose=On
+	;
+	;
 	; Specify path to search for any files not found in current directory.
 	; For example: Library_Path="C:\Program Files\POV-Ray for Windows\include"
 	; There may be some entries already here; if there are they were
@@ -246,44 +396,26 @@
 	; path list after reading this file, so in those cases you don't
 	; necessarily have to have anything at all here.
 	;
+	; Search path for #include source files or command line ini files not
+	; found in the current directory.  New directories are added to the
+	; search path, up to a maximum of 25.
+	;
+	;
 
-	/// Updated files
-	/////////////////////////////////////////////////////
-	1.  .gitignore.............../
-	2.  appveyor.yml............./
-	3.  console.vcxproj........../windows/vs2015
-	4.  console.vcxproj.filters../windows/vs2015
-	5.  vfewin.vcxproj.........../windows/vs2015
-	6.  vfewin.vcxproj.filters.../windows/vs2015
-	7.  openexr_eLut.vcxproj...../windows/vs2015
-	8.  openexr_toFloat.vcxproj../windows/vs2015
-	9.  povray.sln.............../windows/vs2015
-	10. syspovconfig.h.........../windows/povconfig
-	11. vfeplatform.cpp........../vfe/win
-	12. vfeplatform.h............/vfe/win
-	13. disp.h.................../windows...........(New) 
-	14. disp_sdl.cpp............./windows...........(New) 
-	15. disp_sdl.h.............../windows...........(New) 
-	16. disp_text.h............../windows...........(New) 
-	17. disp_text.cpp............/windows...........(New) 
-	18. winconsole.cpp.........../vfe/win/console
-	19. winoptions.cpp.........../vfe/win/console...(New)
-	20. winoptions.h............./vfe/win/console...(New)
-	21. CUI_README.txt.........../windows...........(New)
-	22. autobuild.cmd............/windows/vs2015....(New)
-	23. autobuild_defs.cmd......./windows/vs2015....(New)
-	24. SDL2.vcxproj............./windows/vs2015....(New)
-	25. SDL2_vcxproj.filters...../windows/vs2015....(New)
-	26. SDL2Main.vcxproj........./windows/vs2015....(New)
-		
-	TODO:
+	; Search path for #include source files or command line ini files not
+	; found in the current directory.  New directories are added to the
+	; search path, up to a maximum of 25.
 
-	On Windows, I have not yet been successful to process interrupt signals passed to the console - e.g. pause, resume and quit. I think the issue is linked with the way SDL creates and uses the WinMain entry point (using SDL_Main) to manage the Windows GUI display screen...
-	
-	On MacOS, the current disp_sdl code (v1.2.15) does not launch the display window; however, execution seems to be without issue. The display window is created, it is just not persisted to the screen. In the next few days I'll see how v2.0.15 behaves as there are some new capabilities that may better support generating the display window on MacOS.
+	Library_Path="C:\Program Files\LPub3D\3rdParty\lpub3d_trace_cui-3.8\resources"
+	Library_Path="C:\Program Files\LPub3D\3rdParty\lpub3d_trace_cui-3.8\resources\ini"
+	Library_Path="C:\Program Files\LPub3D\3rdParty\lpub3d_trace_cui-3.8\resources\include"
 
-	Note: Although I used VS2017 to develop the components described here.
-	I do not believe there is any material difference between VS2017 and VS2015
-	so you can substitute VS2017 for 2015.
-	
-	Please send any comments or corrections to Trevor SANDY <trevor.sandy@gmail.com>
+	; File output type control.
+	;     T    Uncompressed Targa-24
+	;     C    Compressed Targa-24
+	;     P    UNIX PPM
+	;     N    PNG (8-bits per colour RGB)
+	;     Nc   PNG ('c' bit per colour RGB where 5 <= c <= 16)
+
+	Output_to_File=true
+	Output_File_Type=N8             ; (+/-Ftype)
