@@ -2,62 +2,62 @@
 
 Title LPub3D-Trace on Windows auto build script
 
-:: This script uses MSBuild to configure and build LPub3D-Trace from the command line.
-:: The primary benefit is not having to modify source files before building
-:: as described in the official POV-Ray build documentation.
-:: It is possible to build either the GUI or CUI project - see usage below.
+rem This script uses MSBuild to configure and build LPub3D-Trace from the command line.
+rem The primary benefit is not having to modify source files before building
+rem as described in the official POV-Ray build documentation.
+rem It is possible to build either the GUI or CUI project - see usage below.
 
-:: This script is requires autobuild_defs.cmd
-:: --
-::  Trevor SANDY <trevor.sandy@gmail.com>
-::  Last Update: September 26, 2017
-::  Copyright (c) 2017 by Trevor SANDY
-:: --
-:: This script is distributed in the hope that it will be useful,
-:: but WITHOUT ANY WARRANTY; without even the implied warranty of
-:: MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+rem This script is requires autobuild_defs.cmd
+rem --
+rem  Trevor SANDY <trevor.sandy@gmail.com>
+rem  Last Update: September 26, 2017
+rem  Copyright (c) 2017 by Trevor SANDY
+rem --
+rem This script is distributed in the hope that it will be useful,
+rem but WITHOUT ANY WARRANTY; without even the implied warranty of
+rem MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
-:: It is expected that this script will reside in .\windows\vs2015
+rem It is expected that this script will reside in .\windows\vs2015
 
-:: Variables
+rem Variables
 SET VERSION_BASE=3.8
 
-:: Static defaults
+rem Static defaults
 SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
 SET DEFAULT_PLATFORM=x64
 SET PACKAGE=lpub3d_trace_cui
 SET DEBUG=0
 
-:: Build checks settings - set according to your check requirements - do not add quotes
-:: Check 01
-::------------------------------------------
+rem Build checks settings - set according to your check requirements - do not add quotes
+rem Check 01
+rem------------------------------------------
 rem SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
 rem SET BUILD_CHK_MY_OUTPUT=..\..\distribution\scenes\advanced\biscuit
 rem SET BUILD_CHK_MY_PARMS=-f +d +p +v +a0.3 +UA +A +w320 +h240
 rem SET BUILD_CHK_MY_INCLUDES=
 
-:: Check 03
-::------------------------------------------
+rem Check 03
+rem------------------------------------------
 rem SET BUILD_CHK_MY_POV_FILE=tests\csi.ldr.pov
 rem SET BUILD_CHK_MY_OUTPUT=tests\csi.ldr
 rem SET BUILD_CHK_MY_PARMS=+d +a0.3 +UA +A +w2549 +h1650
 rem SET BUILD_CHK_MY_INCLUDES=+L%USERPROFILE%\LDraw\lgeo\ar +L%USERPROFILE%\LDraw\lgeo\lg +L%USERPROFILE%\LDraw\lgeo\stl
 
-:: Check 02
-::------------------------------------------
+rem Check 02
+rem------------------------------------------
 SET BUILD_CHK_MY_POV_FILE=tests\space in dir name test\biscuit.pov
 SET BUILD_CHK_MY_OUTPUT=tests\space in dir name test\biscuit space in file name test
 SET BUILD_CHK_MY_PARMS=+d -p +a0.3 +UA +A +w320 +h240
 SET BUILD_CHK_MY_INCLUDES=
 
-:: Build check static settings - do not modify these.
+rem Build check static settings - do not modify these.
 SET BUILD_CHK_OUTPUT=%BUILD_CHK_MY_OUTPUT%
 SET BUILD_CHK_POV_FILE=%BUILD_CHK_MY_POV_FILE%
 SET BUILD_CHK_PARAMS=%BUILD_CHK_MY_PARMS%
 SET BUILD_CHK_INCLUDE=+L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
 SET BUILD_CHK_INCLUDE=%BUILD_CHK_INCLUDE% %BUILD_CHK_MY_INCLUDES%
 
-:: Visual Studio 'debug' comand line: +I"tests\space in dir name test\biscuit.pov" +O"tests\space in dir name test\biscuit space in file name test.png" +w320 +h240 +d -p +a0.3 +UA +A +L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
+rem Visual Studio 'debug' comand line: +I"tests\space in dir name test\biscuit.pov" +O"tests\space in dir name test\biscuit space in file name test.png" +w320 +h240 +d -p +a0.3 +UA +A +L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
 
 SET CONFIGURATION=unknown
 SET PLATFORM=unknown
@@ -75,7 +75,7 @@ IF %DEBUG%==1 (
   SET DEFAULT_CONFIGURATION=Release
 )
 
-:: Check if invalid platform flag
+rem Check if invalid platform flag
 IF NOT [%1]==[] (
 	IF NOT "%1"=="x86" (
 		IF NOT "%1"=="x86_64" (
@@ -91,7 +91,7 @@ IF NOT [%1]==[] (
 		)
 	)
 )
-:: Parse platform input flag
+rem Parse platform input flag
 IF [%1]==[] (
 	SET PLATFORM=-allcui
 	GOTO :SET_CONFIGURATION
@@ -121,11 +121,11 @@ IF /I "%1"=="-verbose" (
 IF /I "%1"=="-help" (
 	GOTO :USAGE
 )
-:: If we get here display invalid command message.
+rem If we get here display invalid command message.
 GOTO :COMMAND_ERROR
 
 :SET_CONFIGURATION
-:: Check if invalid configuration flag
+rem Check if invalid configuration flag
 IF NOT [%2]==[] (
 	IF NOT "%2"=="-rel" (
 		IF NOT "%2"=="-dbg" (
@@ -145,20 +145,20 @@ IF NOT [%2]==[] (
 		)
 	)
 )
-::  Set the default platform
+rem  Set the default platform
 IF "%PLATFORM%"=="unknown" (
 	SET PLATFORM=%DEFAULT_PLATFORM%
 )
-:: Run a render check without building
+rem Run a render check without building
 IF /I "%1"=="-run" SET RUN_CHK=true
 IF /I "%2"=="-run" SET RUN_CHK=true
 IF /I "%RUN_CHK%"=="true" (
 	SET CONFIGURATION=run render only
 	CALL :CHECK_BUILD %PLATFORM%
-	:: Finish
+	rem Finish
 	EXIT /b
 )
-:: Perform verbose (debug) build
+rem Perform verbose (debug) build
 IF "%1"=="-verbose" (
 	SET CHECK=1
 	SET THIRD_INSTALL=0
@@ -166,7 +166,7 @@ IF "%1"=="-verbose" (
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
-:: Parse configuration input flag
+rem Parse configuration input flag
 IF /I "%1"=="-rbld" SET REBUILD_CHK=true
 IF /I "%2"=="-rbld" SET REBUILD_CHK=true
 IF /I "%REBUILD_CHK%"=="true" (
@@ -177,39 +177,39 @@ IF /I "%REBUILD_CHK%"=="true" (
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
-:: Check if release build
+rem Check if release build
 IF /I "%2"=="-rel" (
 	SET CONFIGURATION=Release
 	GOTO :BUILD
 )
-:: Check if debug build
+rem Check if debug build
 IF /I "%2"=="-dbg" (
 	SET CONFIGURATION=Debug
 	GOTO :BUILD
 )
-:: Check if install - reset configuration
+rem Check if install - reset configuration
 IF /I "%2"=="-ins" (
-	:: 3rd party install
+	rem 3rd party install
 	SET THIRD_INSTALL=1
 	SET INSTALL_ALL=0
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
-:: Install all content
+rem Install all content
 IF /I "%2"=="-allins" (
-	:: 3rd party install
+	rem 3rd party install
 	SET THIRD_INSTALL=1
 	SET INSTALL_ALL=1
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
-:: Build and run an image render check
+rem Build and run an image render check
 IF /I "%2"=="-chk" (
 	SET CHECK=1
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
-:: Parse configuration input flag
+rem Parse configuration input flag
 IF [%2]==[] (
 	SET CHECK=1
 	SET THIRD_INSTALL=1
@@ -217,50 +217,50 @@ IF [%2]==[] (
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
-:: Check if x86_64 and AVX
+rem Check if x86_64 and AVX
 IF "%PLATFORM%"=="x64" (
 	IF /I "%2"=="-avx" GOTO :SET_AVX
 )
-:: Check if x86 and SSE2
+rem Check if x86 and SSE2
 IF "%PLATFORM%"=="Win32" (
 	IF /I "%2"=="-sse2" GOTO :SET_SSE2
 )
-:: Check if bad platform and configuration flag combination
+rem Check if bad platform and configuration flag combination
 IF "%PLATFORM%"=="Win32" (
 	IF /I "%2"=="-avx" GOTO :AVX_ERROR
 )
 IF "%PLATFORM%"=="x64" (
 	IF /I "%2"=="-sse2" GOTO :SSE2_ERROR
 )
-:: If we get here display invalid command message
+rem If we get here display invalid command message
 GOTO :COMMAND_ERROR
 
 :SET_AVX
-:: AVX Configuration
+rem AVX Configuration
 SET CONFIGURATION=Release-AVX
 GOTO :BUILD
 
 :SET_SSE2
-:: SSE2 Configuration
+rem SSE2 Configuration
 SET CONFIGURATION=Release-SSE2
 GOTO :BUILD
 
 :BUILD
-:: Configure build parameters
+rem Configure build parameters
 SET DO_REBUILD=
 SET BUILD_LBL=Building
 IF %REBUILD%==1 (
 	SET DO_REBUILD=/t:Rebuild
 	SET BUILD_LBL=Rebuilding
 )
-:: Check if invalid console flag
+rem Check if invalid console flag
 IF NOT [%3]==[] (
 	IF NOT "%3"=="-gui" (
 		IF NOT "%3"=="-cui" GOTO :PROJECT_ERROR
 	)
 )
-:: Build CUI or GUI project - CUI is default
-:: Parse configuration input flag
+rem Build CUI or GUI project - CUI is default
+rem Parse configuration input flag
 IF [%3]==[] (
 	SET CONSOLE=1
 	SET PROJECT=console.vcxproj
@@ -273,16 +273,16 @@ IF /I "%3"=="-cui" (
 	SET CONSOLE=1
 	SET PROJECT=console.vcxproj
 )
-:: Check if invalid verbose flag
+rem Check if invalid verbose flag
 IF NOT [%4]==[] (
 	IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
 )
-:: Enable verbose tracing (useful for debugging)
+rem Enable verbose tracing (useful for debugging)
 IF /I "%1"=="-verbose" SET VERBOSE_CHK=true
 IF /I "%4"=="-verbose" SET VERBOSE_CHK=true
 IF "%CONFIGURATION%"=="Debug" SET VERBOSE_CHK=true
 IF /I "%VERBOSE_CHK%"=="true" (
-	:: Check if CUI or allCUI project build
+	rem Check if CUI or allCUI project build
 	IF NOT %CONSOLE%==1 (
 		IF NOT "%PLATFORM%"=="-allcui" GOTO :VERBOSE_CUI_ERROR
 	)
@@ -290,26 +290,26 @@ IF /I "%VERBOSE_CHK%"=="true" (
 ) ELSE (
 	SET VERBOSE=0
 )
-:: Initialize the Visual Studio command line development environment
-:: Note you can change this line to your specific environment - I am using VS2017 here.
+rem Initialize the Visual Studio command line development environment
+rem Note you can change this line to your specific environment - I am using VS2017 here.
 CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
-:: Set the LPub3D-Trace auto-build pre-processor defines
+rem Set the LPub3D-Trace auto-build pre-processor defines
 CALL autobuild_defs.cmd
-:: Display the defines set (as environment variable 'PovBuildDefs') for MSbuild
+rem Display the defines set (as environment variable 'PovBuildDefs') for MSbuild
 ECHO.
 ECHO   BUILD_DEFINES.....[%PovBuildDefs%]
 
-:: Display build project message
+rem Display build project message
 CALL :PROJECT_MESSAGE %CONSOLE%
 
-:: Display verbosity message
+rem Display verbosity message
 CALL :VERBOSE_MESSAGE %VERBOSE%
 
-:: Console logging flags (see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference)
-:: SET LOGGING=/clp:ErrorsOnly /nologo
+rem Console logging flags (see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference)
+rem SET LOGGING=/clp:ErrorsOnly /nologo
 SET LOGGING=
 
-:: Check if build all platforms
+rem Check if build all platforms
 IF /I "%PLATFORM%"=="-allcui" (
 	SET CONSOLE=1
 	SET PROJECT=console.vcxproj
@@ -317,47 +317,47 @@ IF /I "%PLATFORM%"=="-allcui" (
 	GOTO :BUILD_ALL_CUI
 )
 
-:: Assemble command line
+rem Assemble command line
 SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT% %LOGGING% %DO_REBUILD%
 ECHO   BUILD_COMMAND.....[%COMMAND_LINE%]
-:: Display the build configuration and platform settings
+rem Display the build configuration and platform settings
 ECHO.
 ECHO -%BUILD_LBL% %CONFIGURATION% Configuration for %PLATFORM% Platform...
 ECHO.
-:: Launch msbuild
+rem Launch msbuild
 %COMMAND_LINE%
-:: Perform build check if specified
+rem Perform build check if specified
 IF %CHECK%==1 CALL :CHECK_BUILD %PLATFORM%
-:: Finish
+rem Finish
 EXIT /b
 
 :BUILD_ALL_CUI
-:: Display the build configuration and platform settings
+rem Display the build configuration and platform settings
 ECHO.
 ECHO -%BUILD_LBL% all CUI Platforms for %CONFIGURATION% Configuration...
-:: Launch msbuild across all CUI platform builds
+rem Launch msbuild across all CUI platform builds
 FOR %%P IN ( Win32, x64 ) DO (
 	SETLOCAL ENABLEDELAYEDEXPANSION
-	:: Assemble command line
+	rem Assemble command line
 	SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING% %DO_REBUILD%
 	ECHO.
 	ECHO --%BUILD_LBL% %%P Platform...
 	ECHO.
 	ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
 	ECHO.
-	:: Launch msbuild
+	rem Launch msbuild
 	!COMMAND_LINE!
-	:: Perform build check if specified
+	rem Perform build check if specified
 	IF %CHECK%==1 CALL :CHECK_BUILD %%P
 	ENDLOCAL
 )
-:: Perform 3rd party install if specified
+rem Perform 3rd party install if specified
 IF %THIRD_INSTALL%==1 GOTO :3RD_PARTY_INSTALL
-:: Finish
+rem Finish
 EXIT /b
 
 :3RD_PARTY_INSTALL
-:: Version major and minor pulled in from autobuild_defs
+rem Version major and minor pulled in from autobuild_defs
 SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 ECHO.
 ECHO -Copying 3rd party distribution files...
@@ -523,7 +523,7 @@ SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
 >>%genConfigFile%.
 >>%genConfigFile%  Output_to_File=true
 >>%genConfigFile%  Output_File_Type=N8             ; (+/-Ftype)
-:: Finish
+rem Finish
 EXIT /b
 
 :PROJECT_MESSAGE
@@ -672,4 +672,4 @@ EXIT /b
 
 :END
 EXIT /b
-:: Done
+rem Done

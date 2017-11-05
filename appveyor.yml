@@ -14,7 +14,7 @@ matrix:
 
 environment:
   GUIProj: windows/vs2015/povray.sln
-  GUIDefs: POV_RAY_IS_AUTOBUILD=1;POV_RAY_BUILD_ID="av$(APPVEYOR_BUILD_NUMBER)";BUILT_BY="AppVeyor";
+  GUIDefs: POV_RAY_IS_AUTOBUILD=1;POV_RAY_BUILD_ID="av$(APPVEYOR_BUILD_NUMBER)";BUILT_BY="Trevor SANDY <trevor.sandy@gmail.com> using AppVeyor for LPub3D.";
   CUIProj: windows/vs2015/console.vcxproj
   CUIDefs: $(GUIDefs)VERSION_BASE="3.8";_CONSOLE;
   matrix:

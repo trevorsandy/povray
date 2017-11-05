@@ -619,7 +619,6 @@ else
       AC_MSG_RESULT([no])
 
     elif test x"$with_libsdl2" = x"from-src"; then # build libsdl from source
-      # AC_MSG_RESULT([yes, build from source])
       pov_sdl2_version=$libsdl2_source_version
 
       if test x"$build" = x"$host"; then
@@ -628,10 +627,8 @@ else
 	    pov_sdl2_h="../libraries/sdl2/include/SDL.h"  # cross compiling
 	  fi
 
-      # AC_MSG_CHECKING([for SDL $pov_sdl2_version source files])
       AS_IF([ test -f "$pov_sdl2_h" ],
 	  [
-	    #  AC_MSG_RESULT([SDL.h found])
 	    pov_check_libsdl2_src=“ok”
 	    AC_MSG_RESULT([yes, using SDL2 v$pov_sdl2_version built from source])
 	    AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
@@ -641,16 +638,11 @@ else
 	    pov_check_libsdl2_src="ko"
 	  ])
 
-      #if test x"$pov_check_libsdl2_src" = x"ok"; then
-      #  AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
-      #fi
-
     else                                          # check for system libsdl
       pov_sdl2_version=$required_libsdl2_version
       AC_MSG_RESULT([checking system SDL2...])
 
       AX_CHECK_LIBSDL2([$pov_sdl2_version])
-
     fi  # check libsdl
 
     if test x"$ax_check_libsdl2" != x"ok" && test x"$pov_check_libsdl2_src" != x"ok"; then
@@ -660,7 +652,6 @@ else
     else
       pov_xwin_msg="$pov_xwin_msg (using SDL2 v$pov_sdl2_version)"
     fi
-
   fi
 
 fi  # with_cygwin_dll
