@@ -78,8 +78,8 @@ before_deploy:
   # create a tarball of the lpub3d_linux_3rdparty folder
   - if [ "$POV_BUILD_PKG" = "yes" ]; then
       if [ -d ${POV_REPO_NAME} ]; then
-        tar -czf ${POV_REPO_NAME}.tar.gz ${POV_REPO_NAME} && echo "Tarball ${POV_REPO_NAME}.tar.gz created."
-      fi
+        tar -czf ${POV_REPO_NAME}.tar.gz ${POV_REPO_NAME} && echo "Tarball ${POV_REPO_NAME}.tar.gz created.";
+      fi;
     fi
 
 deploy:
