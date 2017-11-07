@@ -38,12 +38,12 @@ build_script:
       write-host "Working Directory: $PWD"
       If ($env:POV_BUILD_PKG -eq "yes") {
         cmd.exe /c autobuild.cmd -allcui -allins
-        $env:POV_ARTEFACTS = Get-ChildItem -Path $env:POV_DIST_DIR -Recurse
-        write-host "   ARTEFACT COUNT....[$env:POV_ARTEFACTS.count]"
       } Else {
         cmd.exe /c autobuild.cmd x86 -chk
         cmd.exe /c autobuild.cmd x86_64 -chk
       }
+ - ps: $env:POV_ARTEFACTS = Get-ChildItem -Path $env:POV_DIST_DIR -Recurse
+ - ps: write-host "   ARTEFACT COUNT....[$env:POV_ARTEFACTS.count]"
 
 test: off
 
