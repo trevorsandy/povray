@@ -1,4 +1,4 @@
-@ECHO OFF
+@ECHO OFF &SETLOCAL
 
 Title LPub3D-Trace on Windows auto build script
 
@@ -674,5 +674,6 @@ ECHO If no flag is supplied, 32bit platform, Release Configuration, CUI project 
 EXIT /b
 
 :END
+ENDLOCAL
 EXIT /b
 rem Done
