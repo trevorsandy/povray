@@ -67,7 +67,7 @@ install:
   - cd unix
   - chmod +x prebuild3rdparty.sh && ./prebuild3rdparty.sh
   - cd ..
-  - ./configure COMPILED_BY="Trevor SANDY <trevor.sandy@gmail.com> using Travis CI for LPub3D." --prefix="$(pwd)/lpub3d_linux_3rdparty" LPUB3D_3RD_PARTY="yes" --with-libsdl2 --enable-watch-cursor
+  - ./configure COMPILED_BY="Trevor SANDY <trevor.sandy@gmail.com> using Travis CI for LPub3D." --prefix="$(pwd)/${POV_REPO_NAME}" LPUB3D_3RD_PARTY="yes" --with-libsdl2 --enable-watch-cursor
   - make check
   - make install
 

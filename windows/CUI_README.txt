@@ -202,22 +202,23 @@
 	26. SDL2.vcxproj............./windows/vs2015....(New)
 	27. SDL2_vcxproj.filters...../windows/vs2015....(New)
 	28. SDL2Main.vcxproj........./windows/vs2015....(New)
+	29. povbackend.vcxproj......./windows/vs2015
 	Unix
-	29. travis.yml.............../	
-	30. prebuild3rdparty.sh....../unix..............(New) replaces prebuild.sh	
-	31. configure.ac............./unix
-	32. install................../unix
-	33. syspovconfig.h.........../unix 
-	34. disp_sdl.cpp............./unix
-	35. disp_sdl.h.............../unix 	
-	36. acx_pthread.m4.........../unix/config	
-	37. ax_check_lib.m4........../unix/config
-	38. ax_check_libjpeg.m4....../unix/config
-	39. ax_check_libtiff.m4....../unix/config
-	40. ax_check_libsdl2.m4....../unix/config.......(New) replaces ax_check_libsdl.m4	
-	41. unixconsole.cpp........../vfe/unix 
-	42. unixoptions.cpp........../vfe/unix 
-	43. unixoptions.h............/vfe/unix
+	30. travis.yml.............../	
+	31. prebuild3rdparty.sh....../unix..............(New) replaces prebuild.sh	
+	32. configure.ac............./unix
+	33. install................../unix
+	34. syspovconfig.h.........../unix 
+	35. disp_sdl.cpp............./unix
+	36. disp_sdl.h.............../unix 	
+	37. acx_pthread.m4.........../unix/config	
+	38. ax_check_lib.m4........../unix/config
+	39. ax_check_libjpeg.m4....../unix/config
+	40. ax_check_libtiff.m4....../unix/config
+	41. ax_check_libsdl2.m4....../unix/config.......(New) replaces ax_check_libsdl.m4	
+	42. unixconsole.cpp........../vfe/unix 
+	43. unixoptions.cpp........../vfe/unix 
+	44. unixoptions.h............/vfe/unix
 
 	Note: Although I used VS2017 to develop the Windows Console User Interface build
 	components described here. I do not believe there is any material difference 

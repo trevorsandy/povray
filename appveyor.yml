@@ -1,9 +1,10 @@
-version: 3.8+av{build}
-pull_requests:
-  do_not_increment_build_number: true
+version: 'LPub3D-Trace-CUI-AV-{build}'
+
+clone_folder: c:\projects\povray
+
 branches:
-  except:
-  - coverity_scan
+  only:
+   - lpub3d/raytracer-cui
 
 image: Visual Studio 2017
 
@@ -12,60 +13,54 @@ shallow_clone: true
 matrix:
   fast_finish: true
 
-environment:
-  GUIProj: windows/vs2015/povray.sln
-  GUIDefs: POV_RAY_IS_AUTOBUILD=1;POV_RAY_BUILD_ID="av$(APPVEYOR_BUILD_NUMBER)";BUILT_BY="Trevor SANDY <trevor.sandy@gmail.com> using AppVeyor for LPub3D.";
-  CUIProj: windows/vs2015/console.vcxproj
-  CUIDefs: $(GUIDefs)VERSION_BASE="3.8";_CONSOLE;
-  matrix:
-  # Graphic User Interface (GUI) build matrix
-  - PovBuildProj: $(GUIProj)
-    PovBuildDefs: $(GUIDefs)
-    configuration: Release
-    platform: x64
-    bin_dir: bin64
-    artifact_suffix: -Win64
-  - PovBuildProj: $(GUIProj)
-    PovBuildDefs: $(GUIDefs)
-    configuration: Release-SSE2
-    platform: Win32
-    bin_dir: bin32
-    artifact_suffix: -Win32-sse2
-  - PovBuildProj: $(GUIProj)
-    PovBuildDefs: $(GUIDefs)
-    configuration: Release
-    platform: Win32
-    bin_dir: bin32
-    artifact_suffix: -Win32
-  # Console User Interface (CUI) build matrix
-  - PovBuildProj: $(CUIProj)
-    PovBuildDefs: $(CUIDefs)
-    configuration: Release
-    platform: x64
-    bin_dir: bin64
-    artifact_suffix: -Win64
-  - PovBuildProj: $(CUIProj)
-    PovBuildDefs: $(CUIDefs)
-    configuration: Release-SSE2
-    platform: Win32
-    bin_dir: bin32
-    artifact_suffix: -Win32-sse2
-  - PovBuildProj: $(CUIProj)
-    PovBuildDefs: $(CUIDefs)
-    configuration: Release
-    platform: Win32
-    bin_dir: bin32
-    artifact_suffix: -Win32
+init:
+ - ps: write-host "Building LPub3D-Trace-CUI x86 and x86_64 architectures..."
+ - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+ - ps: |
+      If ($env:APPVEYOR_REPO_COMMIT_MESSAGE.ToLower().Contains("[build pkg]")) {
+        write-host "[build pkg] detected."
+        $env:POV_BUILD_PKG = "yes"
+        $env:POV_REPO_NAME = "lpub3d_windows_3rdparty"
+        If ($env:APPVEYOR_REPO_COMMIT_MESSAGE.ToLower().Contains("[deploy pkg]")) {
+          write-host "[deploy pkg] detected."
+          $env:POV_DEPLOY_PKG = $true
+        }
+      }
+ - ps: |
+      If ($env:APPVEYOR_REPO_COMMIT_MESSAGE.ToLower().Contains("[deploy pkg]")) {
+        write-host "[deploy pkg] detected."
+        $env:POV_DEPLOY_PKG = $true
+      }
 
-install:
-  - ECHO Check PovBuildProj=%PovBuildProj%
-  - ECHO Check PovBuildDefs=%PovBuildDefs%
-
-before_build:
-
-build:
-  project: $(PovBuildProj)
-  parallel: true
-  verbosity: minimal
+build_script:
+ - ps: |
+      If ($env:POV_BUILD_PKG -eq "yes") {
+        cmd.exe /c windows\vs2015\autobuild -allcui -allins
+      } Else {
+        cmd.exe /c windows\vs2015\autobuild x86 -chk
+        cmd.exe /c windows\vs2015\autobuild x86_64 -chk
+      }
 
 test: off
+
+after_build:
+ - ps: |
+      If (($env:POV_DEPLOY_PKG -eq "yes") -and (Test-Path .\$env:APPVEYOR_BUILD_FOLDER\$env:POV_REPO_NAME\lpub3d_trace_cui-3.8\bin\x86_64\lpub3d_trace_cui64.exe)) {
+        bash -lc "tar -czf ${POV_REPO_NAME}.tar.gz ${POV_REPO_NAME} && echo Tarball ${POV_REPO_NAME}.tar.gz created."
+        If ($env:POV_BUILD_PKG -eq "yes") {
+          $root = Resolve-Path .\$env:APPVEYOR_BUILD_FOLDER
+          [IO.Directory]::GetFiles($root.Path, '*.tar.gz', 'TopDirectoryOnly') | % { Push-AppveyorArtifact $_ -FileName $_.Substring($root.Path.Length + 1) -DeploymentName $env:POV_REPO_NAME }
+        }
+      }
+
+deploy:
+ - provider: GitHub
+   description: ''
+   auth_token:
+     secure: rnf4qpF81ISjm8q13OgkAaoKZReXpjODhU9fbGFMhMydHrda1ezLubGXRU9OKGu4
+   artifact: $(POV_REPO_NAME).tar.gz
+   prerelease: true
+   force_update: true
+   on:
+    branch: lpub3d/raytracer-cui
+    pov_deploy_pkg: true

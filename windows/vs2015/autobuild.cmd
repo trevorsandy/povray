@@ -19,32 +19,35 @@ rem MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 rem It is expected that this script will reside in .\windows\vs2015
 
-rem Variables
-SET VERSION_BASE=3.8
-
 rem Static defaults
-SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
-SET DEFAULT_PLATFORM=x64
+IF "%APPVEYOR%" EQU "True" (
+	rem deposit archive folder top build-folder
+  SET DIST_DIR_ROOT=..\..\lpub3d_windows_3rdparty
+) ELSE (
+	SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
+)
 SET PACKAGE=lpub3d_trace_cui
+SET DEFAULT_PLATFORM=x64
+SET VERSION_BASE=3.8
 SET DEBUG=0
 
 rem Build checks settings - set according to your check requirements - do not add quotes
 rem Check 01
-rem------------------------------------------
+rem ------------------------------------------
 rem SET BUILD_CHK_POV_FILE=..\..\distribution\scenes\advanced\biscuit.pov
 rem SET BUILD_CHK_MY_OUTPUT=..\..\distribution\scenes\advanced\biscuit
 rem SET BUILD_CHK_MY_PARMS=-f +d +p +v +a0.3 +UA +A +w320 +h240
 rem SET BUILD_CHK_MY_INCLUDES=
 
-rem Check 03
-rem------------------------------------------
+rem Check 02
+rem ------------------------------------------
 rem SET BUILD_CHK_MY_POV_FILE=tests\csi.ldr.pov
 rem SET BUILD_CHK_MY_OUTPUT=tests\csi.ldr
 rem SET BUILD_CHK_MY_PARMS=+d +a0.3 +UA +A +w2549 +h1650
 rem SET BUILD_CHK_MY_INCLUDES=+L%USERPROFILE%\LDraw\lgeo\ar +L%USERPROFILE%\LDraw\lgeo\lg +L%USERPROFILE%\LDraw\lgeo\stl
 
-rem Check 02
-rem------------------------------------------
+rem Check 03
+rem ------------------------------------------
 SET BUILD_CHK_MY_POV_FILE=tests\space in dir name test\biscuit.pov
 SET BUILD_CHK_MY_OUTPUT=tests\space in dir name test\biscuit space in file name test
 SET BUILD_CHK_MY_PARMS=+d -p +a0.3 +UA +A +w320 +h240
@@ -652,12 +655,12 @@ ECHO  -help......1.....Useage flag        [Difault=Off] Display useage.
 ECHO  x86........1.....Platform flag      [Default=On ] Build 32bit architecture.
 ECHO  x86_64.....1.....Platform flag      [Default=On ] Build 64bit architecture.
 ECHO  -allcui....1.....Project flag       [Default=On ] Build and install 32bit, 64bit, CUI configurations.
-ECHO  -allins....2.....Project flag       [Default=Off] Install all distribution artefacts as LPub3D 3rd party installation.
-ECHO  -ins.......2.....Project flag       [Default=On ] Install subset of distribution artefacts as LPub3D 3rd party installation.
+ECHO  -allins....2.....Project flag       [Default=Off] Install all distribution artefacts to lpub3d_windows_3rdparty archive folder.
+ECHO  -ins.......2.....Project flag       [Default=On ] Install subset of distribution artefacts to lpub3d_windows_3rdparty archive folder.
 ECHO  -run.......2,1...Project flag       [Default=Off] Run an image redering check - must be preceded by x86 or x86_64 flag.
-ECHO  -rbld......2,1...Project flag       [Default=Off] Rebuild project - clane and rebuild all project components.
-EChO  -rel.......2.....Configuration flag [Default=On ] Release build.
-EChO  -dgb.......2.....Configuration flag [Default=Off] Debug build.
+ECHO  -rbld......2,1...Project flag       [Default=Off] Rebuild project - clean and rebuild all project components.
+EChO  -rel.......2.....Configuration flag [Default=On ] Specify a release build.
+EChO  -dgb.......2.....Configuration flag [Default=Off] Specify a debug build.
 ECHO  -avx.......2.....Configuraiton flag [Default=Off] AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
 ECHO  -sse2......2.....Configuration flag [Default=Off] SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
 ECHO  -chk.......2.....Project flag       [Default=On ] Build and run an image redering check.
