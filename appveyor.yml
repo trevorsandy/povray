@@ -19,14 +19,15 @@ init:
  - ps: write-host "Building LPub3D-Trace-CUI x86 and x86_64 architectures..."
  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
  - ps: |
+      $env:POV_REPO_NAME = "lpub3d_windows_3rdparty"
       If ($env:APPVEYOR_REPO_COMMIT_MESSAGE.ToLower().Contains("[build pkg]")) {
         write-host "[build pkg] detected."
         $env:POV_BUILD_PKG = "yes"
-        $env:POV_REPO_NAME = "lpub3d_windows_3rdparty"
-        If ($env:APPVEYOR_REPO_COMMIT_MESSAGE.ToLower().Contains("[deploy pkg]")) {
-          write-host "[deploy pkg] detected."
-          $env:POV_DEPLOY_PKG = $true
-        }
+      }
+      If ($env:APPVEYOR_REPO_COMMIT_MESSAGE.ToLower().Contains("[deploy pkg]")) {
+        write-host "[deploy pkg] detected."
+        $env:POV_BUILD_PKG = "yes"
+        $env:POV_DEPLOY_PKG = $true
       }
  - ps: |
       If ($env:APPVEYOR_REPO_COMMIT_MESSAGE.ToLower().Contains("[deploy pkg]")) {
@@ -35,13 +36,13 @@ init:
       }
 
 build_script:
- - ps: |
-      If ($env:POV_BUILD_PKG -eq "yes") {
-        cmd.exe /c windows\vs2015\autobuild -allcui -allins
-      } Else {
-        cmd.exe /c windows\vs2015\autobuild x86 -chk
-        cmd.exe /c windows\vs2015\autobuild x86_64 -chk
-      }
+ - cmd: >-
+      IF /I %POV_BUILD_PKG% EQU "yes" (
+        CALL windows\vs2015\autobuild -allcui -allins
+      ) ELSE (
+        CALL windows\vs2015\autobuild x86 -chk
+        CALL windows\vs2015\autobuild x86_64 -chk
+      )
 
 test: off
 
