@@ -35,11 +35,11 @@ build_script:
  - cmd: >-
       IF /I "%POV_BUILD_PKG%" EQU "yes" (
         CD windows\vs2015
-        autobuild -allcui -allins
+        cmd /c autobuild -allcui -allins
       ) ELSE (
         CD windows\vs2015
-        autobuild x86 -chk
-        autobuild x86_64 -chk
+        cmd /c autobuild x86 -chk
+        cmd /c autobuild x86_64 -chk
       )
 
 test: off
