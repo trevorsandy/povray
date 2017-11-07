@@ -32,15 +32,14 @@ init:
       }
 
 build_script:
- - cmd: >-
-      IF /I "%POV_BUILD_PKG%" EQU "yes" (
-        CD windows\vs2015
-        cmd /c autobuild -allcui -allins
-      ) ELSE (
-        CD windows\vs2015
-        cmd /c autobuild x86 -chk
-        cmd /c autobuild x86_64 -chk
-      )
+ - ps: |
+      cd windows\vs2015 &ECHO We are here: %CD%
+      If ($env:POV_BUILD_PKG -eq "yes") {
+        cmd.exe /c autobuild.cmd -allcui -allins
+      } Else {
+        cmd.exe /c autobuild.cmd x86 -chk
+        cmd.exe /c autobuild.cmd x86_64 -chk
+      }
 
 test: off
 
