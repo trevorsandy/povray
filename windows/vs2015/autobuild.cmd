@@ -362,7 +362,6 @@ FOR %%P IN ( Win32, x64 ) DO (
 	!COMMAND_LINE!
 	rem Perform build check if specified
 	IF %CHECK%==1 CALL :CHECK_BUILD %%P
-	IF "%APPVEYOR%" EQU "True" CALL :CHECK_BUILD %%P
 	ENDLOCAL
 )
 rem Perform 3rd party install if specified
@@ -400,14 +399,13 @@ IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\changes.txt" "%DIST_DIR%\ChangeLog.txt
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\unix\AUTHORS" "%DIST_DIR%\AUTHORS.txt" /A
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Help" "%DIST_DIR%\help"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\doc\html" "%DIST_DIR%\html"
+
 IF  %INSTALL_ALL% == 1  ECHO -Copying Resources...
 IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\" (
 	IF  %INSTALL_ALL% == 1  MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\"
 )
 IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources
-IF  %INSTALL_ALL% == 1  ECHO -Copying Include scripts...
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
-IF  %INSTALL_ALL% == 1  ECHO -Copying Initialization files...
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
@@ -415,7 +413,7 @@ REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" 
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 SET __HOME__=%%USERPROFILE%%
 
-ECHO -Copying x86_64 (64bit) .Conf and .Ini files...
+ECHO -Copying 64bit .Conf and .Ini files...
 IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\x86_64\" (
 	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\x86_64\"
 )
@@ -477,7 +475,7 @@ SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
 >>%genConfigFile%  Output_to_File=true
 >>%genConfigFile%  Output_File_Type=N8             ; (+/-Ftype)
 
-ECHO -Copying x86 (32bit) .Conf and .Ini files...
+ECHO -Copying 32bit .Conf and .Ini files...
 IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\i386\" (
 	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\i386\"
 )
