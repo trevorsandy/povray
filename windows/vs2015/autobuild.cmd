@@ -21,15 +21,18 @@ rem It is expected that this script will reside in .\windows\vs2015
 
 rem Static defaults
 IF "%APPVEYOR%" EQU "True" (
-	IF [%POV_DIST_DIR%] = [] (
+	IF [%POV_DIST_DIR%] == [] (
 		ECHO.
 	  ECHO  -ERROR: Distribution directory not defined.
 	  ECHO  -%~nx0 terminated!
 	  GOTO :END
 	)
+	rem If Appveyor, do not show the image display window
+	SET DISP_WIN=-d
 	rem deposit archive folder top build-folder
 	SET DIST_DIR_ROOT=%POV_DIST_DIR%
 ) ELSE (
+  SET DISP_WIN=+d
 	SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
 )
 SET PACKAGE=lpub3d_trace_cui
@@ -56,7 +59,7 @@ rem Check 03
 rem ------------------------------------------
 SET BUILD_CHK_MY_POV_FILE=tests\space in dir name test\biscuit.pov
 SET BUILD_CHK_MY_OUTPUT=tests\space in dir name test\biscuit space in file name test
-SET BUILD_CHK_MY_PARMS=+d -p +a0.3 +UA +A +w320 +h240
+SET BUILD_CHK_MY_PARMS=%DISP_WIN% -p +a0.3 +UA +A +w320 +h240
 SET BUILD_CHK_MY_INCLUDES=
 
 rem Build check static settings - do not modify these.
