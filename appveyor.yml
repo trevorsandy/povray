@@ -33,7 +33,7 @@ init:
 
 build_script:
  - ps: |
-      cd windows\vs2015; echo "We are here: $PWD""
+      cd windows\vs2015; echo "We are here: $PWD"
       If ($env:POV_BUILD_PKG -eq "yes") {
         cmd.exe /c autobuild.cmd -allcui -allins
       } Else {
