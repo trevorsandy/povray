@@ -18,7 +18,6 @@ matrix:
 init:
  - ps: write-host "Building LPub3D-Trace-CUI x86 and x86_64 architectures..."
  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
- - ps: $env:POV_REPO_NAME = "lpub3d_windows_3rdparty"
  - ps: |
       If ($env:APPVEYOR_REPO_COMMIT_MESSAGE.ToLower().Contains("[build pkg]")) {
         write-host "[build pkg] detected."
@@ -31,35 +30,35 @@ init:
         $env:POV_DEPLOY_PKG = $true
       }
 
+before_build:
+ - ps: $env:POV_DIST_DIR = "$PWD\lpub3d_windows_3rdparty"
+
 build_script:
  - ps: |
-
-      cd windows\vs2015; echo "We are starting here: $PWD"
+      cd windows\vs2015; echo "Working Directory: $PWD"
       If ($env:POV_BUILD_PKG -eq "yes") {
         cmd.exe /c autobuild.cmd -allcui -allins
       } Else {
         cmd.exe /c autobuild.cmd x86 -chk
         cmd.exe /c autobuild.cmd x86_64 -chk
       }
+      $env:POV_ARTEFACTS=Get-ChildItem -Path $env:POV_DIST_DIR -Recurse
 
 test: off
 
 after_build:
  - ps: |
-      If (($env:POV_DEPLOY_PKG -eq "yes") -and (Test-Path .\$env:APPVEYOR_BUILD_FOLDER\$env:POV_REPO_NAME\lpub3d_trace_cui-3.8\bin\x86_64\lpub3d_trace_cui64.exe)) {
-        bash -lc "tar -czf ${POV_REPO_NAME}.tar.gz ${POV_REPO_NAME} && echo Tarball ${POV_REPO_NAME}.tar.gz created."
-        If ($env:POV_BUILD_PKG -eq "yes") {
-          $root = Resolve-Path .\$env:APPVEYOR_BUILD_FOLDER
-          [IO.Directory]::GetFiles($root.Path, '*.tar.gz', 'TopDirectoryOnly') | % { Push-AppveyorArtifact $_ -FileName $_.Substring($root.Path.Length + 1) -DeploymentName $env:POV_REPO_NAME }
-        }
+      If (($env:POV_BUILD_PKG -eq "yes") -and ($env:POV_ARTEFACTS.count -gt 50)) {
+        bash -lc "tar -czf ${POV_DIST_DIR}.tar.gz ${POV_DIST_DIR} && echo Tarball ${POV_DIST_DIR}.tar.gz created."
+        $root = Resolve-Path .\$env:APPVEYOR_BUILD_FOLDER; [IO.Directory]::GetFiles($root.Path, '*.tar.gz', 'TopDirectoryOnly') | % { Push-AppveyorArtifact $_ -FileName $_.Substring($root.Path.Length + 1) -DeploymentName $env:POV_DIST_DIR }
       }
 
 deploy:
  - provider: GitHub
-   description: ''
+   description: 'LPub3d-Trace-CUI - Customized POV-Ray for LPub3D'
    auth_token:
      secure: rnf4qpF81ISjm8q13OgkAaoKZReXpjODhU9fbGFMhMydHrda1ezLubGXRU9OKGu4
-   artifact: $(POV_REPO_NAME).tar.gz
+   artifact: $(POV_DIST_DIR).tar.gz
    prerelease: true
    force_update: true
    on:

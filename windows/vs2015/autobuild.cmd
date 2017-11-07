@@ -21,8 +21,14 @@ rem It is expected that this script will reside in .\windows\vs2015
 
 rem Static defaults
 IF "%APPVEYOR%" EQU "True" (
+	IF [%POV_DIST_DIR%] = [] (
+		ECHO.
+	  ECHO  -ERROR: Distribution directory not defined.
+	  ECHO  -%~nx0 terminated!
+	  GOTO :END
+	)
 	rem deposit archive folder top build-folder
-  SET DIST_DIR_ROOT=..\..\lpub3d_windows_3rdparty
+	SET DIST_DIR_ROOT=%POV_DIST_DIR%
 ) ELSE (
 	SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
 )
@@ -310,7 +316,8 @@ CALL :VERBOSE_MESSAGE %VERBOSE%
 
 rem Console logging flags (see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference)
 rem SET LOGGING=/clp:ErrorsOnly /nologo
-SET LOGGING=
+CALL :DISPLAY_ERRRORS_ONLY_MESSAGE
+SET LOGGING=/clp:ErrorsOnly
 
 rem Check if build all platforms
 IF /I "%PLATFORM%"=="-allcui" (
@@ -383,22 +390,22 @@ IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs\" (
 )
 IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs
 IF  %INSTALL_ALL% == 1  SET DIST_SRC="..\..\distribution\platform-specific\windows"
-IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "%DIST_SRC%\Help" "%DIST_DIR%\help"
-IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\doc\html" "%DIST_DIR%\html"
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\CUI_README.txt" "%DIST_DIR%" /A
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\LICENSE" "%DIST_DIR%\LICENSE.txt" /A
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\changes.txt" "%DIST_DIR%\ChangeLog.txt" /A
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\unix\AUTHORS" "%DIST_DIR%\AUTHORS.txt" /A
+IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Help" "%DIST_DIR%\help"
+REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\doc\html" "%DIST_DIR%\html"
 
 IF  %INSTALL_ALL% == 1  ECHO -Copying Resources...
 IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\" (
 	IF  %INSTALL_ALL% == 1  MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\"
 )
 IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources
-IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
-IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
-IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
-IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
+IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
+IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
+REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
+REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 SET __HOME__=%%USERPROFILE%%
@@ -543,6 +550,12 @@ ECHO.
 ECHO -%STATE%
 EXIT /b
 
+:DISPLAY_ERRRORS_ONLY_MESSAGE
+SET ERROR_ONLY=Minimum console display enabled - only error messages displayed.
+ECHO.
+ECHO -%ERROR_ONLY%
+EXIT /b
+
 :CHECK_BUILD
 IF %1==Win32 SET PL=32
 IF %1==x64 SET PL=64
@@ -559,45 +572,67 @@ EXIT /b
 
 :PLATFORM_ERROR
 ECHO.
-ECHO -(FLAG ERROR) Platform or usage flag is invalid. Use x86 or x86_64. For usage help use -help.
+ECHO -(01. FLAG ERROR) Platform or usage flag is invalid [%~nx0 %*].
+ECHO  Use x86 or x86_64. For usage help use -help.
 GOTO :USAGE
 
 :CONFIGURATION_ERROR
 ECHO.
-ECHO -(FLAG ERROR) Configuration flag is invalid. Use -rel, -avx or -sse2 with appropriate platform flag.
-GOTO :USAGE
+CALL :USAGE
+ECHO.
+ECHO -(02. FLAG ERROR) Configuration flag is invalid [%~nx0 %*].
+ECHO  Use -rel, -avx or -sse2 with appropriate platform flag.
+GOTO :END
 
 :AVX_ERROR
 ECHO.
-ECHO -(FLAG ERROR) AVX is not compatable with %PLATFORM% platform. Use -avx only with x86_64 flag.
-GOTO :USAGE
+CALL :USAGE
+ECHO.
+ECHO -(03. FLAG ERROR) AVX is not compatable with %PLATFORM% platform [%~nx0 %*].
+ECHO  Use -avx only with x86_64 flag.
+GOTO :END
 
 :SSE2_ERROR
 ECHO.
-ECHO -(FLAG ERROR) SSE2 is not compatable with %PLATFORM% platform. Use -sse2 only with x86 flag.
-GOTO :USAGE
+CALL :USAGE
+ECHO.
+ECHO -(04. FLAG ERROR) SSE2 is not compatable with %PLATFORM% platform [%~nx0 %*].
+ECHO  Use -sse2 only with x86 flag.
+GOTO :END
 
 :PROJECT_ERROR
 ECHO.
-ECHO -(FLAG ERROR) Project flag is invalid. Use -cui for Console UI or -gui for Graphic UI.
-GOTO :USAGE
+CALL :USAGE
+ECHO.
+ECHO -(05. FLAG ERROR) Project flag is invalid [%~nx0 %*].
+ECHO  Use -cui for Console UI or -gui for Graphic UI.
+GOTO :END
 
 :VERBOSE_ERROR
 ECHO.
-ECHO -(FLAG ERROR) Output flag is invalid. Use -verbose.
-GOTO :USAGE
+CALL :USAGE
+ECHO.
+ECHO -(06. FLAG ERROR) Output flag is invalid [%~nx0 %*].
+ECHO  Use -verbose.
+GOTO :END
 
 :VERBOSE_CUI_ERROR
 ECHO.
-ECHO -(FLAG ERROR) Output flag can only be used with CUI project. Use -verbose only with -cui flag.
-GOTO :USAGE
+CALL :USAGE
+ECHO.
+ECHO -(07. FLAG ERROR) Output flag can only be used with CUI project [%~nx0 %*].
+ECHO  Use -verbose only with -cui flag.
+GOTO :END
 
 :COMMAND_ERROR
 ECHO.
-ECHO -(COMMAND ERROR) Invalid command string.
-GOTO :USAGE
+CALL :USAGE
+ECHO.
+ECHO -(08. COMMAND ERROR) Invalid command string [%~nx0 %*].
+GOTO :END
 
 :USAGE
+ECHO ----------------------------------------------------------------
 ECHO.
 ECHO LPub3D-Trace Windows auto build script.
 ECHO.
@@ -612,6 +647,7 @@ ECHO     - Git
 ECHO     - Local POV-Ray git repository
 ECHO However, you are free to reconfigue this script to use different components.
 ECHO.
+ECHO ----------------------------------------------------------------
 ECHO Usage:
 ECHO.
 ECHO Help...
@@ -626,6 +662,7 @@ ECHO           [ -rel ^| -dgb ^|-ins ^| -allins ^| -chk ^| -run ^| -rbld ^| -avx
 ECHO           [-cui ^| -gui]
 ECHO           [ -verbose ]
 ECHO.
+ECHO ----------------------------------------------------------------
 ECHO Build all CUI projects and deploy all artefacts as a 3rd party installation bundle
 ECHO autobuild -allcui -allins
 ECHO.
@@ -647,6 +684,11 @@ ECHO.
 ECHO Build 32bit, Release CUI project example:
 ECHO autobuild
 ECHO.
+ECHO.
+ECHO Flags are case sensitive, use lowere case.
+ECHO.
+ECHO If no flag is supplied, 32bit platform, Release Configuration, CUI project built by default.
+ECHO.
 ECHO Flags:
 ECHO ----------------------------------------------------------------
 ECHO ^| Flag    ^| Pos ^| Type             ^| Description
@@ -667,10 +709,7 @@ ECHO  -chk.......2.....Project flag       [Default=On ] Build and run an image r
 ECHO  -cui.......3.....Project flag       [Default=On ] Build Console User Interface (CUI) project (must be preceded by a configuration flag).
 ECHO  -gui.......3.....Project flag       [Default=Off] Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
 ECHO  -verbose...4,1...Project flag       [Default=Off] Display verbose output. Useful for debugging (must be preceded by -cui flag).
-ECHO.
-ECHO Flags are case sensitive, use lowere case.
-ECHO.
-ECHO If no flag is supplied, 32bit platform, Release Configuration, CUI project built by default.
+ECHO ----------------------------------------------------------------
 EXIT /b
 
 :END

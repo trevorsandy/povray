@@ -31,7 +31,6 @@ FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MINOR_VERSION_INT" %VERS
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PRERELEASE" %VERSION_H%') DO SET RELEASE=%%i
 IF "%APPVEYOR%" EQU "True" (
   SET GIT_SHA=%APPVEYOR_REPO_COMMIT:~0,8%
-  ECHO "DEBUG - GIT_SHA %GIT_SHA%"
 ) ELSE (
   FOR /F "tokens=* USEBACKQ" %%i IN (`git rev-parse --short HEAD`) DO SET GIT_SHA=%%i
 )
@@ -60,6 +59,15 @@ rem Display the define attributes to visually confirm all is well.
 ECHO.
 ECHO -Build Parameters:
 ECHO.
+IF "%APPVEYOR%" EQU "True" (
+  ECHO   BUILD_HOST........[APPVEYOR CONTINUOUS INTEGRATION SERVICE]
+  ECHO   BUILD_ID..........[%APPVEYOR_BUILD_ID%]
+  ECHO   BUILD_BRANCH......[%APPVEYOR_REPO_BRANCH%]
+  ECHO   PROJECT_NAME......[%APPVEYOR_PROJECT_NAME%]
+  ECHO   REPOSITORY_NAME...[%APPVEYOR_REPO_NAME%]
+  ECHO   REPO_PROVIDER.....[%APPVEYOR_REPO_PROVIDER%]
+  ECHO   DIST_DIRECTORY....[%DIST_DIR_ROOT%]
+)
 ECHO   VERSION_MAJ.......[%VERSION_MAJ%]
 ECHO   VERSION_MIN.......[%VERSION_MIN%]
 ECHO   RELEASE...........[%RELEASE%]
