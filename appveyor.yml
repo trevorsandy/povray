@@ -32,9 +32,9 @@ init:
       }
 
 build_script:
- - cmc: CD
+ - cmd: CD
  - cmd: >-
-      IF /I "%POV_BUILD_PKG%" EQU "yes" (
+      IF "%POV_BUILD_PKG%" EQU "yes" (
         windows\vs2015\autobuild.bat -allcui -allins
       ) ELSE (
         windows\vs2015\autobuild.bat x86 -chk
