@@ -42,7 +42,7 @@ build_script:
         cmd.exe /c autobuild.cmd x86 -chk
         cmd.exe /c autobuild.cmd x86_64 -chk
       }
-      $env:POV_ARTEFACTS=Get-ChildItem -Path $env:POV_DIST_DIR -Recurse
+      $env:POV_ARTEFACTS = Get-ChildItem -Path $env:POV_DIST_DIR -Recurse
 
 test: off
 
