@@ -29,7 +29,12 @@ rem These are not fixed. You can change as you like
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MAJOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MAJ=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MINOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MIN=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PRERELEASE" %VERSION_H%') DO SET RELEASE=%%i
-FOR /F "tokens=* USEBACKQ" %%i IN (`git rev-parse --short HEAD`) DO SET GIT_SHA=%%i
+IF "%APPVEYOR%" EQU "True" (
+  SET GIT_BASE_CMD=git --git-dir "%APPVEYOR_BUILD_FOLDER%\.git" --work-tree "%CD%"
+  FOR /F "tokens=* USEBACKQ" %%i IN (`%GIT_BASE_CMD% rev-parse --short HEAD`) DO SET GIT_SHA=%%i
+) ELSE (
+  FOR /F "tokens=* USEBACKQ" %%i IN (`git rev-parse --short HEAD`) DO SET GIT_SHA=%%i
+)
 FOR /F "tokens=* USEBACKQ" %%i IN (`msbuild -nologo -version`) DO SET DEV_ENV=%%i
 
 rem Remove quotes and trailing space
