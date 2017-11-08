@@ -268,7 +268,9 @@ IF %REBUILD%==1 (
 rem Check if invalid console flag
 IF NOT [%3]==[] (
 	IF NOT "%3"=="-gui" (
-		IF NOT "%3"=="-cui" GOTO :PROJECT_ERROR
+		IF NOT "%3"=="-verbose" (
+			IF NOT "%3"=="-cui" GOTO :PROJECT_ERROR
+		)
 	)
 )
 rem Build CUI or GUI project - CUI is default
@@ -291,6 +293,7 @@ IF NOT [%4]==[] (
 )
 rem Enable verbose tracing (useful for debugging)
 IF /I "%1"=="-verbose" SET VERBOSE_CHK=true
+IF /I "%3"=="-verbose" SET VERBOSE_CHK=true
 IF /I "%4"=="-verbose" SET VERBOSE_CHK=true
 IF "%CONFIGURATION%"=="Debug" SET VERBOSE_CHK=true
 IF /I "%VERBOSE_CHK%"=="true" (
@@ -389,6 +392,7 @@ SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png
 
 ECHO.
 ECHO   CHECK_BUILD_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
+ECHO.
 ECHO   Generating build check povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 
 CALL :GENERATE_CONF_AND_INI_FILES
@@ -482,9 +486,9 @@ SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 >>%genConfigFile%  ; This example shows how to qualify path names containing space(s):
 >>%genConfigFile%  ; read = "%%HOME%%\this\directory\contains space characters"
 >>%genConfigFile%.
->>%genConfigFile%  ; You can use %%HOME%%, %%INSTALLDIR%% and $PWD (working directory) as the origin to define permitted paths:
+>>%genConfigFile%  ; You can use %%HOME%%, %%INSTALLDIR%% and working directory (%CD%) as the origin to define permitted paths:
 >>%genConfigFile%.
->>%genConfigFile%  ; %%HOME%% is hard-coded to the $USER environment variable.
+>>%genConfigFile%  ; %%HOME%% is hard-coded to the %%USERPROFILE%% environment variable (%USERPROFILE%).
 >>%genConfigFile%  read* = "%%HOME%%\%__POVUSERDIR__%\config"
 >>%genConfigFile%.
 >>%genConfigFile%  read* = "%__POVSYSDIR__%\resources\include"
@@ -495,12 +499,13 @@ SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 >>%genConfigFile%.
 >>%genConfigFile%  ; %%INSTALLDIR%% is hard-coded to the default LPub3D installation path - see default paths above.
 >>%genConfigFile%.
->>%genConfigFile%  ; The $PWD (working directory) is where LPub3D-Trace is called from.
+>>%genConfigFile%  ; The working directory (%CD%) is where LPub3D-Trace is called from.
 >>%genConfigFile%  read* = "..\..\distribution\ini"
 >>%genConfigFile%  read* = "..\..\distribution\include"
 >>%genConfigFile%  read* = "..\..\distribution\scenes"
 >>%genConfigFile%.
 >>%genConfigFile%  read+write* = .
+>>%genConfigFile%  read+write* = ".\tests\space in dir name test"
 ECHO   Copying povray.ini file...
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
 SET genConfigFile="%DIST_DIR%\povray.ini" ECHO

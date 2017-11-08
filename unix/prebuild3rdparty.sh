@@ -604,9 +604,9 @@ case "$1" in
 ; This example shows how to qualify path names containing space(s):
 ; read = "%HOME%/this/directory/contains space characters"
 
-; You can use %HOME%, %INSTALLDIR% and $PWD (working directory) as the origin to define permitted paths:
+; You can use %HOME%, %INSTALLDIR% and working directory ($PWD) as the origin to define permitted paths:
 
-; %HOME% is hard-coded to the $USER environment variable.
+; %HOME% is hard-coded to the \$USER environment variable ($USER).
 read* = "%HOME%/__POVUSERDIR__/config"
 
 read* = "__POVSYSDIR__/resources/include"
@@ -617,12 +617,13 @@ read* = "%HOME%/LDraw/lgeo/stl"
 
 ; %INSTALLDIR% is hard-coded to the default LPub3D installation path - see default paths above.
 
-; The $PWD (working directory) is where LPub3D-Trace is called from.
+; The working directory ($PWD) is where LPub3D-Trace is called from.
 ; read* = "../../distribution/ini"
 ; read* = "../../distribution/include"
 ; read* = "../../distribution/scenes"
 
 read+write* = .
+read+write* = "./tests/space in dir name test"
 pbEOF
 	;;
 esac
@@ -701,6 +702,7 @@ pov_xwin_msg = @pov_xwin_msg@
 # This will run before 'make install'.
 check: all
 	@echo "Generating build check povray.conf and povray.ini files..."; \\
+	mkdir -p "\$(lpub3duserdir)/config"; \\
 	cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(lpub3duserdir)/config/povray.conf; \\
 	cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > \$(lpub3duserdir)/config/povray.ini
 	@echo "Executing render output file check..."; \\
