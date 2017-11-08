@@ -702,9 +702,8 @@ pov_xwin_msg = @pov_xwin_msg@
 # This will run before 'make install'.
 check: all
 	@echo "Generating build check povray.conf and povray.ini files..."; \\
-	mkdir -p "\$(lpub3duserdir)/config"; \\
-	cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(lpub3duserdir)/config/povray.conf; \\
-	cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > \$(lpub3duserdir)/config/povray.ini
+	cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(HOME)/\$(lpub3duserdir)/config/povray.conf; \\
+	cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > \$(HOME)/\$(lpub3duserdir)/config/povray.ini
 	@echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\
 	+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes
