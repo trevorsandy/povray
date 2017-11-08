@@ -65,11 +65,11 @@ using boost::to_lower_copy;
 
 #ifdef BUILDING_AMD64
 #ifndef LPUB3D_TRACE_SYS_PATH
-# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
+# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files\\LPub3D\\3rdParty\\" PACKAGE "-" VERSION_BASE "\\resources"
 #endif
 #else
 #ifndef LPUB3D_TRACE_SYS_PATH
-# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files (x86)\\LPub3D\\3rdParty\\resources\\" PACKAGE "-" VERSION_BASE
+# define LPUB3D_TRACE_SYS_PATH "C:\\Program Files (x86)\\LPub3D\\3rdParty\\" PACKAGE "-" VERSION_BASE "\\resources"
 #endif
 #endif
 
@@ -360,6 +360,7 @@ namespace vfePlatform
         string  m_sysini, m_sysini_old;   // system ini filename
         string  m_userini, m_userini_old; // user ini filename
         FileIO  m_file_io;
+        bool m_soften_sysconf_message;    // soften missing povray.conf message
         ShellOut m_shellout;
         list<WinPath> m_permitted_paths;
         list<Conf_Option> m_custom_conf_options;

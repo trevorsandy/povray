@@ -925,6 +925,11 @@ namespace vfePlatform
         if (m_user_dir.length() != 0)
             m_Session->AddExcludedPath(m_user_dir);
 
+        // soften the sysconf is missing message
+        m_soften_sysconf_message = false;
+        if (getenv("POV_SYSCONF_MSG") > 0)
+            m_soften_sysconf_message = true;
+
         // read system configuration file
         if(m_sysconf.length() != 0)
         {
@@ -936,8 +941,14 @@ namespace vfePlatform
             }
             else
             {
-                fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE_NAME);
-                perror(m_sysconf.c_str());
+                // fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE);
+                // perror(m_sysconf.c_str());
+                if (getenv("POV_IGNORE_SYSCONF_MSG") > 0)
+                    fprintf(stderr, "%s: ignoring system configuration file ", PACKAGE_NAME);
+                else {
+                    fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE_NAME);
+                    perror(m_sysconf.c_str());
+                }
             }
         }
 

@@ -670,13 +670,13 @@ povgroup = @povgroup@
 
 # Povray conf and ini paths
 if MACOS_BUILD
-datapath = /Library/Application\ Support/LPub3D\ Software/LPub3D/3rdParty
+datapath = Library/Application\ Support/LPub3D\ Software/LPub3D/3rdParty
 sysapppath = /Applications/LPub3D.app/Contents/3rdParty
 else
-datapath = /.local/share/LPub3D\ Software/LPub3D/3rdParty
+datapath = .local/share/LPub3D\ Software/LPub3D/3rdParty
 sysapppath = /usr/share/lpub3d/3rdParty
 endif
-userdatapath = \$(HOME)\$(datapath)
+userdatapath = \$(HOME)/\$(datapath)
 lpub3duserdir = \$(datapath)/@PACKAGE@-@VERSION_BASE@
 lpub3dsysdir = \$(sysapppath)/@PACKAGE@-@VERSION_BASE@
 lpub3dlibdir = \$(lpub3dsysdir)/resources
@@ -698,18 +698,23 @@ CONFIG_CLEAN_FILES =
 pov_xwin_msg = @pov_xwin_msg@
 
 # Render a test scene for 'make check'.
-# This is meant to run before 'make install'.
+# This will run before 'make install'.
 check: all
+	@echo "Generating build check povray.conf and povray.ini files..."; \\
+	cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(lpub3duserdir)/config/povray.conf; \\
+	cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > \$(lpub3duserdir)/config/povray.ini
 	@echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\
 	+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes
-	@echo "Executing the render display window check..."; \\
-	case "\$(pov_xwin_msg)" in \\
-		*enabled*) \\
-		\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 \\
-		+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes; \\
-		;; \\
-	esac
+	@if ! test "\$(CI)" = "true"; then \\
+		echo "Executing the render display window check..."; \\
+		case "\$(pov_xwin_msg)" in \\
+			*enabled*) \\
+			\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 \\
+			+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes; \\
+			;; \\
+		esac ; \\
+	fi
 
 # Install scripts in povlibdir.
 nobase_povlib_SCRIPTS = `echo $scriptfiles`

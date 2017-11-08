@@ -57,17 +57,16 @@ using boost::to_lower_copy;
  * These constants don't have to be in config.h .
  */
 
-// Default System Library Locations (suffix = /conf)
 #ifdef LPUB3D_OSX_BUILD
 # ifndef LPUB3D_TRACE_SYS_PATH
-#  define LPUB3D_TRACE_SYS_PATH "/Applications/LPub3D.app/Contents/3rdParty/resources/" PACKAGE "-" VERSION_BASE
+#  define LPUB3D_TRACE_SYS_PATH "/Applications/LPub3D.app/Contents/3rdParty/" PACKAGE "-" VERSION_BASE "/resources"
 # endif
 # ifndef LPUB3D_TRACE_USER_PATH
 #  define LPUB3D_TRACE_USER_PATH "Library/Application Support/LPub3D Software/LPub3D/3rdParty/" PACKAGE "-" VERSION_BASE
 # endif
 #else
 # ifndef LPUB3D_TRACE_SYS_PATH
-#  define LPUB3D_TRACE_SYS_PATH "/usr/share/lpub3d/3rdParty/resources/" PACKAGE "-" VERSION_BASE
+#  define LPUB3D_TRACE_SYS_PATH "/usr/share/lpub3d/3rdParty/" PACKAGE "-" VERSION_BASE "/resources"
 # endif
 # ifndef LPUB3D_TRACE_USER_PATH
 #  define LPUB3D_TRACE_USER_PATH ".local/share/LPub3D Software/LPub3D/3rdParty/" PACKAGE "-" VERSION_BASE

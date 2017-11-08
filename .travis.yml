@@ -54,20 +54,20 @@ before_install:
   # Update repository index and download package dependencies/docker-engine if required
   - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
       sudo apt-get update -qq;
-      export POV_REPO_NAME=lpub3d_linux_3rdparty;
+      export POV_DIST_DIR=lpub3d_linux_3rdparty;
     else
       brew update;
       brew install ccache;
       export CXXFLAGS="-fno-fast-math";
       export PATH="/usr/local/opt/ccache/libexec:$PATH";
-      export POV_REPO_NAME=lpub3d_macos_3rdparty;
+      export POV_DIST_DIR=lpub3d_macos_3rdparty;
     fi
 
 install:
   - cd unix
   - chmod +x prebuild3rdparty.sh && ./prebuild3rdparty.sh
   - cd ..
-  - ./configure COMPILED_BY="Trevor SANDY <trevor.sandy@gmail.com> using Travis CI for LPub3D." --prefix="$(pwd)/${POV_REPO_NAME}" LPUB3D_3RD_PARTY="yes" --with-libsdl2 --enable-watch-cursor
+  - ./configure COMPILED_BY="Trevor SANDY <trevor.sandy@gmail.com> using Travis CI for LPub3D." --prefix="$(pwd)/${POV_DIST_DIR}" LPUB3D_3RD_PARTY="yes" --with-libsdl2 --enable-watch-cursor
   - make check
   - make install
 
@@ -77,8 +77,8 @@ script:
 before_deploy:
   # create a tarball of the lpub3d_linux_3rdparty folder
   - if [ "$POV_BUILD_PKG" = "yes" ]; then
-      if [ -d ${POV_REPO_NAME} ]; then
-        tar -czf ${POV_REPO_NAME}.tar.gz ${POV_REPO_NAME} && echo "Tarball ${POV_REPO_NAME}.tar.gz created.";
+      if [ -d ${POV_DIST_DIR} ]; then
+        tar -czf ${POV_DIST_DIR}.tar.gz ${POV_DIST_DIR} && echo "Tarball ${POV_DIST_DIR}.tar.gz created.";
       fi;
     fi
 
@@ -86,8 +86,11 @@ deploy:
   provider: releases
   api_key:
     secure: fm2MVQ6fTKeTBADPZHjRGyBUebh8CWbTzXFpibvNR31sJ2IGx+7ppNQChN/7d3ybLZyXCIpjxjkcBBwXOmFOIZ5BjQ5EuDf/aJRaS3Z2AwIt80agxtHTq4MSNmRscn2Hv/q6LoXJro2ZHPfHGzP7yeCELR78gfb9HE64IDd7+ORZY48sMlZ77y48/BdEnN9hmRVmxZw8OQItLjbJR4cHFoRGEET6GR2QtrfBnJVQfRmO4aXwYs6j5l4ncdSKrMVUfPK2o9ab9egEclGXxoQR5wNPHzCUZtlJFpfdyHFOaeYDx4s+CjmQH4hUQB0+4z8v/mdwoYR+2ntgaH8/3jGM0aW6x271XGdUDW0Ri/6m9hQ0bA3JdiHgDAsV1ayXT4dz2BMXEI8Dv6MIyVXw187zTCcDzZhHRbUcRqlp43P+tIjodLOYVT/hiSSVrKczqLUr15q8YLiyyK3/91OgYl5XA2Alm1KHhMn16wplpcbzu/vyOJ/GXRKOnCd2G7CeBGqWh5/Jg1Xp9EjuupMQWNvYKPLzXaPMVagE5zfENjbNamctlPcL0nDEvynliFcz3VhhVEx86DnQPqriTG8PtuI7wE6OvqFQ4zpTufDOfLKx73gXWB3h15fQUh3/qFH7EYz5kCghIkcudoRH5k6Vn/kaTuZ4XBmDYj8aw6cxTFFIbG0=
-  file: ${POV_REPO_NAME}.tar.gz
+  file: ${POV_DIST_DIR}.tar.gz
   overwrite: true
+  name: ${POV_DIST_DIR}
+  body: 'LPub3D-Trace-CUI - archive package of LPub3D image renderer based on POV-Ray'
+  prerelease: true
   skip_cleanup: true
   on:
     repo: trevorsandy/povray
