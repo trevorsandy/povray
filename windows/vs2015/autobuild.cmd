@@ -287,6 +287,14 @@ IF /I "%3"=="-cui" (
 	SET CONSOLE=1
 	SET PROJECT=console.vcxproj
 )
+IF /I "%3"=="-verbose" (
+	IF /I "%2"=="-allins" (
+		IF /I "%1"=="-allcui" (
+			SET CONSOLE=1
+			SET PROJECT=console.vcxproj
+		)
+	)
+)
 rem Check if invalid verbose flag
 IF NOT [%4]==[] (
 	IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
