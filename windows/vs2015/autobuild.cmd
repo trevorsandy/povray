@@ -447,14 +447,14 @@ IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\" (
 )
 IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources
 IF  %INSTALL_ALL% == 1  ECHO -Copying Include scripts...
-IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
+IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
 IF  %INSTALL_ALL% == 1  ECHO -Copying Initialization files...
-IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
+IF  %INSTALL_ALL% == 1  XCOPY /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 
 ECHO -Generating povray.conf and povray.ini files for %ARCH_LABEL% target platform...
-FOR %%A IN ( x86_64, i386 ) DO (
+FOR %%A IN ( x86_64 ) DO (
 	SET ARCH_LABEL=[64bit]
 	SET TARGET_ARCH=%%A
 	SET SYS_DIR_ROOT=C:\Program Files
