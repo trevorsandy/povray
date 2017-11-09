@@ -43,6 +43,7 @@ before_install:
       echo "$TRAVIS_COMMIT_MESSAGE"
       | grep -E  '\[build pkg\]'
       && echo "[build pkg] detected."
+      && export POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty
       && export POV_BUILD_PKG=yes || true
   # Build and deploy package if commit message contains [deploy pkg]
   - >
@@ -52,16 +53,17 @@ before_install:
       && export POV_BUILD_PKG=yes
       && export POV_DEPLOY_PKG=yes || true
   # Update repository index and download package dependencies/docker-engine if required
-  - if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-      sudo apt-get update -qq;
-      export POV_DIST_DIR=lpub3d_linux_3rdparty;
-    else
-      brew update;
-      brew install ccache;
-      export CXXFLAGS="-fno-fast-math";
-      export PATH="/usr/local/opt/ccache/libexec:$PATH";
-      export POV_DIST_DIR=lpub3d_macos_3rdparty;
-    fi
+  - >
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+        sudo apt-get update -qq;
+        export POV_DIST_DIR=lpub3d_linux_3rdparty;
+      else
+        brew update;
+        brew install ccache;
+        export CXXFLAGS="-fno-fast-math";
+        export PATH="/usr/local/opt/ccache/libexec:$PATH";
+        export POV_DIST_DIR=lpub3d_macos_3rdparty;
+      fi
 
 install:
   - cd unix
@@ -76,11 +78,12 @@ script:
 
 before_deploy:
   # create a tarball of the lpub3d_linux_3rdparty folder
-  - if [ "$POV_BUILD_PKG" = "yes" ]; then
-      if [ -d ${POV_DIST_DIR} ]; then
-        tar -czf ${POV_DIST_DIR}.tar.gz ${POV_DIST_DIR} && echo "Tarball ${POV_DIST_DIR}.tar.gz created.";
-      fi;
-    fi
+  - >
+      if [ "$POV_BUILD_PKG" = "yes" ]; then
+        if [ -d ${POV_DIST_DIR} ]; then
+          tar -czf ${POV_DIST_DIR}.tar.gz ${POV_DIST_DIR} && echo "Tarball ${POV_DIST_DIR}.tar.gz created.";
+        fi;
+      fi
 
 deploy:
   provider: releases

@@ -411,6 +411,8 @@ bin%PL%\%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%
 EXIT /b
 
 :3RD_PARTY_INSTALL
+ECHO.
+ECHO -DEBUG We are here: %CD%
 rem Version major and minor pulled in from autobuild_defs
 SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 ECHO.
@@ -420,6 +422,8 @@ ECHO -Copying %PACKAGE%32%d%.exe...
 IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
 	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
 )
+ECHO.
+ECHO -DEBUG exe destination path: "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
 COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
 
 ECHO -Copying %PACKAGE%64%d%.exe...
