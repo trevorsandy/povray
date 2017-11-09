@@ -698,8 +698,7 @@ CONFIG_CLEAN_FILES =
 # Test scene display status
 pov_xwin_msg = @pov_xwin_msg@
 
-# /home/travis/build/trevorsandy/povray/unix'
-# Render a test scene for 'make check'.
+# Render a test scene for 'make check' and validate config files settings.
 # This will run before 'make install'.
 build_check_lpub3duserdir = \$(HOME)/\$(lpub3duserdir)/config
 check: all
@@ -709,6 +708,7 @@ check: all
 		sudo \$(mkdir_p) "\$(build_check_lpub3duserdir)" && sudo chown \$(povowner) "\$(build_check_lpub3duserdir)" && sudo chgrp \$(povgroup) "\$(build_check_lpub3duserdir)"; \\
 		cat \$(top_builddir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > "\$(build_check_lpub3duserdir)/povray.conf"; \\
 		cat \$(top_builddir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > "\$(build_check_lpub3duserdir)/povray.ini"; \\
+		export POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty; \\
 	fi
 	@echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\

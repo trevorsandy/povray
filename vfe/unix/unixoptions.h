@@ -69,7 +69,7 @@ using boost::to_lower_copy;
 #  define LPUB3D_TRACE_SYS_PATH "/usr/share/lpub3d/3rdParty/" PACKAGE "-" VERSION_BASE "/resources"
 # endif
 # ifndef LPUB3D_TRACE_USER_PATH
-#  define LPUB3D_TRACE_USER_PATH ".local/share/LPub3D Software/LPub3D/3rdParty/" PACKAGE "-" VERSION_BASE
+#  define LPUB3D_TRACE_USER_PATH ".local/share/LPub3D\\ Software/LPub3D/3rdParty/" PACKAGE "-" VERSION_BASE
 # endif
 #endif
 
