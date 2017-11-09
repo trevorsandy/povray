@@ -598,8 +598,8 @@ case "$1" in
 ; INSTALLDIR  = __POVSYSDIR__
 ; SYSCONF     = __POVSYSDIR__/resources/config/povray.conf
 ; SYSINI      = __POVSYSDIR__/resources/config/povray.ini
-; USERCONF    = %HOME%/__POVUSERDIR__/config/povray.conf
-; USERINI     = %HOME%/__POVUSERDIR__/config/povray.ini
+; USERCONF    = "%HOME%/__POVUSERDIR__/config/povray.conf"
+; USERINI     = "%HOME%/__POVUSERDIR__/config/povray.ini"
 
 ; This example shows how to qualify path names containing space(s):
 ; read = "%HOME%/this/directory/contains space characters"
@@ -701,16 +701,14 @@ pov_xwin_msg = @pov_xwin_msg@
 # /home/travis/build/trevorsandy/povray/unix'
 # Render a test scene for 'make check'.
 # This will run before 'make install'.
+build_check_lpub3duserdir = \$(HOME)/\$(lpub3duserdir)/config
 check: all
-	@echo "Generating build check povray.conf and povray.ini files..."; \\
-	if test "\$(CI)" = "true"; then \\
-		echo "Continuous Integration Build Environment"; \\
-		sudo mkdir -p "\$(HOME)/\$(lpub3duserdir)/config"; \\
-		sudo cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(HOME)/\$(lpub3duserdir)/config/povray.conf; \\
-		sudo cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > \$(HOME)/\$(lpub3duserdir)/config/povray.ini; \\
-	else \\
-		cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(HOME)/\$(lpub3duserdir)/config/povray.conf; \\
-		cat \$(top_srcdir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > \$(HOME)/\$(lpub3duserdir)/config/povray.ini; \\
+	@if test "\$(CI)" = "true"; then \\
+		echo "Using Continuous Integration Build Environment"; \\
+		echo "Generating build check povray.conf and povray.ini files..."; \\
+		sudo \$(mkdir_p) "\$(build_check_lpub3duserdir)" && sudo chown \$(povowner) "\$(build_check_lpub3duserdir)" && sudo chgrp \$(povgroup) "\$(build_check_lpub3duserdir)"; \\
+		cat \$(top_builddir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > "\$(build_check_lpub3duserdir)/povray.conf"; \\
+		cat \$(top_builddir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > "\$(build_check_lpub3duserdir)/povray.ini"; \\
 	fi
 	@echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\

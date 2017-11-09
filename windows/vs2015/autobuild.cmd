@@ -387,6 +387,8 @@ IF %1==x64 SET PL=64
 
 ECHO.
 ECHO --Check Build - %CONFIGURATION% Configuration, %PL%bit Platform...
+rem Version major and minor pulled in from autobuild_defs
+SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 rem Suppress Missing System Povray.conf file as we are only using the user instance
 SET POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty
 SET TARGET_ARCH=x86_64
