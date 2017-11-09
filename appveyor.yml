@@ -15,7 +15,6 @@ matrix:
 
 init:
  - ps: write-host "Building LPub3D-Trace-CUI x86 and x86_64 architectures..."
- - ps: $env:POV_DIST_DIR = "lpub3d_windows_3rdparty"
  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
  - ps: |
       If ($env:APPVEYOR_REPO_COMMIT_MESSAGE.ToLower().Contains("[build pkg]")) {
@@ -30,6 +29,7 @@ init:
       }
 
 before_build:
+ - ps: $env:POV_DIST_DIR = "lpub3d_windows_3rdparty"
  - ps: $env:POV_DIST_DIR_PATH = "$env:APPVEYOR_BUILD_FOLDER\$env:POV_DIST_DIR"
  - ps: write-host "Build directory.....[$env:POV_DIST_DIR_PATH]"
 
@@ -38,11 +38,8 @@ build_script:
       cd windows\vs2015; write-host "Working Directory: $PWD"
       If ($env:POV_BUILD_PKG -eq "yes") {
         cmd.exe /c autobuild.cmd -allcui -allins
-        write-host "Build directory 2nd...[$env:POV_DIST_DIR_PATH]"
         $env:POV_ARTEFACT_ITEM_COUNT = (Get-ChildItem -Path $env:POV_DIST_DIR_PATH -Recurse).count
         write-host "`n  Artifact count....[$env:POV_ARTEFACT_ITEM_COUNT]"
-        $env:POV_ARTEFACT_ITEMS = Get-ChildItem -Path $env:POV_DIST_DIR_PATH -Recurse
-        write-host "`n  Artifact Items....[$env:POV_ARTEFACT_ITEMS]"
       } Else {
         cmd.exe /c autobuild.cmd x86 -chk
         cmd.exe /c autobuild.cmd x86_64 -chk
