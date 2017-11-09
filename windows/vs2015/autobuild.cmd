@@ -359,8 +359,8 @@ EXIT /b
 rem Display the build configuration and platform settings
 ECHO.
 ECHO -%BUILD_LBL% all CUI Platforms for %CONFIGURATION% Configuration...
-rem Launch msbuild across all CUI platform builds
-FOR %%P IN ( Win32, x64 ) DO (
+rem Launch msbuild across all CUI platform builds  Win32, x64
+FOR %%P IN ( x64 ) DO (
 	SETLOCAL ENABLEDELAYEDEXPANSION
 	rem Assemble command line
 	SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING% %DO_REBUILD%
@@ -456,7 +456,7 @@ REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DI
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 
 ECHO -Generating povray.conf and povray.ini files for %ARCH_LABEL% target platform...
-FOR %%A IN ( x86_64 ) DO (
+FOR %%A IN ( x86_64 i386 ) DO (
 	SET ARCH_LABEL=[64bit]
 	SET TARGET_ARCH=%%A
 	SET SYS_DIR_ROOT=C:\Program Files
