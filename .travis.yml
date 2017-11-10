@@ -54,15 +54,13 @@ before_install:
       && export POV_DEPLOY_PKG=yes || true
   # Update repository index and download package dependencies/docker-engine if required
   - >
-      if [ "$TRAVIS_OS_NAME" = "linux" ]; then
-        sudo apt-get update -qq;
-        export POV_DIST_DIR=lpub3d_linux_3rdparty;
-      else
-        brew update;
-        brew install ccache;
+      if [ "$TRAVIS_OS_NAME" = "osx" ]; then
         export CXXFLAGS="-fno-fast-math";
         export PATH="/usr/local/opt/ccache/libexec:$PATH";
         export POV_DIST_DIR=lpub3d_macos_3rdparty;
+      else
+        sudo apt-get update -qq;
+        export POV_DIST_DIR=lpub3d_linux_3rdparty;
       fi
 
 install:
@@ -92,7 +90,7 @@ deploy:
   file: ${POV_DIST_DIR}.tar.gz
   overwrite: true
   name: ${POV_DIST_DIR}
-  body: 'LPub3D-Trace-CUI - archive package of LPub3D image renderer based on POV-Ray'
+  body: 'LPub3D-Trace-CUI - `uname` archive package of LPub3D image renderer based on POV-Ray'
   prerelease: true
   skip_cleanup: true
   on:

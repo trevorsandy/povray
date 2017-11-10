@@ -3,7 +3,7 @@
 tab=`echo -e '\t'`
 nl='
 '
-
+echo "pre-commit check..."
 ########################################################################################################################
 #
 # Workarounds for quirks of particular runtime environments.
@@ -28,16 +28,16 @@ case "$(uname -s)" in
      # no known quirks to work around
      ;;
 
-   CYGWIN*|MINGW32*|MSYS*)
+   CYGWIN*|MINGW32*|MINGW64*|MSYS*)
      echo 'Running on MS Windows'
      # 'sed' output has LF line endings, but we want CR+LF for consistency.
      sed_newline_fix='s/$/\r/g'
      # 'sed -i' sets the edited file to read-only.
-     sed_i_fix() { chmod u+w "$@" ; }
+     sed_i_fix() { if test "$@"; then chmod u+w "$@" ; fi }
      ;;
 
    *)
-     echo 'Running on unidentified OS' 
+     echo 'Running on unidentified OS'
      # no known quirks to work around
      ;;
 
@@ -289,5 +289,5 @@ git add $stage >/dev/null 2>/dev/null
 ########################################################################################################################
 #
 # Done.
-
+echo "check completed."
 exit 0

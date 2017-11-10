@@ -578,7 +578,7 @@ conf="../povray.conf"
 
 case "$1" in
 	clean)
-	for file in $conf $conf.in; do
+	for file in $conf $conf.in $conf.check.in; do
 		rm $file 2> /dev/null  &&  echo "Cleanup $file"
 	done
 	;;
@@ -618,8 +618,18 @@ read* = "__POVSYSDIR__/resources/ini"
 
 ; The working directory ($PWD) is where LPub3D-Trace is called from.
 read+write* = .
+pbEOF
+
+	### ../povray.conf.check.in (build check template %HOME%/__POVUSERDIR__/config/povray.conf)
+
+	echo "Create $conf.check.in"
+	cat ../distribution/povray.conf | sed \
+		's/C:.POVRAY3 drive and/__POVSYSDIR__/' > $conf.check.in
+	cat << pbEOF >> $conf.check.in
 
 ; LPub3D-Trace build check settings...
+
+; The working directory ($PWD) is where LPub3D-Trace is called from.
 read* = "../../distribution/ini"
 read* = "../../distribution/include"
 read* = "../../distribution/scenes"
@@ -706,7 +716,7 @@ check: all
 		echo "Using Continuous Integration Build Environment"; \\
 		echo "Generating build check povray.conf and povray.ini files..."; \\
 		sudo \$(mkdir_p) "\$(build_check_lpub3duserdir)" && sudo chown \$(povowner) "\$(build_check_lpub3duserdir)" && sudo chgrp \$(povgroup) "\$(build_check_lpub3duserdir)"; \\
-		cat \$(top_builddir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > "\$(build_check_lpub3duserdir)/povray.conf"; \\
+		cat \$(top_builddir)/povray.conf.check.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > "\$(build_check_lpub3duserdir)/povray.conf"; \\
 		cat \$(top_builddir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > "\$(build_check_lpub3duserdir)/povray.ini"; \\
 	fi
 	@echo "Executing render output file check..."; \\

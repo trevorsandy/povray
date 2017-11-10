@@ -35,6 +35,8 @@ IF "%APPVEYOR%" EQU "True" (
   SET DISP_WIN=+d
 	SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
 )
+rem Set console output logging level - (0=normal:all output or 1=minimum:error output)
+SET MIN_CONSOLE_OUTPUT=1
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
 SET VERSION_BASE=3.8
@@ -70,7 +72,7 @@ SET BUILD_CHK_INCLUDE=+L"..\..\distribution\ini" +L"..\..\distribution\include" 
 SET BUILD_CHK_INCLUDE=%BUILD_CHK_INCLUDE% %BUILD_CHK_MY_INCLUDES%
 
 rem Visual Studio 'debug' comand line: +I"tests\space in dir name test\biscuit.pov" +O"tests\space in dir name test\biscuit space in file name test.png" +w320 +h240 +d -p +a0.3 +UA +A +L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
-
+SET FLAG_CONFLICT=unknown
 SET CONFIGURATION=unknown
 SET PLATFORM=unknown
 SET PROJECT=unknown
@@ -168,13 +170,20 @@ IF /I "%RUN_CHK%"=="true" (
 	SET CONFIGURATION=run render only
 	CALL :BUILD_CHECK %PLATFORM%
 	rem Finish
-	EXIT /b
+	GOTO :END
 )
 rem Perform verbose (debug) build
 IF "%1"=="-verbose" (
 	SET CHECK=1
 	SET THIRD_INSTALL=0
 	SET INSTALL_ALL=0
+	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+	GOTO :BUILD
+)
+rem Check if build all platforms
+IF /I "%1"=="-allcui" (
+	SET CONSOLE=1
+	SET PROJECT=console.vcxproj
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
@@ -229,18 +238,19 @@ IF [%2]==[] (
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
-rem Check if x86_64 and AVX
+rem Check if %1=x86_64 and %2=AVX
 IF "%PLATFORM%"=="x64" (
 	IF /I "%2"=="-avx" GOTO :SET_AVX
 )
-rem Check if x86 and SSE2
+rem Check if  %1=x86 and %2=SSE2
 IF "%PLATFORM%"=="Win32" (
 	IF /I "%2"=="-sse2" GOTO :SET_SSE2
 )
-rem Check if bad platform and configuration flag combination
+rem Check if bad platform and configuration flag combination -  %1=Win32 and %2=-avx
 IF "%PLATFORM%"=="Win32" (
 	IF /I "%2"=="-avx" GOTO :AVX_ERROR
 )
+rem Check if bad platform and configuration flag combination -  %1=x64 and %2=-sse2
 IF "%PLATFORM%"=="x64" (
 	IF /I "%2"=="-sse2" GOTO :SSE2_ERROR
 )
@@ -280,13 +290,24 @@ IF [%3]==[] (
 	SET PROJECT=console.vcxproj
 )
 IF /I "%3"=="-gui" (
-	SET CONSOLE=0
-	SET PROJECT=povray.sln
+	IF "%1"=="-allcui" (
+		SET FLAG_CONFLICT=-allcui flag detected, -gui flag ignored.
+		CALL :FLAG_CONFLICT_DETECTED %*
+	) ELSE (
+		SET CONSOLE=0
+		SET PROJECT=povray.sln
+	)
 )
 IF /I "%3"=="-cui" (
-	SET CONSOLE=1
-	SET PROJECT=console.vcxproj
+	IF "%1"=="-allcui" (
+		SET FLAG_CONFLICT=-allcui flag detected, -cui flag ignored.
+		CALL :FLAG_CONFLICT_DETECTED %*
+	) ELSE (
+		SET CONSOLE=1
+		SET PROJECT=console.vcxproj
+	)
 )
+IF "%FLAG_CONFLICT%" == "fatal" GOTO :END
 rem Run an image render check
 IF /I "%3"=="-chk" (
 	SET CHECK=1
@@ -302,12 +323,18 @@ IF "%CONFIGURATION%"=="Debug" SET VERBOSE_CHK=true
 IF /I "%VERBOSE_CHK%"=="true" (
 	rem Check if CUI or allCUI project build
 	IF NOT %CONSOLE%==1 (
-		IF NOT "%PLATFORM%"=="-allcui" GOTO :VERBOSE_CUI_ERROR
+		IF NOT "%PLATFORM%"=="-allcui" (
+			GOTO :VERBOSE_CUI_ERROR
+		)
 	)
 	SET VERBOSE=1
-) ELSE (
-	SET VERBOSE=0
 )
+rem Set console output logging level - (0=normal:all output or 1=minimum:error output)
+rem Console output - see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference
+IF %MIN_CONSOLE_OUTPUT%==1 (
+	SET CONSOLE_OUTPUT_FLAGS=/clp:ErrorsOnly /nologo
+)
+
 rem Initialize the Visual Studio command line development environment
 rem Note you can change this line to your specific environment - I am using VS2017 here.
 CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
@@ -323,21 +350,16 @@ CALL :PROJECT_MESSAGE %CONSOLE%
 rem Display verbosity message
 CALL :VERBOSE_MESSAGE %VERBOSE%
 
-rem Console logging flags (see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference)
-rem SET LOGGING=/clp:ErrorsOnly /nologo
-CALL :DISPLAY_ERRRORS_ONLY_MESSAGE
-SET LOGGING=/clp:ErrorsOnly /nologo
+rem Console output logging level message
+CALL :CONSOLE_OUTPUT_MESSAGE %MIN_CONSOLE_OUTPUT%
 
 rem Check if build all platforms
 IF /I "%PLATFORM%"=="-allcui" (
-	SET CONSOLE=1
-	SET PROJECT=console.vcxproj
-	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD_ALL_CUI
 )
 
 rem Assemble command line
-SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT% %LOGGING% %DO_REBUILD%
+SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT% %CONSOLE_OUTPUT_FLAGS% %DO_REBUILD%
 ECHO   BUILD_COMMAND.....[%COMMAND_LINE%]
 rem Display the build configuration and platform settings
 ECHO.
@@ -348,17 +370,17 @@ rem Launch msbuild
 rem Perform build check if specified
 IF %CHECK%==1 CALL :BUILD_CHECK %PLATFORM%
 rem Finish
-EXIT /b
+GOTO :END
 
 :BUILD_ALL_CUI
 rem Display the build configuration and platform settings
 ECHO.
-ECHO -%BUILD_LBL% all CUI Platforms for %CONFIGURATION% Configuration...
+ECHO -%BUILD_LBL% x86 and x86_64 CUI Platforms for %CONFIGURATION% Configuration...
 rem Launch msbuild across all CUI platform builds
 FOR %%P IN ( Win32, x64 ) DO (
 	SETLOCAL ENABLEDELAYEDEXPANSION
 	rem Assemble command line
-	SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING% %DO_REBUILD%
+	SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %CONSOLE_OUTPUT_FLAGS% %DO_REBUILD%
 	ECHO.
 	ECHO --%BUILD_LBL% %%P Platform...
 	ECHO.
@@ -379,7 +401,7 @@ GOTO :END
 IF %1==Win32 SET PL=32
 IF %1==x64 SET PL=64
 ECHO.
-ECHO --Check Build - %CONFIGURATION% Configuration, %PL%bit Platform...
+ECHO --Build check - %CONFIGURATION% Configuration, %PL%bit Platform...
 rem Version major and minor pulled in from autobuild_defs
 SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 rem Suppress Missing System Povray.conf file as we are only using the user instance
@@ -394,7 +416,7 @@ CALL :GENERATE_CONF_AND_INI_FILES
 IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
 SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png" %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
 ECHO.
-ECHO   CHECK_BUILD_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
+ECHO   BUILD_CHECK_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
 
 bin%PL%\%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%
 EXIT /b
@@ -450,7 +472,7 @@ FOR %%A IN ( x86_64 i386 ) DO (
 		SET SYS_DIR_ROOT=C:\Program Files (x86)
 	)
 	SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A
-	
+
 	CALL :GENERATE_CONF_AND_INI_FILES
 )
 rem Finish
@@ -458,12 +480,12 @@ GOTO :END
 
 :GENERATE_CONF_AND_INI_FILES
 ECHO.
-ECHO   Generating build check povray.conf and povray.ini files for %ARCH_LABEL% target platform...
+ECHO   Generate build check povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 SET __HOME__=%%USERPROFILE%%
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 SET __POVSYSDIR__=%SYS_DIR_ROOT%\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
-ECHO   Updating povray.conf file...
+ECHO   Creating %DIST_DIR%\povray.conf...
 COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
 SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 :GENERATE povray.conf settings file
@@ -503,7 +525,7 @@ IF %CHECK%==1 (
 >>%genConfigFile%  read* = "..\..\distribution\scenes"
 >>%genConfigFile%  read+write* = ".\tests\space in dir name test"
 )
-ECHO   Updating povray.ini file...
+ECHO   Creating %DIST_DIR%\povray.ini...
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
 SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
 :GENERATE povray.ini settings file
@@ -536,77 +558,100 @@ ECHO -%OPTION%
 EXIT /b
 
 :VERBOSE_MESSAGE
-SET STATE=Verbose (%CONFIGURATION%) tracing is OFF - Default
-IF %1==1 SET STATE=Verbose (%CONFIGURATION%) tracing is ON
+SET STATE=Verbose (Win Debug) tracing is OFF - Default
+IF %1==1 SET STATE=Verbose (Win Debug) tracing is ON
 ECHO.
 ECHO -%STATE%
 EXIT /b
 
-:DISPLAY_ERRRORS_ONLY_MESSAGE
-SET ERROR_ONLY=Minimum console display enabled - only error messages displayed.
+:CONSOLE_OUTPUT_MESSAGE
+SET STATE=Normal console display enabled - all output displayed - Default.
+IF %1==1 SET STATE=Minimum console display enabled - only error output displayed.
 ECHO.
-ECHO -%ERROR_ONLY%
+ECHO -%STATE%
+EXIT /b
+
+:FLAG_CONFLICT_DETECTED
+IF "%FLAG_CONFLICT%" == "unknown" (
+	SET FLAG_CONFLICT=fatal
+	GOTO :FLAG_CONFLICT_ERROR
+)
+ECHO.
+ECHO -08. (FLAG CONFLICT) %FLAG_CONFLICT_MSG% [%~nx0 %*].
+ECHO      Enter '%~nx0 --help' to see Usage.
+ECHO.
 EXIT /b
 
 :PLATFORM_ERROR
 ECHO.
-ECHO -(01. FLAG ERROR) Platform or usage flag is invalid [%~nx0 %*].
-ECHO  Use x86 or x86_64. For usage help use -help.
-GOTO :USAGE
+CALL :USAGE
+ECHO.
+ECHO -01. (FLAG ERROR) Platform or usage flag is invalid [%~nx0 %*].
+ECHO      Use x86 or x86_64. For usage help use -help.
+GOTO :END
 
 :CONFIGURATION_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -(02. FLAG ERROR) Configuration flag is invalid [%~nx0 %*].
-ECHO  Use -rel, -avx or -sse2 with appropriate platform flag.
+ECHO -02. (FLAG ERROR) Configuration flag is invalid [%~nx0 %*].
+ECHO      Use -rel, -avx or -sse2 with appropriate platform flag.
 GOTO :END
 
 :AVX_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -(03. FLAG ERROR) AVX is not compatable with %PLATFORM% platform [%~nx0 %*].
-ECHO  Use -avx only with x86_64 flag.
+ECHO -03. (FLAG ERROR) AVX is not compatable with %PLATFORM% platform [%~nx0 %*].
+ECHO      Use -avx only with x86_64 flag.
 GOTO :END
 
 :SSE2_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -(04. FLAG ERROR) SSE2 is not compatable with %PLATFORM% platform [%~nx0 %*].
-ECHO  Use -sse2 only with x86 flag.
+ECHO -04. (FLAG ERROR) SSE2 is not compatable with %PLATFORM% platform [%~nx0 %*].
+ECHO      Use -sse2 only with x86 flag.
 GOTO :END
 
 :PROJECT_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -(05. FLAG ERROR) Project flag is invalid [%~nx0 %*].
-ECHO  Use -cui for Console UI or -gui for Graphic UI.
+ECHO -05. (FLAG ERROR) Project flag is invalid [%~nx0 %*].
+ECHO      Use -cui for Console UI or -gui for Graphic UI.
 GOTO :END
 
 :VERBOSE_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -(06. FLAG ERROR) Output flag is invalid [%~nx0 %*].
-ECHO  Use -verbose.
+ECHO -06. (FLAG ERROR) Verbose (Win Debug) output flag invalid [%~nx0 %*].
+ECHO      Use -verbose.
 GOTO :END
 
 :VERBOSE_CUI_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -(07. FLAG ERROR) Output flag can only be used with CUI project [%~nx0 %*].
-ECHO  Use -verbose only with -cui flag.
+ECHO -07. (FLAG ERROR) Verbose (Win Debug) output flag can only be used with the CUI project [%~nx0 %*].
+ECHO      Use -verbose only with -cui or -allcui flags.
+GOTO :END
+
+:FLAG_CONFLICT_ERROR
+ECHO.
+CALL :USAGE
+ECHO.
+ECHO -08. (FLAG CONFLICT ERROR) Incompatable flag in the command arguments [%~nx0 %*].
+ECHO      See Usage.
 GOTO :END
 
 :COMMAND_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -(08. COMMAND ERROR) Invalid command string [%~nx0 %*].
+ECHO -09. (COMMAND ERROR) Invalid command string [%~nx0 %*].
+ECHO      See Usage.
 GOTO :END
 
 :USAGE
@@ -688,6 +733,15 @@ ECHO  -cui.......3.....Project flag       [Default=On ] Build Console User Inter
 ECHO  -gui.......3.....Project flag       [Default=Off] Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
 ECHO  -verbose...4,1...Project flag       [Default=Off] Display verbose output. Useful for debugging (must be preceded by -cui flag).
 ECHO ----------------------------------------------------------------
+EXIT /b
+
+:DEBUG_BYPASS
+rem Insert marked section below before command as required
+rem DEBUG ----------->>
+GOTO :DEBUG_BYPASS
+rem DEBUG <<----------
+ECHO.
+ECHO -DEBUG - EXECUTION BYPASS
 EXIT /b
 
 :END

@@ -8,6 +8,11 @@ branches:
   only:
    - lpub3d/raytracer-cui
 
+skip_commits:
+  files:
+   - unix/
+   - vfe/unix/
+
 image: Visual Studio 2017
 
 matrix:
@@ -16,7 +21,7 @@ matrix:
 environment:
   POV_DIST_DIR: lpub3d_windows_3rdparty
   POV_DIST_DIR_PATH: $(APPVEYOR_BUILD_FOLDER)\$(POV_DIST_DIR)
- 
+
 init:
  - ps: write-host "Building LPub3D-Trace-CUI x86 and x86_64 architectures..."
  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
@@ -31,10 +36,6 @@ init:
         $env:POV_BUILD_PKG = "yes"
         $env:POV_DEPLOY_PKG = $true
       }
-
-#before_build:
-# - ps: $env:POV_DIST_DIR = "lpub3d_windows_3rdparty"
-# - ps: $env:POV_DIST_DIR_PATH = "$env:APPVEYOR_BUILD_FOLDER\$env:POV_DIST_DIR"
 
 build_script:
  - ps: |
