@@ -180,13 +180,6 @@ IF "%1"=="-verbose" (
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
-rem Check if build all platforms
-IF /I "%1"=="-allcui" (
-	SET CONSOLE=1
-	SET PROJECT=console.vcxproj
-	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
-	GOTO :BUILD
-)
 rem Parse configuration input flag
 IF /I "%1"=="-rbld" SET REBUILD_CHK=true
 IF /I "%2"=="-rbld" SET REBUILD_CHK=true
@@ -275,7 +268,13 @@ IF %REBUILD%==1 (
 	SET DO_REBUILD=/t:Rebuild
 	SET BUILD_LBL=Rebuilding
 )
-rem Check if invalid console flag
+rem Check if build all platforms
+IF /I "%1"=="-allcui" (
+	SET CONSOLE=1
+	SET PROJECT=console.vcxproj
+	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+)
+rem Check if invalid command line flag
 IF NOT [%3]==[] (
 	IF NOT "%3"=="-gui" (
 		IF NOT "%3"=="-cui" (
@@ -369,7 +368,6 @@ rem Launch msbuild
 %COMMAND_LINE%
 rem Perform build check if specified
 IF %CHECK%==1 CALL :BUILD_CHECK %PLATFORM%
-rem Finish
 GOTO :END
 
 :BUILD_ALL_CUI
@@ -385,7 +383,7 @@ FOR %%P IN ( Win32, x64 ) DO (
 	ECHO --%BUILD_LBL% %%P Platform...
 	ECHO.
 	ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
-	ECHO.
+	IF NOT %MIN_CONSOLE_OUTPUT%==1 ECHO.
 	rem Launch msbuild
 	!COMMAND_LINE!
 	rem Perform build check if specified
@@ -394,7 +392,6 @@ FOR %%P IN ( Win32, x64 ) DO (
 )
 rem Perform 3rd party install if specified
 IF %THIRD_INSTALL%==1 GOTO :3RD_PARTY_INSTALL
-rem Finish
 GOTO :END
 
 :BUILD_CHECK
@@ -408,10 +405,10 @@ rem Suppress Missing System Povray.conf file as we are only using the user insta
 SET POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty
 SET ARCH_LABEL=[%PL%bit]
 SET SYS_DIR_ROOT=C:\Program Files
-IF %1 == Win32 SET SYS_DIR_ROOT=C:\Program Files (x86)
+IF "%1" == "Win32" SET SYS_DIR_ROOT=C:\Program Files (x86)
 SET DIST_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
 
-CALL :GENERATE_CONF_AND_INI_FILES
+CALL :GENERATE_BUILD_CHECK_CONF_AND_INI_FILES
 
 IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
 SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png" %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
@@ -419,6 +416,20 @@ ECHO.
 ECHO   BUILD_CHECK_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
 
 bin%PL%\%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%
+ECHO.
+ECHO --Build check cleanup
+IF EXIST "%DIST_DIR%\povray.CHK_BAK.conf" (
+	COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.conf" "%DIST_DIR%\povray.conf"
+	DEL /Q "%DIST_DIR%\povray.CHK_BAK.conf"
+) ELSE (
+	DEL /Q "%DIST_DIR%\povray.conf"
+)
+IF EXIST "%DIST_DIR%\povray.CHK_BAK.ini" (
+	COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.ini" "%DIST_DIR%\povray.ini"
+	DEL /Q "%DIST_DIR%\povray.CHK_BAK.ini"
+) ELSE (
+	DEL /Q "%DIST_DIR%\povray.ini"
+)
 EXIT /b
 
 :3RD_PARTY_INSTALL
@@ -464,90 +475,114 @@ IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 
-FOR %%A IN ( x86_64 i386 ) DO (
+FOR %%A IN ( x86_64, i386 ) DO (
+	SET TARGET_ARCH=%%A
+	SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A
 	SET ARCH_LABEL=[64bit]
 	SET SYS_DIR_ROOT=C:\Program Files
-	IF %%A == i386 (
+	ECHO   TARGET_ARCH...........[%%A]
+	ECHO   DIST_DIR..............[%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A]
+	IF "%%A" == "i386" (
 		SET ARCH_LABEL=[32bit]
-		SET SYS_DIR_ROOT=C:\Program Files (x86)
+		SET SYS_DIR_ROOT=C:\Program Files ^(x86^)
 	)
-	SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A
-
 	CALL :GENERATE_CONF_AND_INI_FILES
 )
-rem Finish
 GOTO :END
 
 :GENERATE_CONF_AND_INI_FILES
 ECHO.
-ECHO   Generate build check povray.conf and povray.ini files for %ARCH_LABEL% target platform...
+ECHO   Generate povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 SET __HOME__=%%USERPROFILE%%
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
-SET __POVSYSDIR__=%SYS_DIR_ROOT%\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
+REM SET __POVSYSDIR__=%SYS_DIR_ROOT%\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
 ECHO   Creating %DIST_DIR%\povray.conf...
 COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
 SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 :GENERATE povray.conf settings file
 >>%genConfigFile%.
->>%genConfigFile%  ; Default (hard coded) paths:
->>%genConfigFile%  ; HOME        = %__HOME__%
->>%genConfigFile%  ; INSTALLDIR  = %__POVSYSDIR__%
->>%genConfigFile%  ; SYSCONF     = %__POVSYSDIR__%\resources\config\povray.conf
->>%genConfigFile%  ; SYSINI      = %__POVSYSDIR__%\resources\config\povray.ini
->>%genConfigFile%  ; USERCONF    = %%HOME%%\%__POVUSERDIR__%\config\povray.conf
->>%genConfigFile%  ; USERINI     = %%HOME%%\%__POVUSERDIR__%\config\povray.ini
+>>%genConfigFile% ; Default (hard coded) paths:
+>>%genConfigFile% ; HOME        = %__HOME__%
+>>%genConfigFile% ; INSTALLDIR  = __POVSYSDIR__
+>>%genConfigFile% ; SYSCONF     = __POVSYSDIR__\resources\config\povray.conf
+>>%genConfigFile% ; SYSINI      = __POVSYSDIR__\resources\config\povray.ini
+>>%genConfigFile% ; USERCONF    = %%HOME%%\__POVUSERDIR__\config\povray.conf
+>>%genConfigFile% ; USERINI     = %%HOME%%\__POVUSERDIR__\config\povray.ini
 >>%genConfigFile%.
->>%genConfigFile%  ; This example shows how to qualify path names containing space(s):
->>%genConfigFile%  ; read = "%%HOME%%\this\directory\contains space characters"
+>>%genConfigFile% ; This example shows how to qualify path names containing space(s):
+>>%genConfigFile% ; read = "%%HOME%%\this\directory\contains space characters"
 >>%genConfigFile%.
->>%genConfigFile%  ; You can use %%HOME%%, %%INSTALLDIR%% and working directory (%CD%) as the origin to define permitted paths:
+>>%genConfigFile% ; You can use %%HOME%%, %%INSTALLDIR%% and working directory (%CD%) as the origin to define permitted paths:
 >>%genConfigFile%.
->>%genConfigFile%  ; %%HOME%% is hard-coded to the %%USERPROFILE%% environment variable (%USERPROFILE%).
->>%genConfigFile%  read* = "%%HOME%%\%__POVUSERDIR__%\config"
+>>%genConfigFile% ; %%HOME%% is hard-coded to the %%USERPROFILE%% environment variable (%USERPROFILE%).
+>>%genConfigFile% read* = "%%HOME%%\%__POVUSERDIR__%\config"
 >>%genConfigFile%.
->>%genConfigFile%  read* = "%__POVSYSDIR__%\resources\include"
->>%genConfigFile%  read* = "%__POVSYSDIR__%\resources\ini"
->>%genConfigFile%  read* = "%%HOME%%\LDraw\lgeo\ar"
->>%genConfigFile%  read* = "%%HOME%%\LDraw\lgeo\lg"
->>%genConfigFile%  read* = "%%HOME%%\LDraw\lgeo\stl"
+>>%genConfigFile% ; read* = "__LGEOARDIR__\ar"
+>>%genConfigFile% ; read* = "__LGEOLGDIR__\lg"
+>>%genConfigFile% ; read* = "__LGEOSTLDIR__\stl"
 >>%genConfigFile%.
->>%genConfigFile%  ; %%INSTALLDIR%% is hard-coded to the default LPub3D installation path - see default paths above.
+>>%genConfigFile% ; %%INSTALLDIR%% is hard-coded to the default LPub3D installation path - see default paths above.
+>>%genConfigFile% read* = "__POVSYSDIR__\resources\include"
+>>%genConfigFile% read* = "__POVSYSDIR__\resources\ini"
 >>%genConfigFile%.
->>%genConfigFile%  ; The working directory (%CD%) is where LPub3D-Trace is called from.
->>%genConfigFile%.
->>%genConfigFile%  read+write* = .
-IF %CHECK%==1 (
->>%genConfigFile%.
->>%genConfigFile%  ; LPub3D-Trace build check settings...
->>%genConfigFile%  read* = "..\..\distribution\ini"
->>%genConfigFile%  read* = "..\..\distribution\include"
->>%genConfigFile%  read* = "..\..\distribution\scenes"
->>%genConfigFile%  read+write* = ".\tests\space in dir name test"
-)
+>>%genConfigFile% ; The working directory (%CD%) is where LPub3D-Trace is called from.
+>>%genConfigFile% read+write* = .
 ECHO   Creating %DIST_DIR%\povray.ini...
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
 SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
 :GENERATE povray.ini settings file
 >>%genConfigFile%.
->>%genConfigFile%  ; Search path for #include source files or command line ini files not
->>%genConfigFile%  ; found in the current directory.  New directories are added to the
->>%genConfigFile%  ; search path, up to a maximum of 25.
+>>%genConfigFile% ; Search path for #include source files or command line ini files not
+>>%genConfigFile% ; found in the current directory.  New directories are added to the
+>>%genConfigFile% ; search path, up to a maximum of 25.
 >>%genConfigFile%.
->>%genConfigFile%  Library_Path="%__POVSYSDIR__%\resources"
->>%genConfigFile%  Library_Path="%__POVSYSDIR__%\resources\ini"
->>%genConfigFile%  Library_Path="%__POVSYSDIR__%\resources\include"
+>>%genConfigFile% Library_Path="__POVSYSDIR__\resources"
+>>%genConfigFile% Library_Path="__POVSYSDIR__\resources\ini"
+>>%genConfigFile% Library_Path="__POVSYSDIR__\resources\include"
 >>%genConfigFile%.
->>%genConfigFile%  ; File output type control.
->>%genConfigFile%  ;     T    Uncompressed Targa-24
->>%genConfigFile%  ;     C    Compressed Targa-24
->>%genConfigFile%  ;     P    UNIX PPM
->>%genConfigFile%  ;     N    PNG (8-bits per colour RGB)
->>%genConfigFile%  ;     Nc   PNG ('c' bit per colour RGB where 5 ^<= c ^<= 16)
+>>%genConfigFile% ; File output type control.
+>>%genConfigFile% ;     T    Uncompressed Targa-24
+>>%genConfigFile% ;     C    Compressed Targa-24
+>>%genConfigFile% ;     P    UNIX PPM
+>>%genConfigFile% ;     N    PNG (8-bits per colour RGB)
+>>%genConfigFile% ;     Nc   PNG ('c' bit per colour RGB where 5 ^<= c ^<= 16)
 >>%genConfigFile%.
->>%genConfigFile%  Output_to_File=true
->>%genConfigFile%  Output_File_Type=N8             ; (+/-Ftype)
-rem Finish
+>>%genConfigFile% Output_to_File=true
+>>%genConfigFile% Output_File_Type=N8             ; (+/-Ftype)
+EXIT /b
+
+:GENERATE_BUILD_CHECK_CONF_AND_INI_FILES
+ECHO.
+ECHO   Generate build check povray.conf file for %ARCH_LABEL% target platform...
+SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
+IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
+IF EXIST "%DIST_DIR%\povray.conf" COPY /V /Y "%DIST_DIR%\povray.conf" "%DIST_DIR%\povray.CHK_BAK.conf"
+ECHO   Creating %DIST_DIR%\povray.conf...
+COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
+SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
+:GENERATE build check povray.conf settings file
+>>%genConfigFile%.
+>>%genConfigFile% ; LPub3D-Trace build check settings...
+>>%genConfigFile%.
+>>%genConfigFile% ; %%HOME%% is hard-coded to the %%USERPROFILE%% environment variable (%USERPROFILE%).
+>>%genConfigFile% read* = "%%HOME%%\%__POVUSERDIR__%\config"
+>>%genConfigFile%.
+>>%genConfigFile% ; The working directory (%CD%) is where LPub3D-Trace is called from.
+>>%genConfigFile% read* = "..\..\distribution\ini"
+>>%genConfigFile% read* = "..\..\distribution\include"
+>>%genConfigFile% read* = "..\..\distribution\scenes"
+>>%genConfigFile% read+write* = ".\tests\space in dir name test"
+ECHO   Creating %DIST_DIR%\povray.ini...
+IF EXIST "%DIST_DIR%\povray.ini" COPY /V /Y "%DIST_DIR%\povray.ini" "%DIST_DIR%\povray.CHK_BAK.ini"
+COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
+SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
+:GENERATE build check povray.ini settings file
+>>%genConfigFile%.
+>>%genConfigFile% ; LPub3D-Trace build check settings...
+>>%genConfigFile%.
+>>%genConfigFile% Output_to_File=true
+>>%genConfigFile% Output_File_Type=N8             ; (+/-Ftype)
 EXIT /b
 
 :PROJECT_MESSAGE
@@ -747,4 +782,3 @@ EXIT /b
 :END
 ENDLOCAL
 EXIT /b
-rem Done

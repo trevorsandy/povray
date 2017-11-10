@@ -608,9 +608,10 @@ case "$1" in
 
 ; %HOME% is hard-coded to the \$USER environment variable ($USER).
 read* = "%HOME%/__POVUSERDIR__/config"
-read* = "%HOME%/LDraw/lgeo/ar"
-read* = "%HOME%/LDraw/lgeo/lg"
-read* = "%HOME%/LDraw/lgeo/stl"
+
+; read* = "__LGEOARDIR__/ar"
+; read* = "__LGEOLGDIR__/lg"
+; read* = "__LGEOSTLDIR__/stl"
 
 ; %INSTALLDIR% is hard-coded to the default LPub3D installation path - see default paths above.
 read* = "__POVSYSDIR__/resources/include"
@@ -629,10 +630,14 @@ pbEOF
 
 ; LPub3D-Trace build check settings...
 
+; %HOME% is hard-coded to the \$USER environment variable ($USER).
+read* = "%HOME%/__POVUSERDIR__/config"
+
 ; The working directory ($PWD) is where LPub3D-Trace is called from.
 read* = "../../distribution/ini"
 read* = "../../distribution/include"
 read* = "../../distribution/scenes"
+read+write* = .
 read+write* = "./tests/space in dir name test"
 pbEOF
 	;;
@@ -741,7 +746,7 @@ povdoc_DATA = AUTHORS ChangeLog NEWS CUI_README LICENSE
 # Install configuration and INI files in povconfdir.
 dist_povconf_DATA = povray.conf
 povray.conf:
-	cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(top_builddir)/povray.conf
+	cat \$(top_srcdir)/povray.conf.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > \$(top_builddir)/povray.conf
 
 povconf_DATA = povray.ini
 povray.ini:
