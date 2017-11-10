@@ -10,7 +10,7 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: September 26, 2017
+rem  Last Update: November 10, 2017
 rem  Copyright (c) 2017 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -21,16 +21,16 @@ rem It is expected that this script will reside in .\windows\vs2015
 
 rem Static defaults
 IF "%APPVEYOR%" EQU "True" (
-	IF [%APPVEYOR_BUILD_FOLDER%\%POV_DIST_DIR%] == [] (
+	IF [%POV_DIST_DIR_PATH%] == [] (
 		ECHO.
-	  ECHO  -ERROR: Distribution directory not defined.
+	  ECHO  -ERROR: Distribution directory path not defined.
 	  ECHO  -%~nx0 terminated!
 	  GOTO :END
 	)
 	rem If Appveyor, do not show the image display window
 	SET DISP_WIN=-d
 	rem deposit archive folder top build-folder
-	SET DIST_DIR_ROOT=%APPVEYOR_BUILD_FOLDER%\%POV_DIST_DIR%
+	SET DIST_DIR_ROOT=%POV_DIST_DIR_PATH%
 ) ELSE (
   SET DISP_WIN=+d
 	SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
@@ -80,8 +80,8 @@ SET REBUILD=unknown
 SET CHECK=unknown
 
 IF %DEBUG%==1 (
-	SET d=d
-	SET DEFAULT_CONFIGURATION=Debug
+  SET d=d
+  SET DEFAULT_CONFIGURATION=Debug
 ) ELSE (
   SET d=
   SET DEFAULT_CONFIGURATION=Release
@@ -215,7 +215,7 @@ IF /I "%2"=="-allins" (
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 	GOTO :BUILD
 )
-rem Build and run an image render check
+rem Run an image render check
 IF /I "%2"=="-chk" (
 	SET CHECK=1
 	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
@@ -268,8 +268,8 @@ IF %REBUILD%==1 (
 rem Check if invalid console flag
 IF NOT [%3]==[] (
 	IF NOT "%3"=="-gui" (
-		IF NOT "%3"=="-verbose" (
-			IF NOT "%3"=="-cui" GOTO :PROJECT_ERROR
+		IF NOT "%3"=="-cui" (
+			IF NOT "%3"=="-chk" GOTO :PROJECT_ERROR
 		)
 	)
 )
@@ -287,13 +287,9 @@ IF /I "%3"=="-cui" (
 	SET CONSOLE=1
 	SET PROJECT=console.vcxproj
 )
-IF /I "%3"=="-verbose" (
-	IF /I "%2"=="-allins" (
-		IF /I "%1"=="-allcui" (
-			SET CONSOLE=1
-			SET PROJECT=console.vcxproj
-		)
-	)
+rem Run an image render check
+IF /I "%3"=="-chk" (
+	SET CHECK=1
 )
 rem Check if invalid verbose flag
 IF NOT [%4]==[] (
@@ -301,7 +297,6 @@ IF NOT [%4]==[] (
 )
 rem Enable verbose tracing (useful for debugging)
 IF /I "%1"=="-verbose" SET VERBOSE_CHK=true
-IF /I "%3"=="-verbose" SET VERBOSE_CHK=true
 IF /I "%4"=="-verbose" SET VERBOSE_CHK=true
 IF "%CONFIGURATION%"=="Debug" SET VERBOSE_CHK=true
 IF /I "%VERBOSE_CHK%"=="true" (
@@ -331,7 +326,7 @@ CALL :VERBOSE_MESSAGE %VERBOSE%
 rem Console logging flags (see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference)
 rem SET LOGGING=/clp:ErrorsOnly /nologo
 CALL :DISPLAY_ERRRORS_ONLY_MESSAGE
-SET LOGGING=/clp:ErrorsOnly
+SET LOGGING=/clp:ErrorsOnly /nologo
 
 rem Check if build all platforms
 IF /I "%PLATFORM%"=="-allcui" (
@@ -373,39 +368,33 @@ FOR %%P IN ( Win32, x64 ) DO (
 	!COMMAND_LINE!
 	rem Perform build check if specified
 	IF %CHECK%==1 CALL :BUILD_CHECK %%P
-	IF "%APPVEYOR%" EQU "True" CALL :BUILD_CHECK %%P
 	ENDLOCAL
 )
 rem Perform 3rd party install if specified
 IF %THIRD_INSTALL%==1 GOTO :3RD_PARTY_INSTALL
 rem Finish
-EXIT /b
+GOTO :END
 
 :BUILD_CHECK
 IF %1==Win32 SET PL=32
 IF %1==x64 SET PL=64
-
 ECHO.
 ECHO --Check Build - %CONFIGURATION% Configuration, %PL%bit Platform...
 rem Version major and minor pulled in from autobuild_defs
 SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 rem Suppress Missing System Povray.conf file as we are only using the user instance
 SET POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty
-SET TARGET_ARCH=x86_64
 SET ARCH_LABEL=[%PL%bit]
 SET SYS_DIR_ROOT=C:\Program Files
 IF %1 == Win32 SET SYS_DIR_ROOT=C:\Program Files (x86)
 SET DIST_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
-IF NOT EXIST "%DIST_DIR%\" 	MKDIR "%DIST_DIR%\"
-IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
-SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png" %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
-
-ECHO.
-ECHO   CHECK_BUILD_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
-ECHO.
-ECHO   Generating build check povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 
 CALL :GENERATE_CONF_AND_INI_FILES
+
+IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
+SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png" %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
+ECHO.
+ECHO   CHECK_BUILD_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
 
 bin%PL%\%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%
 EXIT /b
@@ -453,34 +442,28 @@ IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 
-ECHO -Generating povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 FOR %%A IN ( x86_64 i386 ) DO (
 	SET ARCH_LABEL=[64bit]
-	SET TARGET_ARCH=%%A
 	SET SYS_DIR_ROOT=C:\Program Files
-	SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A
-	IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A\" (
-		MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A\"
-	)
 	IF %%A == i386 (
 		SET ARCH_LABEL=[32bit]
 		SET SYS_DIR_ROOT=C:\Program Files (x86)
 	)
+	SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A
+	
 	CALL :GENERATE_CONF_AND_INI_FILES
 )
-EXIT /b
+rem Finish
+GOTO :END
 
 :GENERATE_CONF_AND_INI_FILES
-rem ECHO -Generating %ARCH_LABEL% .Conf and .Ini files...
-rem IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%TARGET_ARCH%\" (
-rem 	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%TARGET_ARCH%\"
-rem )
-rem SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%TARGET_ARCH%
-
+ECHO.
+ECHO   Generating build check povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 SET __HOME__=%%USERPROFILE%%
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 SET __POVSYSDIR__=%SYS_DIR_ROOT%\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
-ECHO   Copying povray.conf file...
+IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
+ECHO   Updating povray.conf file...
 COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
 SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 :GENERATE povray.conf settings file
@@ -510,13 +493,17 @@ SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 >>%genConfigFile%  ; %%INSTALLDIR%% is hard-coded to the default LPub3D installation path - see default paths above.
 >>%genConfigFile%.
 >>%genConfigFile%  ; The working directory (%CD%) is where LPub3D-Trace is called from.
+>>%genConfigFile%.
+>>%genConfigFile%  read+write* = .
+IF %CHECK%==1 (
+>>%genConfigFile%.
+>>%genConfigFile%  ; LPub3D-Trace build check settings...
 >>%genConfigFile%  read* = "..\..\distribution\ini"
 >>%genConfigFile%  read* = "..\..\distribution\include"
 >>%genConfigFile%  read* = "..\..\distribution\scenes"
->>%genConfigFile%.
->>%genConfigFile%  read+write* = .
 >>%genConfigFile%  read+write* = ".\tests\space in dir name test"
-ECHO   Copying povray.ini file...
+)
+ECHO   Updating povray.ini file...
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
 SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
 :GENERATE povray.ini settings file

@@ -608,21 +608,21 @@ case "$1" in
 
 ; %HOME% is hard-coded to the \$USER environment variable ($USER).
 read* = "%HOME%/__POVUSERDIR__/config"
-
-read* = "__POVSYSDIR__/resources/include"
-read* = "__POVSYSDIR__/resources/ini"
 read* = "%HOME%/LDraw/lgeo/ar"
 read* = "%HOME%/LDraw/lgeo/lg"
 read* = "%HOME%/LDraw/lgeo/stl"
 
 ; %INSTALLDIR% is hard-coded to the default LPub3D installation path - see default paths above.
+read* = "__POVSYSDIR__/resources/include"
+read* = "__POVSYSDIR__/resources/ini"
 
 ; The working directory ($PWD) is where LPub3D-Trace is called from.
-; read* = "../../distribution/ini"
-; read* = "../../distribution/include"
-; read* = "../../distribution/scenes"
-
 read+write* = .
+
+; LPub3D-Trace build check settings...
+read* = "../../distribution/ini"
+read* = "../../distribution/include"
+read* = "../../distribution/scenes"
 read+write* = "./tests/space in dir name test"
 pbEOF
 	;;
