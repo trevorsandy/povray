@@ -404,11 +404,9 @@ SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 rem Suppress Missing System Povray.conf file as we are only using the user instance
 SET POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty
 SET ARCH_LABEL=[%PL%bit]
-SET SYS_DIR_ROOT=C:\Program Files
-IF "%1" == "Win32" SET SYS_DIR_ROOT=C:\Program Files (x86)
 SET DIST_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
 
-CALL :GENERATE_BUILD_CHECK_CONF_AND_INI_FILES
+CALL :MAKE_BUILD_CHECK_CONF_AND_INI_FILES
 
 IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
 SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png" %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
@@ -479,21 +477,16 @@ FOR %%A IN ( x86_64, i386 ) DO (
 	SET TARGET_ARCH=%%A
 	SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A
 	SET ARCH_LABEL=[64bit]
-	SET SYS_DIR_ROOT=C:\Program Files
-	IF "%%A" == "i386" (
-		SET ARCH_LABEL=[32bit]
-		SET SYS_DIR_ROOT=C:\Program Files ^(x86^)
-	)
-	CALL :GENERATE_CONF_AND_INI_FILES
+	IF "%%A" == "i386" SET ARCH_LABEL=[32bit]
+	CALL :MAKE_CONF_AND_INI_FILES
 )
 GOTO :END
 
-:GENERATE_CONF_AND_INI_FILES
+:MAKE_CONF_AND_INI_FILES
 ECHO.
 ECHO   Generate povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 SET __HOME__=%%USERPROFILE%%
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
-REM SET __POVSYSDIR__=%SYS_DIR_ROOT%\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
 ECHO   Creating %DIST_DIR%\povray.conf...
 COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
@@ -550,7 +543,7 @@ SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
 >>%genConfigFile% Output_File_Type=N8             ; (+/-Ftype)
 EXIT /b
 
-:GENERATE_BUILD_CHECK_CONF_AND_INI_FILES
+:MAKE_BUILD_CHECK_CONF_AND_INI_FILES
 ECHO.
 ECHO   Generate build check povray.conf file for %ARCH_LABEL% target platform...
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
@@ -778,5 +771,6 @@ ECHO -DEBUG - EXECUTION BYPASS
 EXIT /b
 
 :END
+ECHO Finished.
 ENDLOCAL
 EXIT /b
