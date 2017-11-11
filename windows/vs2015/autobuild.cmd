@@ -480,8 +480,6 @@ FOR %%A IN ( x86_64, i386 ) DO (
 	SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A
 	SET ARCH_LABEL=[64bit]
 	SET SYS_DIR_ROOT=C:\Program Files
-	ECHO   TARGET_ARCH...........[%%A]
-	ECHO   DIST_DIR..............[%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A]
 	IF "%%A" == "i386" (
 		SET ARCH_LABEL=[32bit]
 		SET SYS_DIR_ROOT=C:\Program Files ^(x86^)

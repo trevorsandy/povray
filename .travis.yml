@@ -55,6 +55,8 @@ before_install:
   # Update repository index and download package dependencies/docker-engine if required
   - >
       if [ "$TRAVIS_OS_NAME" = "osx" ]; then
+        brew install openexr;
+        brew install sdl2;
         export CXXFLAGS="-fno-fast-math";
         export PATH="/usr/local/opt/ccache/libexec:$PATH";
         export POV_DIST_DIR=lpub3d_macos_3rdparty;
