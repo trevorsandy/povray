@@ -415,7 +415,7 @@ ECHO   BUILD_CHECK_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
 
 bin%PL%\%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%
 ECHO.
-ECHO --Build check cleanup
+ECHO --Build check cleanup...
 IF EXIST "%DIST_DIR%\povray.CHK_BAK.conf" (
 	COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.conf" "%DIST_DIR%\povray.conf"
 	DEL /Q "%DIST_DIR%\povray.CHK_BAK.conf"
@@ -474,7 +474,6 @@ REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DI
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 
 FOR %%A IN ( x86_64, i386 ) DO (
-	SET TARGET_ARCH=%%A
 	SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A
 	SET ARCH_LABEL=[64bit]
 	IF "%%A" == "i386" SET ARCH_LABEL=[32bit]
@@ -483,12 +482,11 @@ FOR %%A IN ( x86_64, i386 ) DO (
 GOTO :END
 
 :MAKE_CONF_AND_INI_FILES
-ECHO.
 ECHO   Generate povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 SET __HOME__=%%USERPROFILE%%
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
-ECHO   Creating %DIST_DIR%\povray.conf...
+ECHO   Create povray.conf...
 COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
 SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 :GENERATE povray.conf settings file
@@ -519,7 +517,7 @@ SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 >>%genConfigFile%.
 >>%genConfigFile% ; The working directory (%CD%) is where LPub3D-Trace is called from.
 >>%genConfigFile% read+write* = .
-ECHO   Creating %DIST_DIR%\povray.ini...
+ECHO   Create povray.ini...
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
 SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
 :GENERATE povray.ini settings file
@@ -549,7 +547,7 @@ ECHO   Generate build check povray.conf file for %ARCH_LABEL% target platform...
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
 IF EXIST "%DIST_DIR%\povray.conf" COPY /V /Y "%DIST_DIR%\povray.conf" "%DIST_DIR%\povray.CHK_BAK.conf"
-ECHO   Creating %DIST_DIR%\povray.conf...
+ECHO   Create %DIST_DIR%\povray.conf...
 COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
 SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 :GENERATE build check povray.conf settings file
@@ -564,7 +562,7 @@ SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 >>%genConfigFile% read* = "..\..\distribution\include"
 >>%genConfigFile% read* = "..\..\distribution\scenes"
 >>%genConfigFile% read+write* = ".\tests\space in dir name test"
-ECHO   Creating %DIST_DIR%\povray.ini...
+ECHO   Create %DIST_DIR%\povray.ini...
 IF EXIST "%DIST_DIR%\povray.ini" COPY /V /Y "%DIST_DIR%\povray.ini" "%DIST_DIR%\povray.CHK_BAK.ini"
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
 SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
@@ -591,8 +589,8 @@ ECHO -%STATE%
 EXIT /b
 
 :CONSOLE_OUTPUT_MESSAGE
-SET STATE=Normal console display enabled - all output displayed - Default.
-IF %1==1 SET STATE=Minimum console display enabled - only error output displayed.
+SET STATE=Normal build output enabled - all output displayed - Default.
+IF %1==1 SET STATE=Minimum build output enabled - only error output displayed.
 ECHO.
 ECHO -%STATE%
 EXIT /b
@@ -734,7 +732,7 @@ ECHO Build 32bit, Release CUI project example:
 ECHO autobuild
 ECHO.
 ECHO.
-ECHO Flags are case sensitive, use lowere case.
+ECHO Flags are not case sensitive, use lowere case.
 ECHO.
 ECHO If no flag is supplied, 32bit platform, Release Configuration, CUI project built by default.
 ECHO.
