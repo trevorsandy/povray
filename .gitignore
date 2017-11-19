@@ -195,6 +195,7 @@ $RECYCLE.BIN/
 /kde_install.sh
 /povray.1
 /povray.conf
+/povray.conf.check.in
 /povray.ini.in
 /povray.conf.in
 # Files created by unix/prebuild.sh script in specific subdirectories

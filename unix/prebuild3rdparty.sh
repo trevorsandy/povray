@@ -703,7 +703,7 @@ SUBDIRS = source vfe platform unix
 # Additional files to distribute.
 EXTRA_DIST = \\
 	bootstrap kde_install.sh \\
-	doc icons include ini scenes scripts \\
+	include ini scripts \\
 	povray.ini.in changes.txt revision.txt
 
 # Additional files to clean with 'make distclean'.
@@ -771,7 +771,7 @@ dist-hook:
 install-data-local:
 	cat /dev/null > \$(povinstall);
 	@echo "Creating data directories..."; \\
-	list='\$(top_srcdir)/icons \$(top_srcdir)/include \$(top_srcdir)/ini \$(top_srcdir)/scenes'; \\
+	list='\$(top_srcdir)/include \$(top_srcdir)/ini'; \\
 	dirlist=\`find \$\$list -type d | sed s,\$(top_srcdir)/,,\`; \\
 	for p in "" \$\$dirlist ; do \\
 		\$(mkdir_p) \$(DESTDIR)\$(povlibdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povlibdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
@@ -780,16 +780,6 @@ install-data-local:
 	filelist=\`find \$\$list -type f | sed s,\$(top_srcdir)/,,\`; \\
 	for f in \$\$filelist ; do \\
 		\$(INSTALL_DATA) \$(top_srcdir)/\$\$f \$(DESTDIR)\$(povlibdir)/\$\$f && chown \$(povowner) \$(DESTDIR)\$(povlibdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povlibdir)/\$\$f && echo "\$(DESTDIR)\$(povlibdir)/\$\$f" >> \$(povinstall); \\
-	done
-	@echo "Creating documentation directories..."; \\
-	dirlist=\`find \$(top_srcdir)/doc/ -type d | sed s,\$(top_srcdir)/doc/,,\`; \\
-	for p in "" \$\$dirlist ; do \\
-		\$(mkdir_p) \$(DESTDIR)\$(povdocdir)/\$\$p && chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$p && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$p && printf "%s\\n" "\$(DESTDIR)\$(povdocdir)/\$\$p" "\`cat \$(povinstall)\`" > \$(povinstall); \\
-	done
-	@echo "Copying documentation files..."; \\
-	filelist=\`find \$(top_srcdir)/doc/ -type f | sed s,\$(top_srcdir)/doc/,,\`; \\
-	for f in \$\$filelist ; do \\
-		\$(INSTALL_DATA) \$(top_srcdir)/doc/\$\$f \$(DESTDIR)\$(povdocdir)/\$\$f && chown \$(povowner) \$(DESTDIR)\$(povdocdir)/\$\$f && chgrp \$(povgroup) \$(DESTDIR)\$(povdocdir)/\$\$f && echo "\$(DESTDIR)\$(povdocdir)/\$\$f" >> \$(povinstall); \\
 	done
 	@echo "Creating user directories..."; \\
 	for p in \$(povuser) \$(povconfuser) ; do \\
@@ -811,7 +801,8 @@ install-data-hook:
 	@echo "Setting \$(PACKAGE) permissions..."; \\
 	chmod 755 \$(DESTDIR)\$(povbin)/\$(PACKAGE) && echo "\$(DESTDIR)\$(povbin)/\$(PACKAGE)" >> \$(povinstall)
 	@echo "Performing cleanup..."; \\
-	rm -f \$(bindir)/\$(PACKAGE) && echo "\$(bindir)/\$(PACKAGE)" >> \$(povinstall); \\
+	rm -rf \$(bindir)/\$(PACKAGE) && echo "\$(bindir)/\$(PACKAGE)" >> \$(povinstall); \\
+	rm -rf \$(bindir) && echo "\$(bindir)" >> \$(povinstall); \\
 	chown \$(povowner) \$(DESTDIR)\$(povbase) && chgrp \$(povgroup) \$(DESTDIR)\$(povbase) && echo "\$(DESTDIR)\$(povbase)" >> \$(povinstall)
 	@echo "Setting doc files ownership..."; \\
 	for f in AUTHORS ChangeLog NEWS CUI_README LICENSE; do \\
