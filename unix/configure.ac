@@ -622,21 +622,21 @@ else
       pov_sdl2_version=$libsdl2_source_version
 
       if test x"$build" = x"$host"; then
-	    pov_sdl2_h="./libraries/sdl2/include/SDL.h"
-	  else
-	    pov_sdl2_h="../libraries/sdl2/include/SDL.h"  # cross compiling
-	  fi
+	      pov_sdl2_h="./libraries/sdl2/include/SDL.h"
+	    else
+	      pov_sdl2_h="../libraries/sdl2/include/SDL.h"  # cross compiling
+	    fi
 
       AS_IF([ test -f "$pov_sdl2_h" ],
-	  [
-	    pov_check_libsdl2_src=“ok”
-	    AC_MSG_RESULT([yes, using SDL2 v$pov_sdl2_version built from source])
-	    AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
-	  ],
-	  [
-	    AC_MSG_RESULT([no, SDL.h header not found])
-	    pov_check_libsdl2_src="ko"
-	  ])
+	    [
+	      pov_check_libsdl2_src=“ok”
+	      AC_MSG_RESULT([yes, using SDL2 v$pov_sdl2_version built from source])
+	      AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
+	    ],
+	    [
+	      AC_MSG_RESULT([no, SDL.h header not found])
+	      pov_check_libsdl2_src="ko"
+	    ])
 
     else                                          # check for system libsdl
       pov_sdl2_version=$required_libsdl2_version
@@ -649,6 +649,8 @@ else
       AC_MSG_WARN([the preview display is disabled])
       AC_DEFINE([LIBSDL_MISSING], [], [Don't use SDL2.])
       pov_xwin_msg="disabled"
+    elif test x"$ax_check_libsdl2" = x"ok"; then
+      pov_xwin_msg="$pov_xwin_msg (using SDL2 v$ax_check_libsdl2_version)"
     else
       pov_xwin_msg="$pov_xwin_msg (using SDL2 v$pov_sdl2_version)"
     fi
@@ -1590,9 +1592,8 @@ The $PACKAGE_NAME components will be installed in the following directories.
   User configuration files:   ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/config
   Standard include files:     ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/include
   Standard INI files:         ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/ini
-  Standard demo scene files:  ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/scenes
   Unix man page:              ${povdatadir}/$PACKAGE-$VERSION_BASE/resources/man
-  Documentation (text, HTML): ${povdatadir}/$PACKAGE-$VERSION_BASE/docs
+  Documentation (text):       ${povdatadir}/$PACKAGE-$VERSION_BASE/docs
 ===============================================================================
 ])
 else
