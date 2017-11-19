@@ -7,7 +7,7 @@ rem needed to build the solution/project.
 rem This script is intended to be called from autobuild.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: September 03, 2017
+rem  Last Update: November 19, 2017
 rem  Copyright (c) 2017 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -30,11 +30,19 @@ FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MAJOR_VERSION_INT" %VERS
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MINOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MIN=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PRERELEASE" %VERSION_H%') DO SET RELEASE=%%i
 IF "%APPVEYOR%" EQU "True" (
-  SET GIT_SHA=%APPVEYOR_REPO_COMMIT:~0,8%
+  SET GIT_SHA=%APPVEYOR_REPO_COMMIT:~0,7%
 ) ELSE (
-  FOR /F "tokens=* USEBACKQ" %%i IN (`git rev-parse --short HEAD`) DO SET GIT_SHA=%%i
+  IF EXIST "..\..\.git" (
+	FOR /F "tokens=* USEBACKQ" %%i IN (`git rev-parse --short HEAD`) DO SET GIT_SHA=%%i
+  ) ELSE (
+	FOR /F "tokens=1 USEBACKQ" %%i IN (`git ls-remote --tags https://github.com/trevorsandy/povray.git v3.8.0_lpub3d`) DO SET GIT_SHA=%%i
+	GIT_SHA=%GIT_SHA:~0,7%
+  )
+  
 )
 FOR /F "tokens=* USEBACKQ" %%i IN (`msbuild -nologo -version`) DO SET DEV_ENV=%%i
+rem If there is not .git folder substitue with 0s
+IF "%GIT_SHA%" EQU "unknown" SET GIT_SHA=00000
 
 rem Remove quotes and trailing space
 CALL :CLEAN VERSION_MAJ %VERSION_MAJ%

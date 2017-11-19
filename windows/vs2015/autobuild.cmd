@@ -10,7 +10,7 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: November 10, 2017
+rem  Last Update: November 19, 2017
 rem  Copyright (c) 2017 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -35,8 +35,6 @@ IF "%APPVEYOR%" EQU "True" (
   SET DISP_WIN=+d
 	SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
 )
-rem Set console output logging level - (0=normal:all output or 1=minimum:error output)
-SET MIN_CONSOLE_OUTPUT=1
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
 SET VERSION_BASE=3.8
@@ -72,6 +70,8 @@ SET BUILD_CHK_INCLUDE=+L"..\..\distribution\ini" +L"..\..\distribution\include" 
 SET BUILD_CHK_INCLUDE=%BUILD_CHK_INCLUDE% %BUILD_CHK_MY_INCLUDES%
 
 rem Visual Studio 'debug' comand line: +I"tests\space in dir name test\biscuit.pov" +O"tests\space in dir name test\biscuit space in file name test.png" +w320 +h240 +d -p +a0.3 +UA +A +L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
+rem Set console output logging level - (0=normal:all output or 1=minimum:error output)
+SET MINIMUM_LOGGING=unknown
 SET FLAG_CONFLICT=unknown
 SET CONFIGURATION=unknown
 SET PLATFORM=unknown
@@ -278,7 +278,9 @@ rem Check if invalid command line flag
 IF NOT [%3]==[] (
 	IF NOT "%3"=="-gui" (
 		IF NOT "%3"=="-cui" (
-			IF NOT "%3"=="-chk" GOTO :PROJECT_ERROR
+			IF NOT "%3"=="-chk" (
+				IF NOT "%4"=="-minlog" (GOTO :PROJECT_ERROR
+			)
 		)
 	)
 )
@@ -311,9 +313,11 @@ rem Run an image render check
 IF /I "%3"=="-chk" (
 	SET CHECK=1
 )
-rem Check if invalid verbose flag
+rem Check if invalid command line flag
 IF NOT [%4]==[] (
-	IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
+	IF NOT "%4"=="-minlog" (
+		IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
+	)
 )
 rem Enable verbose tracing (useful for debugging)
 IF /I "%1"=="-verbose" SET VERBOSE_CHK=true
@@ -328,10 +332,16 @@ IF /I "%VERBOSE_CHK%"=="true" (
 	)
 	SET VERBOSE=1
 )
-rem Set console output logging level - (0=normal:all output or 1=minimum:error output)
 rem Console output - see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference
-IF %MIN_CONSOLE_OUTPUT%==1 (
-	SET CONSOLE_OUTPUT_FLAGS=/clp:ErrorsOnly /nologo
+rem Set console output logging level - (normal:all output or minlog=only error output)
+IF /I "%3"=="-minlog" (
+  SET MINIMUM_LOGGING=1
+)
+IF /I "%4"=="-minlog" (
+  SET MINIMUM_LOGGING=1
+)
+IF /I %MINIMUM_LOGGING%==1 (
+  SET LOGGING_FLAGS=/clp:ErrorsOnly /nologo
 )
 
 rem Initialize the Visual Studio command line development environment
@@ -350,7 +360,7 @@ rem Display verbosity message
 CALL :VERBOSE_MESSAGE %VERBOSE%
 
 rem Console output logging level message
-CALL :CONSOLE_OUTPUT_MESSAGE %MIN_CONSOLE_OUTPUT%
+CALL :OUTPUT_LOGGING_MESSAGE %MINIMUM_LOGGING%
 
 rem Check if build all platforms
 IF /I "%PLATFORM%"=="-allcui" (
@@ -358,7 +368,7 @@ IF /I "%PLATFORM%"=="-allcui" (
 )
 
 rem Assemble command line
-SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT% %CONSOLE_OUTPUT_FLAGS% %DO_REBUILD%
+SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
 ECHO   BUILD_COMMAND.....[%COMMAND_LINE%]
 rem Display the build configuration and platform settings
 ECHO.
@@ -378,7 +388,7 @@ rem Launch msbuild across all CUI platform builds
 FOR %%P IN ( Win32, x64 ) DO (
 	SETLOCAL ENABLEDELAYEDEXPANSION
 	rem Assemble command line
-	SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %CONSOLE_OUTPUT_FLAGS% %DO_REBUILD%
+	SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
 	ECHO.
 	ECHO --%BUILD_LBL% %%P Platform...
 	ECHO.
@@ -588,7 +598,7 @@ ECHO.
 ECHO -%STATE%
 EXIT /b
 
-:CONSOLE_OUTPUT_MESSAGE
+:OUTPUT_LOGGING_MESSAGE
 SET STATE=Normal build output enabled - all output displayed - Default.
 IF %1==1 SET STATE=Minimum build output enabled - only error output displayed.
 ECHO.
@@ -611,7 +621,9 @@ ECHO.
 CALL :USAGE
 ECHO.
 ECHO -01. (FLAG ERROR) Platform or usage flag is invalid [%~nx0 %*].
-ECHO      Use x86 or x86_64. For usage help use -help.
+ECHO      Use x86 or x86_64 for platforms, -allcui for all CUIs, -run to execute
+ECHO      without building, -rbld to rebuild or -verbose for 'Win Debug' messages. 
+ECHO      For usage help use -help.
 GOTO :END
 
 :CONFIGURATION_ERROR
@@ -619,7 +631,11 @@ ECHO.
 CALL :USAGE
 ECHO.
 ECHO -02. (FLAG ERROR) Configuration flag is invalid [%~nx0 %*].
-ECHO      Use -rel, -avx or -sse2 with appropriate platform flag.
+ECHO      Use -avx or -sse2 with appropriate platform flag,
+ECHO      -rel for release build, -dbg for debug build, -ins to 
+ECHO      install config files, -allins to install all documentation
+ECHO      -chk for Build Check, -run to without building or -rbld to rebuild
+ECHO      
 GOTO :END
 
 :AVX_ERROR
@@ -643,15 +659,16 @@ ECHO.
 CALL :USAGE
 ECHO.
 ECHO -05. (FLAG ERROR) Project flag is invalid [%~nx0 %*].
-ECHO      Use -cui for Console UI or -gui for Graphic UI.
+ECHO      Use -cui for Console UI, -gui for Graphic UI, 
+ECHO      -chk for Build Check or -minlog to display build errors only.
 GOTO :END
 
 :VERBOSE_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -06. (FLAG ERROR) Verbose (Win Debug) output flag invalid [%~nx0 %*].
-ECHO      Use -verbose.
+ECHO -06. (FLAG ERROR) Verbose (Win Debug) or minum console output flag invalid [%~nx0 %*].
+ECHO      Use -verbose for 'Win Debug' messages or -minlog to display build errors only.
 GOTO :END
 
 :VERBOSE_CUI_ERROR
@@ -756,6 +773,7 @@ ECHO  -chk.......2.....Project flag       [Default=On ] Build and run an image r
 ECHO  -cui.......3.....Project flag       [Default=On ] Build Console User Interface (CUI) project (must be preceded by a configuration flag).
 ECHO  -gui.......3.....Project flag       [Default=Off] Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
 ECHO  -verbose...4,1...Project flag       [Default=Off] Display verbose output. Useful for debugging (must be preceded by -cui flag).
+ECHO  -minlog....4,3...Project flag       [Default=Off] Minimum build logging - only display build errors
 ECHO ----------------------------------------------------------------
 EXIT /b
 
