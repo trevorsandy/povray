@@ -408,7 +408,7 @@ FOR %%P IN ( Win32, x64 ) DO (
     ECHO --%BUILD_LBL% %%P Platform...
     ECHO.
     ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
-    IF NOT %MIN_CONSOLE_OUTPUT%==1 ECHO.
+    IF NOT %MINIMUM_LOGGING%==1 ECHO.
     rem Launch msbuild
     !COMMAND_LINE!
     rem Perform build check if specified

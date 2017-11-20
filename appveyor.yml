@@ -43,11 +43,11 @@ build_script:
       write-host "  Build directory.....[$env:POV_DIST_DIR_PATH]"
       cd windows\vs2015; write-host "  Working Directory...[$PWD]"
       If ($env:POV_BUILD_PKG -eq "yes") {
-        cmd.exe /c autobuild.cmd -allcui -allins -chk
+        cmd.exe /c autobuild.cmd -allcui -allins -chk -minlog
         $env:POV_ARTEFACT_ITEM_COUNT = (Get-ChildItem -Path $env:POV_DIST_DIR_PATH -Recurse).count
         write-host "`n  Artifact count....[$env:POV_ARTEFACT_ITEM_COUNT]"
       } Else {
-        cmd.exe /c autobuild.cmd -allcui -chk
+        cmd.exe /c autobuild.cmd -allcui -chk -minlog
       }
 
 test: off
