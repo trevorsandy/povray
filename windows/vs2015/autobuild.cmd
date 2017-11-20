@@ -21,19 +21,19 @@ rem It is expected that this script will reside in .\windows\vs2015
 
 rem Static defaults
 IF "%APPVEYOR%" EQU "True" (
-	IF [%POV_DIST_DIR_PATH%] == [] (
-		ECHO.
-	  ECHO  -ERROR: Distribution directory path not defined.
-	  ECHO  -%~nx0 terminated!
-	  GOTO :END
-	)
-	rem If Appveyor, do not show the image display window
-	SET DISP_WIN=-d
-	rem deposit archive folder top build-folder
-	SET DIST_DIR_ROOT=%POV_DIST_DIR_PATH%
+    IF [%POV_DIST_DIR_PATH%] == [] (
+      ECHO.
+      ECHO  -ERROR: Distribution directory path not defined.
+      ECHO  -%~nx0 terminated!
+      GOTO :END
+    )
+    rem If Appveyor, do not show the image display window
+    SET DISP_WIN=-d
+    rem deposit archive folder top build-folder
+    SET DIST_DIR_ROOT=%POV_DIST_DIR_PATH%
 ) ELSE (
-  SET DISP_WIN=+d
-	SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
+    SET DISP_WIN=+d
+    SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
 )
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
@@ -72,6 +72,9 @@ SET BUILD_CHK_INCLUDE=%BUILD_CHK_INCLUDE% %BUILD_CHK_MY_INCLUDES%
 rem Visual Studio 'debug' comand line: +I"tests\space in dir name test\biscuit.pov" +O"tests\space in dir name test\biscuit space in file name test.png" +w320 +h240 +d -p +a0.3 +UA +A +L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
 rem Set console output logging level - (0=normal:all output or 1=minimum:error output)
 SET MINIMUM_LOGGING=unknown
+SET THIRD_INSTALL=unknown
+SET INSTALL_32BIT=unknown
+SET INSTALL_64BIT=unknown
 SET FLAG_CONFLICT=unknown
 SET CONFIGURATION=unknown
 SET PLATFORM=unknown
@@ -79,61 +82,62 @@ SET PROJECT=unknown
 SET CONSOLE=unknown
 SET VERBOSE=unknown
 SET REBUILD=unknown
+
 SET CHECK=unknown
 
 IF %DEBUG%==1 (
-  SET d=d
-  SET DEFAULT_CONFIGURATION=Debug
+    SET d=d
+    SET DEFAULT_CONFIGURATION=Debug
 ) ELSE (
-  SET d=
-  SET DEFAULT_CONFIGURATION=Release
+    SET d=
+    SET DEFAULT_CONFIGURATION=Release
 )
 
 rem Check if invalid platform flag
 IF NOT [%1]==[] (
-	IF NOT "%1"=="x86" (
-		IF NOT "%1"=="x86_64" (
-			IF NOT "%1"=="-allcui" (
-				IF NOT "%1"=="-run" (
-					IF NOT "%1"=="-rbld" (
-						IF NOT "%1"=="-verbose" (
-							IF NOT "%1"=="-help" GOTO :PLATFORM_ERROR
-						)
-					)
-				)
-			)
-		)
-	)
+    IF NOT "%1"=="x86" (
+        IF NOT "%1"=="x86_64" (
+            IF NOT "%1"=="-allcui" (
+                IF NOT "%1"=="-run" (
+                    IF NOT "%1"=="-rbld" (
+                        IF NOT "%1"=="-verbose" (
+                            IF NOT "%1"=="-help" GOTO :PLATFORM_ERROR
+                        )
+                    )
+                )
+            )
+        )
+    )
 )
 rem Parse platform input flag
 IF [%1]==[] (
-	SET PLATFORM=-allcui
-	GOTO :SET_CONFIGURATION
+    SET PLATFORM=-allcui
+    GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="x86" (
-	SET PLATFORM=Win32
-	GOTO :SET_CONFIGURATION
+    SET PLATFORM=Win32
+    GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="x86_64" (
-	SET PLATFORM=x64
-	GOTO :SET_CONFIGURATION
+    SET PLATFORM=x64
+    GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-allcui" (
-	SET PLATFORM=-allcui
-	GOTO :SET_CONFIGURATION
+    SET PLATFORM=-allcui
+    GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-run" (
-	GOTO :SET_CONFIGURATION
+    GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-rbld" (
-	SET PLATFORM=-allcui
-	GOTO :SET_CONFIGURATION
+    SET PLATFORM=-allcui
+    GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-verbose" (
-	GOTO :SET_CONFIGURATION
+    GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-help" (
-	GOTO :USAGE
+    GOTO :USAGE
 )
 rem If we get here display invalid command message.
 GOTO :COMMAND_ERROR
@@ -141,111 +145,111 @@ GOTO :COMMAND_ERROR
 :SET_CONFIGURATION
 rem Check if invalid configuration flag
 IF NOT [%2]==[] (
-	IF NOT "%2"=="-rel" (
-		IF NOT "%2"=="-dbg" (
-			IF NOT "%2"=="-avx" (
-				IF NOT "%2"=="-ins" (
-					IF NOT "%2"=="-allins" (
-						IF NOT "%2"=="-chk" (
-							IF NOT "%2"=="-run" (
-								IF NOT "%2"=="-rbld" (
-									IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
-								)
-							)
-						)
-					)
-				)
-			)
-		)
-	)
+    IF NOT "%2"=="-rel" (
+        IF NOT "%2"=="-dbg" (
+            IF NOT "%2"=="-avx" (
+                IF NOT "%2"=="-ins" (
+                    IF NOT "%2"=="-allins" (
+                        IF NOT "%2"=="-chk" (
+                            IF NOT "%2"=="-run" (
+                                IF NOT "%2"=="-rbld" (
+                                    IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+    )
 )
 rem  Set the default platform
 IF "%PLATFORM%"=="unknown" (
-	SET PLATFORM=%DEFAULT_PLATFORM%
+    SET PLATFORM=%DEFAULT_PLATFORM%
 )
 rem Run a render check without building
 IF /I "%1"=="-run" SET RUN_CHK=true
 IF /I "%2"=="-run" SET RUN_CHK=true
 IF /I "%RUN_CHK%"=="true" (
-	SET CONFIGURATION=run render only
-	CALL :BUILD_CHECK %PLATFORM%
-	rem Finish
-	GOTO :END
+    SET CONFIGURATION=run render only
+    CALL :BUILD_CHECK %PLATFORM%
+    rem Finish
+    GOTO :END
 )
 rem Perform verbose (debug) build
 IF "%1"=="-verbose" (
-	SET CHECK=1
-	SET THIRD_INSTALL=0
-	SET INSTALL_ALL=0
-	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
-	GOTO :BUILD
+    SET CHECK=1
+    SET THIRD_INSTALL=0
+    SET INSTALL_ALL=0
+    SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+    GOTO :BUILD
 )
 rem Parse configuration input flag
 IF /I "%1"=="-rbld" SET REBUILD_CHK=true
 IF /I "%2"=="-rbld" SET REBUILD_CHK=true
 IF /I "%REBUILD_CHK%"=="true" (
-	SET REBUILD=1
-	SET CHECK=1
-	SET THIRD_INSTALL=1
-	SET INSTALL_ALL=0
-	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
-	GOTO :BUILD
+    SET REBUILD=1
+    SET CHECK=1
+    SET THIRD_INSTALL=1
+    SET INSTALL_ALL=0
+    SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+    GOTO :BUILD
 )
 rem Check if release build
 IF /I "%2"=="-rel" (
-	SET CONFIGURATION=Release
-	GOTO :BUILD
+    SET CONFIGURATION=Release
+    GOTO :BUILD
 )
 rem Check if debug build
 IF /I "%2"=="-dbg" (
-	SET CONFIGURATION=Debug
-	GOTO :BUILD
+    SET CONFIGURATION=Debug
+    GOTO :BUILD
 )
 rem Check if install - reset configuration
 IF /I "%2"=="-ins" (
-	rem 3rd party install
-	SET THIRD_INSTALL=1
-	SET INSTALL_ALL=0
-	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
-	GOTO :BUILD
+    rem 3rd party install
+    SET THIRD_INSTALL=1
+    SET INSTALL_ALL=0
+    SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+    GOTO :BUILD
 )
 rem Install all content
 IF /I "%2"=="-allins" (
-	rem 3rd party install
-	SET THIRD_INSTALL=1
-	SET INSTALL_ALL=1
-	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
-	GOTO :BUILD
+    rem 3rd party install
+    SET THIRD_INSTALL=1
+    SET INSTALL_ALL=1
+    SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+    GOTO :BUILD
 )
 rem Run an image render check
 IF /I "%2"=="-chk" (
-	SET CHECK=1
-	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
-	GOTO :BUILD
+    SET CHECK=1
+    SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+    GOTO :BUILD
 )
 rem Parse configuration input flag
 IF [%2]==[] (
-	SET CHECK=1
-	SET THIRD_INSTALL=1
-	SET INSTALL_ALL=0
-	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
-	GOTO :BUILD
+    SET CHECK=1
+    SET THIRD_INSTALL=1
+    SET INSTALL_ALL=0
+    SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+    GOTO :BUILD
 )
 rem Check if %1=x86_64 and %2=AVX
 IF "%PLATFORM%"=="x64" (
-	IF /I "%2"=="-avx" GOTO :SET_AVX
+    IF /I "%2"=="-avx" GOTO :SET_AVX
 )
 rem Check if  %1=x86 and %2=SSE2
 IF "%PLATFORM%"=="Win32" (
-	IF /I "%2"=="-sse2" GOTO :SET_SSE2
+    IF /I "%2"=="-sse2" GOTO :SET_SSE2
 )
 rem Check if bad platform and configuration flag combination -  %1=Win32 and %2=-avx
 IF "%PLATFORM%"=="Win32" (
-	IF /I "%2"=="-avx" GOTO :AVX_ERROR
+    IF /I "%2"=="-avx" GOTO :AVX_ERROR
 )
 rem Check if bad platform and configuration flag combination -  %1=x64 and %2=-sse2
 IF "%PLATFORM%"=="x64" (
-	IF /I "%2"=="-sse2" GOTO :SSE2_ERROR
+    IF /I "%2"=="-sse2" GOTO :SSE2_ERROR
 )
 rem If we get here display invalid command message
 GOTO :COMMAND_ERROR
@@ -265,83 +269,87 @@ rem Configure build parameters
 SET DO_REBUILD=
 SET BUILD_LBL=Building
 IF %REBUILD%==1 (
-	SET DO_REBUILD=/t:Rebuild
-	SET BUILD_LBL=Rebuilding
+    SET DO_REBUILD=/t:Rebuild
+    SET BUILD_LBL=Rebuilding
 )
 rem Check if build all platforms
 IF /I "%1"=="-allcui" (
-	SET CONSOLE=1
-	SET PROJECT=console.vcxproj
-	SET CONFIGURATION=%DEFAULT_CONFIGURATION%
+    SET CONSOLE=1
+    SET PROJECT=console.vcxproj
+    SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 )
 rem Check if invalid command line flag
 IF NOT [%3]==[] (
-	IF NOT "%3"=="-gui" (
-		IF NOT "%3"=="-cui" (
-			IF NOT "%3"=="-chk" (
-				IF NOT "%4"=="-minlog" (GOTO :PROJECT_ERROR
-			)
-		)
-	)
+    IF NOT "%3"=="-gui" (
+        IF NOT "%3"=="-cui" (
+            IF NOT "%3"=="-chk" (
+                IF NOT "%3"=="-minlog" GOTO :PROJECT_ERROR
+            )
+        )
+    )
 )
 rem Build CUI or GUI project - CUI is default
 rem Parse configuration input flag
 IF [%3]==[] (
-	SET CONSOLE=1
-	SET PROJECT=console.vcxproj
+    SET CONSOLE=1
+    SET PROJECT=console.vcxproj
 )
 IF /I "%3"=="-gui" (
-	IF "%1"=="-allcui" (
-		SET FLAG_CONFLICT=-allcui flag detected, -gui flag ignored.
-		CALL :FLAG_CONFLICT_DETECTED %*
-	) ELSE (
-		SET CONSOLE=0
-		SET PROJECT=povray.sln
-	)
+    IF "%1"=="-allcui" (
+        SET FLAG_CONFLICT=-allcui flag detected, -gui flag ignored.
+        CALL :FLAG_CONFLICT_DETECTED %*
+    ) ELSE (
+        SET CONSOLE=0
+        SET PROJECT=povray.sln
+    )
 )
 IF /I "%3"=="-cui" (
-	IF "%1"=="-allcui" (
-		SET FLAG_CONFLICT=-allcui flag detected, -cui flag ignored.
-		CALL :FLAG_CONFLICT_DETECTED %*
-	) ELSE (
-		SET CONSOLE=1
-		SET PROJECT=console.vcxproj
-	)
+    IF "%1"=="-allcui" (
+        SET FLAG_CONFLICT=-allcui flag detected, -cui flag ignored.
+        CALL :FLAG_CONFLICT_DETECTED %*
+    ) ELSE (
+        SET CONSOLE=1
+        SET PROJECT=console.vcxproj
+    )
 )
 IF "%FLAG_CONFLICT%" == "fatal" GOTO :END
 rem Run an image render check
 IF /I "%3"=="-chk" (
-	SET CHECK=1
+    SET CHECK=1
+    rem This flag should have it's own slot, but this will do for now...
+    SET CONSOLE=1
+    SET PROJECT=console.vcxproj
 )
 rem Check if invalid command line flag
 IF NOT [%4]==[] (
-	IF NOT "%4"=="-minlog" (
-		IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
-	)
+    IF NOT "%4"=="-minlog" (
+        IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
+    )
 )
 rem Enable verbose tracing (useful for debugging)
 IF /I "%1"=="-verbose" SET VERBOSE_CHK=true
 IF /I "%4"=="-verbose" SET VERBOSE_CHK=true
 IF "%CONFIGURATION%"=="Debug" SET VERBOSE_CHK=true
 IF /I "%VERBOSE_CHK%"=="true" (
-	rem Check if CUI or allCUI project build
-	IF NOT %CONSOLE%==1 (
-		IF NOT "%PLATFORM%"=="-allcui" (
-			GOTO :VERBOSE_CUI_ERROR
-		)
-	)
-	SET VERBOSE=1
+    rem Check if CUI or allCUI project build
+    IF NOT %CONSOLE%==1 (
+        IF NOT "%PLATFORM%"=="-allcui" (
+            GOTO :VERBOSE_CUI_ERROR
+        )
+    )
+    SET VERBOSE=1
 )
 rem Console output - see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference
 rem Set console output logging level - (normal:all output or minlog=only error output)
+SET LOGGING_FLAGS=
 IF /I "%3"=="-minlog" (
-  SET MINIMUM_LOGGING=1
+    SET MINIMUM_LOGGING=1
 )
 IF /I "%4"=="-minlog" (
-  SET MINIMUM_LOGGING=1
+    SET MINIMUM_LOGGING=1
 )
-IF /I %MINIMUM_LOGGING%==1 (
-  SET LOGGING_FLAGS=/clp:ErrorsOnly /nologo
+IF /I %MINIMUM_LOGGING% == 1 (
+    SET LOGGING_FLAGS=/clp:ErrorsOnly /nologo
 )
 
 rem Initialize the Visual Studio command line development environment
@@ -364,11 +372,12 @@ CALL :OUTPUT_LOGGING_MESSAGE %MINIMUM_LOGGING%
 
 rem Check if build all platforms
 IF /I "%PLATFORM%"=="-allcui" (
-	GOTO :BUILD_ALL_CUI
+    GOTO :BUILD_ALL_CUI
 )
 
 rem Assemble command line
 SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
+ECHO.
 ECHO   BUILD_COMMAND.....[%COMMAND_LINE%]
 rem Display the build configuration and platform settings
 ECHO.
@@ -378,6 +387,12 @@ rem Launch msbuild
 %COMMAND_LINE%
 rem Perform build check if specified
 IF %CHECK%==1 CALL :BUILD_CHECK %PLATFORM%
+rem Package 3rd party install content
+IF %THIRD_INSTALL%==1 (
+    IF %PLATFORM%==Win32 SET INSTALL_32BIT=1
+    IF %PLATFORM%==x64 SET INSTALL_64BIT=1
+    CALL :3RD_PARTY_INSTALL
+)
 GOTO :END
 
 :BUILD_ALL_CUI
@@ -386,22 +401,26 @@ ECHO.
 ECHO -%BUILD_LBL% x86 and x86_64 CUI Platforms for %CONFIGURATION% Configuration...
 rem Launch msbuild across all CUI platform builds
 FOR %%P IN ( Win32, x64 ) DO (
-	SETLOCAL ENABLEDELAYEDEXPANSION
-	rem Assemble command line
-	SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
-	ECHO.
-	ECHO --%BUILD_LBL% %%P Platform...
-	ECHO.
-	ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
-	IF NOT %MIN_CONSOLE_OUTPUT%==1 ECHO.
-	rem Launch msbuild
-	!COMMAND_LINE!
-	rem Perform build check if specified
-	IF %CHECK%==1 CALL :BUILD_CHECK %%P
-	ENDLOCAL
+    SETLOCAL ENABLEDELAYEDEXPANSION
+    rem Assemble command line
+    SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
+    ECHO.
+    ECHO --%BUILD_LBL% %%P Platform...
+    ECHO.
+    ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
+    IF NOT %MIN_CONSOLE_OUTPUT%==1 ECHO.
+    rem Launch msbuild
+    !COMMAND_LINE!
+    rem Perform build check if specified
+    IF %CHECK%==1 CALL :BUILD_CHECK %%P
+    ENDLOCAL
 )
 rem Perform 3rd party install if specified
-IF %THIRD_INSTALL%==1 GOTO :3RD_PARTY_INSTALL
+IF %THIRD_INSTALL%==1 (
+    SET INSTALL_32BIT=1
+    SET INSTALL_64BIT=1
+    CALL :3RD_PARTY_INSTALL
+)
 GOTO :END
 
 :BUILD_CHECK
@@ -427,16 +446,16 @@ bin%PL%\%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%
 ECHO.
 ECHO --Build check cleanup...
 IF EXIST "%DIST_DIR%\povray.CHK_BAK.conf" (
-	COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.conf" "%DIST_DIR%\povray.conf"
-	DEL /Q "%DIST_DIR%\povray.CHK_BAK.conf"
+    COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.conf" "%DIST_DIR%\povray.conf"
+    DEL /Q "%DIST_DIR%\povray.CHK_BAK.conf"
 ) ELSE (
-	DEL /Q "%DIST_DIR%\povray.conf"
+    DEL /Q "%DIST_DIR%\povray.conf"
 )
 IF EXIST "%DIST_DIR%\povray.CHK_BAK.ini" (
-	COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.ini" "%DIST_DIR%\povray.ini"
-	DEL /Q "%DIST_DIR%\povray.CHK_BAK.ini"
+    COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.ini" "%DIST_DIR%\povray.ini"
+    DEL /Q "%DIST_DIR%\povray.CHK_BAK.ini"
 ) ELSE (
-	DEL /Q "%DIST_DIR%\povray.ini"
+    DEL /Q "%DIST_DIR%\povray.ini"
 )
 EXIT /b
 
@@ -445,22 +464,26 @@ rem Version major and minor pulled in from autobuild_defs
 SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 ECHO.
 ECHO -Copying 3rd party distribution files...
-ECHO.
-ECHO -Copying %PACKAGE%32%d%.exe...
-IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
-	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
+IF %INSTALL_32BIT% == 1 (
+    ECHO.
+    ECHO -Copying %PACKAGE%32%d%.exe...
+    IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
+        MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
+    )
+    COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
 )
-COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
-
-ECHO -Copying %PACKAGE%64%d%.exe...
-IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
-	MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
+IF %INSTALL_64BIT% == 1 (
+    ECHO.
+    ECHO -Copying %PACKAGE%64%d%.exe...
+    IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
+        MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
+    )
+    COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
 )
-COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
-
+IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Copying Documentaton...
 IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs\" (
-	IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs\"
+    IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs\"
 )
 IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs
 IF  %INSTALL_ALL% == 1  SET DIST_SRC="..\..\distribution\platform-specific\windows"
@@ -470,26 +493,32 @@ IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\changes.txt" "%DIST_DIR%\ChangeLog.txt
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\unix\AUTHORS" "%DIST_DIR%\AUTHORS.txt" /A
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Help" "%DIST_DIR%\help"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\doc\html" "%DIST_DIR%\html"
-
+IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Copying Resources...
 IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\" (
-	IF  %INSTALL_ALL% == 1  MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\"
+    IF  %INSTALL_ALL% == 1  MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\"
 )
 IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources
+IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Copying Include scripts...
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
+IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Copying Initialization files...
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 
-FOR %%A IN ( x86_64, i386 ) DO (
-	SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config\%%A
-	SET ARCH_LABEL=[64bit]
-	IF "%%A" == "i386" SET ARCH_LABEL=[32bit]
-	CALL :MAKE_CONF_AND_INI_FILES
+SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config
+IF %INSTALL_32BIT% == 1 (
+    SET ARCH_LABEL=[32bit]
+    SET DIST_DIR=%DIST_DIR%\i386
 )
-GOTO :END
+IF %INSTALL_64BIT% == 1 (
+    SET ARCH_LABEL=[64bit]
+    SET DIST_DIR=%DIST_DIR%\x86_64
+)
+CALL :MAKE_CONF_AND_INI_FILES
+EXIT /b
 
 :MAKE_CONF_AND_INI_FILES
 ECHO   Generate povray.conf and povray.ini files for %ARCH_LABEL% target platform...
@@ -607,8 +636,8 @@ EXIT /b
 
 :FLAG_CONFLICT_DETECTED
 IF "%FLAG_CONFLICT%" == "unknown" (
-	SET FLAG_CONFLICT=fatal
-	GOTO :FLAG_CONFLICT_ERROR
+    SET FLAG_CONFLICT=fatal
+    GOTO :FLAG_CONFLICT_ERROR
 )
 ECHO.
 ECHO -08. (FLAG CONFLICT) %FLAG_CONFLICT_MSG% [%~nx0 %*].
@@ -622,7 +651,7 @@ CALL :USAGE
 ECHO.
 ECHO -01. (FLAG ERROR) Platform or usage flag is invalid [%~nx0 %*].
 ECHO      Use x86 or x86_64 for platforms, -allcui for all CUIs, -run to execute
-ECHO      without building, -rbld to rebuild or -verbose for 'Win Debug' messages. 
+ECHO      without building, -rbld to rebuild or -verbose for 'Win Debug' messages.
 ECHO      For usage help use -help.
 GOTO :END
 
@@ -632,10 +661,10 @@ CALL :USAGE
 ECHO.
 ECHO -02. (FLAG ERROR) Configuration flag is invalid [%~nx0 %*].
 ECHO      Use -avx or -sse2 with appropriate platform flag,
-ECHO      -rel for release build, -dbg for debug build, -ins to 
+ECHO      -rel for release build, -dbg for debug build, -ins to
 ECHO      install config files, -allins to install all documentation
 ECHO      -chk for Build Check, -run to without building or -rbld to rebuild
-ECHO      
+ECHO
 GOTO :END
 
 :AVX_ERROR
@@ -659,7 +688,7 @@ ECHO.
 CALL :USAGE
 ECHO.
 ECHO -05. (FLAG ERROR) Project flag is invalid [%~nx0 %*].
-ECHO      Use -cui for Console UI, -gui for Graphic UI, 
+ECHO      Use -cui for Console UI, -gui for Graphic UI,
 ECHO      -chk for Build Check or -minlog to display build errors only.
 GOTO :END
 
@@ -787,6 +816,6 @@ ECHO -DEBUG - EXECUTION BYPASS
 EXIT /b
 
 :END
-ECHO Finished.
+ECHO -%~nx0 finished.
 ENDLOCAL
 EXIT /b

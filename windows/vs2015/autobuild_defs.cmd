@@ -18,10 +18,10 @@ rem It is expected that this script will reside in .\windows\vs2015
 
 rem Variables
 SET DEV_ENV=unknown
-SET GIT_SHA=unknown
 SET VERSION_MAJ=unknown
 SET VERSION_MIN=unknown
 SET RELEASE=unknown
+SET GIT_SHA=000000
 SET VERSION_H="..\..\source\base\version.h"
 
 rem Get some source details to populate the required defines
@@ -29,20 +29,18 @@ rem These are not fixed. You can change as you like
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MAJOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MAJ=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MINOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MIN=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PRERELEASE" %VERSION_H%') DO SET RELEASE=%%i
+rem Get the latest version tag sha - if not available locally, try remote
 IF "%APPVEYOR%" EQU "True" (
-  SET GIT_SHA=%APPVEYOR_REPO_COMMIT:~0,7%
+    SET GIT_SHA=%APPVEYOR_REPO_COMMIT:~0,7%
 ) ELSE (
-  IF EXIST "..\..\.git" (
-	FOR /F "tokens=* USEBACKQ" %%i IN (`git rev-parse --short HEAD`) DO SET GIT_SHA=%%i
-  ) ELSE (
-	FOR /F "tokens=1 USEBACKQ" %%i IN (`git ls-remote --tags https://github.com/trevorsandy/povray.git v3.8.0_lpub3d`) DO SET GIT_SHA=%%i
-	GIT_SHA=%GIT_SHA:~0,7%
-  )
-  
+    IF EXIST "..\..\.git" (
+        FOR /F "tokens=* USEBACKQ" %%i IN (`git rev-parse --short HEAD`) DO SET GIT_SHA=%%i
+    ) ELSE (
+        FOR /F "tokens=1 USEBACKQ" %%i IN (`git ls-remote --tags https://github.com/trevorsandy/povray.git v3.8.0_lpub3d`) DO SET GIT_SHA=%%i
+    )
 )
+rem Get the MSBuild version
 FOR /F "tokens=* USEBACKQ" %%i IN (`msbuild -nologo -version`) DO SET DEV_ENV=%%i
-rem If there is not .git folder substitue with 0s
-IF "%GIT_SHA%" EQU "unknown" SET GIT_SHA=00000
 
 rem Remove quotes and trailing space
 CALL :CLEAN VERSION_MAJ %VERSION_MAJ%
@@ -54,7 +52,7 @@ SET VERSION_BASE="%VERSION_MAJ%.%VERSION_MIN%"
 rem POV-Ray documentation would like you to use "YOUR NAME (YOUR EMAIL)" here.
 SET BUILT_BY="Trevor SANDY<trevor.sandy@gmail.com> for LPub3D using MSBuild v%DEV_ENV%"
 rem Here I use the git sha. You can change if you're not building from a local git repository.
-SET BUILD_ID="%GIT_SHA%"
+SET BUILD_ID="%GIT_SHA:~0,7%"
 
 rem Set project build defines - configured to build GUI project at this stage
 SET PovBuildDefs=POV_RAY_IS_AUTOBUILD=1;VERSION_BASE=%VERSION_BASE%;POV_RAY_BUILD_ID=%BUILD_ID%;BUILT_BY=%BUILT_BY%;
@@ -68,21 +66,20 @@ ECHO.
 ECHO -Build Parameters:
 ECHO.
 IF "%APPVEYOR%" EQU "True" (
-  ECHO   BUILD_HOST..........[APPVEYOR CONTINUOUS INTEGRATION SERVICE]
-  ECHO   BUILD_ID............[%APPVEYOR_BUILD_ID%]
-  ECHO   BUILD_BRANCH........[%APPVEYOR_REPO_BRANCH%]
-  ECHO   PROJECT_NAME........[%APPVEYOR_PROJECT_NAME%]
-  ECHO   REPOSITORY_NAME.....[%APPVEYOR_REPO_NAME%]
-  ECHO   REPO_PROVIDER.......[%APPVEYOR_REPO_PROVIDER%]
-  ECHO   DIST_DIRECTORY......[%DIST_DIR_ROOT%]
+    ECHO   BUILD_HOST..........[APPVEYOR CONTINUOUS INTEGRATION SERVICE]
+    ECHO   BUILD_ID............[%APPVEYOR_BUILD_ID%]
+    ECHO   BUILD_BRANCH........[%APPVEYOR_REPO_BRANCH%]
+    ECHO   PROJECT_NAME........[%APPVEYOR_PROJECT_NAME%]
+    ECHO   REPOSITORY_NAME.....[%APPVEYOR_REPO_NAME%]
+    ECHO   REPO_PROVIDER.......[%APPVEYOR_REPO_PROVIDER%]
+    ECHO   DIST_DIRECTORY......[%DIST_DIR_ROOT%]
 )
 ECHO   VERSION_MAJ.........[%VERSION_MAJ%]
 ECHO   VERSION_MIN.........[%VERSION_MIN%]
 ECHO   RELEASE.............[%RELEASE%]
-ECHO   GIT_SHA.............[%GIT_SHA%]
 ECHO   DEV_ENV.............[%DEV_ENV%]
 ECHO   VERSION_BASE........[%VERSION_BASE%]
-ECHO   BUILD_ID............[%BUILD_ID%]
+ECHO   BUILD_ID.(GIT_SHA)..[%BUILD_ID%]
 ECHO   BUILT_BY............[%BUILT_BY%]
 GOTO :END
 
