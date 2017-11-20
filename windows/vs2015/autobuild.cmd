@@ -388,9 +388,9 @@ rem Launch msbuild
 rem Perform build check if specified
 IF %CHECK%==1 CALL :BUILD_CHECK %PLATFORM%
 rem Package 3rd party install content
-IF %THIRD_INSTALL%==1 (
-    IF %PLATFORM%==Win32 SET INSTALL_32BIT=1
-    IF %PLATFORM%==x64 SET INSTALL_64BIT=1
+IF %THIRD_INSTALL% == 1 (
+    IF %PLATFORM% == Win32 SET INSTALL_32BIT=1
+    IF %PLATFORM% == x64 SET INSTALL_64BIT=1
     CALL :3RD_PARTY_INSTALL
 )
 GOTO :END
@@ -412,11 +412,11 @@ FOR %%P IN ( Win32, x64 ) DO (
     rem Launch msbuild
     !COMMAND_LINE!
     rem Perform build check if specified
-    IF %CHECK%==1 CALL :BUILD_CHECK %%P
     ENDLOCAL
+    IF %CHECK% == 1 CALL :BUILD_CHECK %%P
 )
 rem Perform 3rd party install if specified
-IF %THIRD_INSTALL%==1 (
+IF %THIRD_INSTALL% == 1 (
     SET INSTALL_32BIT=1
     SET INSTALL_64BIT=1
     CALL :3RD_PARTY_INSTALL
@@ -443,19 +443,16 @@ ECHO.
 ECHO   BUILD_CHECK_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
 
 bin%PL%\%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%
+
 ECHO.
 ECHO --Build check cleanup...
-IF EXIST "%DIST_DIR%\povray.CHK_BAK.conf" (
-    COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.conf" "%DIST_DIR%\povray.conf"
-    DEL /Q "%DIST_DIR%\povray.CHK_BAK.conf"
-) ELSE (
-    DEL /Q "%DIST_DIR%\povray.conf"
-)
-IF EXIST "%DIST_DIR%\povray.CHK_BAK.ini" (
-    COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.ini" "%DIST_DIR%\povray.ini"
-    DEL /Q "%DIST_DIR%\povray.CHK_BAK.ini"
-) ELSE (
-    DEL /Q "%DIST_DIR%\povray.ini"
+FOR %%I IN ( conf, ini ) DO (
+    IF EXIST "%DIST_DIR%\povray.CHK_BAK.%%I" (
+        COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.%%I" "%DIST_DIR%\povray.%%I"
+        DEL /Q "%DIST_DIR%\povray.CHK_BAK.%%I"
+    ) ELSE (
+        DEL /Q "%DIST_DIR%\povray.%%I"
+    )
 )
 EXIT /b
 
@@ -582,7 +579,7 @@ EXIT /b
 
 :MAKE_BUILD_CHECK_CONF_AND_INI_FILES
 ECHO.
-ECHO   Generate build check povray.conf file for %ARCH_LABEL% target platform...
+ECHO   Generate build check povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
 IF EXIST "%DIST_DIR%\povray.conf" COPY /V /Y "%DIST_DIR%\povray.conf" "%DIST_DIR%\povray.CHK_BAK.conf"

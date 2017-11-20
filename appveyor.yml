@@ -22,6 +22,9 @@ matrix:
 environment:
   POV_DIST_DIR: lpub3d_windows_3rdparty
   POV_DIST_DIR_PATH: $(APPVEYOR_BUILD_FOLDER)\$(POV_DIST_DIR)
+  POV_BUILD_PKG: no
+  POV_DEPLOY_PKG: false
+  POV_ARTEFACT_ITEM_COUNT: 0
 
 init:
  - ps: write-host "Building LPub3D-Trace-CUI x86 and x86_64 architectures..."
