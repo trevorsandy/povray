@@ -20,11 +20,8 @@ matrix:
   fast_finish: true
 
 environment:
-  POV_DIST_DIR: lpub3d_windows_3rdparty
-  POV_DIST_DIR_PATH: $(APPVEYOR_BUILD_FOLDER)\$(POV_DIST_DIR)
-  POV_BUILD_PKG: no
-  POV_DEPLOY_PKG: false
-  POV_ARTEFACT_ITEM_COUNT: 0
+  LP3D_DIST_DIR: lpub3d_windows_3rdparty
+  LP3D_DIST_DIR_PATH: $(APPVEYOR_BUILD_FOLDER)\$(LP3D_DIST_DIR)
 
 init:
  - ps: write-host "Building LPub3D-Trace-CUI x86 and x86_64 architectures..."
@@ -43,11 +40,11 @@ init:
 
 build_script:
  - ps: |
-      write-host "  Build directory.....[$env:POV_DIST_DIR_PATH]"
+      write-host "  Build directory.....[$env:LP3D_DIST_DIR_PATH]"
       cd windows\vs2015; write-host "  Working Directory...[$PWD]"
       If ($env:POV_BUILD_PKG -eq "yes") {
         cmd.exe /c autobuild.cmd -allcui -allins -chk -minlog
-        $env:POV_ARTEFACT_ITEM_COUNT = (Get-ChildItem -Path $env:POV_DIST_DIR_PATH -Recurse).count
+        $env:POV_ARTEFACT_ITEM_COUNT = (Get-ChildItem -Path $env:LP3D_DIST_DIR_PATH -Recurse).count
         write-host "`n  Artifact count....[$env:POV_ARTEFACT_ITEM_COUNT]"
       } Else {
         cmd.exe /c autobuild.cmd -allcui -chk -minlog
@@ -58,9 +55,9 @@ test: off
 after_build:
  - ps: |
       If (($env:POV_BUILD_PKG -eq "yes") -and ([int]$env:POV_ARTEFACT_ITEM_COUNT -gt 50)){
-        cd $env:APPVEYOR_BUILD_FOLDER; write-host "Creating zip archive artefact from ./$env:POV_DIST_DIR..."
-        7z a -tzip $env:POV_DIST_DIR $env:POV_DIST_DIR | Select-String -Pattern '(^Creating)|(^Everything)' -CaseSensitive; write-host "Zip archive $env:POV_DIST_DIR.zip created."
-        $root = Resolve-Path $env:APPVEYOR_BUILD_FOLDER; [IO.Directory]::GetFiles($root.Path, '*.zip', 'TopDirectoryOnly') | % { Push-AppveyorArtifact $_ -Type zip -FileName $_.Substring($root.Path.Length + 1) -DeploymentName $env:POV_DIST_DIR}
+        cd $env:APPVEYOR_BUILD_FOLDER; write-host "Creating zip archive artefact from ./$env:LP3D_DIST_DIR..."
+        7z a -tzip $env:LP3D_DIST_DIR $env:LP3D_DIST_DIR | Select-String -Pattern '(^Creating)|(^Everything)' -CaseSensitive; write-host "Zip archive $env:LP3D_DIST_DIR.zip created."
+        $root = Resolve-Path $env:APPVEYOR_BUILD_FOLDER; [IO.Directory]::GetFiles($root.Path, '*.zip', 'TopDirectoryOnly') | % { Push-AppveyorArtifact $_ -Type zip -FileName $_.Substring($root.Path.Length + 1) -DeploymentName $env:LP3D_DIST_DIR}
       }
 
 deploy:
@@ -69,8 +66,8 @@ deploy:
    description: 'LPub3D-Trace-CUI - Windows archive package of LPub3D image renderer based on POV-Ray'
    auth_token:
      secure: rnf4qpF81ISjm8q13OgkAaoKZReXpjODhU9fbGFMhMydHrda1ezLubGXRU9OKGu4
-   release: $(POV_DIST_DIR)
-   artifact: $(POV_DIST_DIR).zip
+   release: $(LP3D_DIST_DIR)
+   artifact: $(LP3D_DIST_DIR).zip
    prerelease: true
    force_update: true
    on:

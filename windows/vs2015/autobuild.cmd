@@ -21,7 +21,7 @@ rem It is expected that this script will reside in .\windows\vs2015
 
 rem Static defaults
 IF "%APPVEYOR%" EQU "True" (
-    IF [%POV_DIST_DIR_PATH%] == [] (
+    IF [%LP3D_DIST_DIR_PATH%] == [] (
       ECHO.
       ECHO  -ERROR: Distribution directory path not defined.
       ECHO  -%~nx0 terminated!
@@ -30,10 +30,10 @@ IF "%APPVEYOR%" EQU "True" (
     rem If Appveyor, do not show the image display window
     SET DISP_WIN=-d
     rem deposit archive folder top build-folder
-    SET DIST_DIR_ROOT=%POV_DIST_DIR_PATH%
+    SET DIST_DIR=%LP3D_DIST_DIR_PATH%
 ) ELSE (
     SET DISP_WIN=+d
-    SET DIST_DIR_ROOT=..\..\..\lpub3d_windows_3rdparty
+    SET DIST_DIR=..\..\..\lpub3d_windows_3rdparty
 )
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
@@ -464,25 +464,25 @@ ECHO -Copying 3rd party distribution files...
 IF %INSTALL_32BIT% == 1 (
     ECHO.
     ECHO -Copying %PACKAGE%32%d%.exe...
-    IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
-        MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
+    IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
+        MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
     )
-    COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
+    COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
 )
 IF %INSTALL_64BIT% == 1 (
     ECHO.
     ECHO -Copying %PACKAGE%64%d%.exe...
-    IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
-        MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
+    IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
+        MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
     )
-    COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
+    COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
 )
 IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Copying Documentaton...
-IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs\" (
-    IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs\"
+IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs\" (
+    IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs\"
 )
-IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\docs
+IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs
 IF  %INSTALL_ALL% == 1  SET DIST_SRC="..\..\distribution\platform-specific\windows"
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\CUI_README.txt" "%DIST_DIR%" /A
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\LICENSE" "%DIST_DIR%\LICENSE.txt" /A
@@ -492,10 +492,10 @@ IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Help" "%DIST_DIR%\he
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\doc\html" "%DIST_DIR%\html"
 IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Copying Resources...
-IF NOT EXIST "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\" (
-    IF  %INSTALL_ALL% == 1  MKDIR "%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\"
+IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\" (
+    IF  %INSTALL_ALL% == 1  MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\"
 )
-IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources
+IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources
 IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Copying Include scripts...
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
@@ -505,7 +505,7 @@ IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
 REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
 
-SET DIST_DIR=%DIST_DIR_ROOT%\%PACKAGE%-%VERSION_BASE%\resources\config
+SET DIST_DIR=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\config
 IF %INSTALL_32BIT% == 1 (
     SET ARCH_LABEL=[32bit]
     SET DIST_DIR=%DIST_DIR%\i386
@@ -800,6 +800,10 @@ ECHO  -cui.......3.....Project flag       [Default=On ] Build Console User Inter
 ECHO  -gui.......3.....Project flag       [Default=Off] Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
 ECHO  -verbose...4,1...Project flag       [Default=Off] Display verbose output. Useful for debugging (must be preceded by -cui flag).
 ECHO  -minlog....4,3...Project flag       [Default=Off] Minimum build logging - only display build errors
+ECHO.
+ECHO Flags are case sensitive, use lowere case.
+ECHO.
+ECHO If no flag is supplied, 32bit platform, Release Configuration, CUI project built by default.
 ECHO ----------------------------------------------------------------
 EXIT /b
 
