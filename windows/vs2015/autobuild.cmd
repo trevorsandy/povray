@@ -10,7 +10,7 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: November 19, 2017
+rem  Last Update: November 23, 2017
 rem  Copyright (c) 2017 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -433,7 +433,7 @@ SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 rem Suppress Missing System Povray.conf file as we are only using the user instance
 SET POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty
 SET ARCH_LABEL=[%PL%bit]
-SET DIST_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
+SET CONFIG_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
 
 CALL :MAKE_BUILD_CHECK_CONF_AND_INI_FILES
 
@@ -447,11 +447,11 @@ bin%PL%\%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%
 ECHO.
 ECHO --Build check cleanup...
 FOR %%I IN ( conf, ini ) DO (
-    IF EXIST "%DIST_DIR%\povray.CHK_BAK.%%I" (
-        COPY /V /Y "%DIST_DIR%\povray.CHK_BAK.%%I" "%DIST_DIR%\povray.%%I"
-        DEL /Q "%DIST_DIR%\povray.CHK_BAK.%%I"
+    IF EXIST "%CONFIG_DIR%\povray.CHK_BAK.%%I" (
+        COPY /V /Y "%CONFIG_DIR%\povray.CHK_BAK.%%I" "%CONFIG_DIR%\povray.%%I"
+        DEL /Q "%CONFIG_DIR%\povray.CHK_BAK.%%I"
     ) ELSE (
-        DEL /Q "%DIST_DIR%\povray.%%I"
+        DEL /Q "%CONFIG_DIR%\povray.%%I"
     )
 )
 EXIT /b
@@ -460,10 +460,14 @@ EXIT /b
 rem Version major and minor pulled in from autobuild_defs
 SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 ECHO.
-ECHO -Copying 3rd party distribution files...
-IF %INSTALL_32BIT% == 1 (
+IF %INSTALL_ALL% == 1 (
+	ECHO -Installing all distribution files...
+) ELSE (
+	ECHO -Installing configuration files...
+)
+IF %INSTALL_ALL% == 1 (
     ECHO.
-    ECHO -Copying %PACKAGE%32%d%.exe...
+    ECHO -Installing %PACKAGE%32%d%.exe...
     IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
         MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
     )
@@ -471,48 +475,45 @@ IF %INSTALL_32BIT% == 1 (
 )
 IF %INSTALL_64BIT% == 1 (
     ECHO.
-    ECHO -Copying %PACKAGE%64%d%.exe...
+    ECHO -Installing %PACKAGE%64%d%.exe...
     IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
         MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
     )
     COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
 )
 IF  %INSTALL_ALL% == 1  ECHO.
-IF  %INSTALL_ALL% == 1  ECHO -Copying Documentaton...
+IF  %INSTALL_ALL% == 1  ECHO -Installing Documentaton...
 IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs\" (
     IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs\"
 )
-IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs
-IF  %INSTALL_ALL% == 1  SET DIST_SRC="..\..\distribution\platform-specific\windows"
-IF  %INSTALL_ALL% == 1  COPY /V /Y "..\CUI_README.txt" "%DIST_DIR%" /A
-IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\LICENSE" "%DIST_DIR%\LICENSE.txt" /A
-IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\changes.txt" "%DIST_DIR%\ChangeLog.txt" /A
-IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\unix\AUTHORS" "%DIST_DIR%\AUTHORS.txt" /A
-IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Help" "%DIST_DIR%\help"
-REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\doc\html" "%DIST_DIR%\html"
+IF  %INSTALL_ALL% == 1  SET DIST_INSTALL_PATH=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs
+IF  %INSTALL_ALL% == 1  SET DIST_INSTALL_SRC="..\..\distribution\platform-specific\windows"
+IF  %INSTALL_ALL% == 1  COPY /V /Y "..\CUI_README.txt" "%DIST_INSTALL_PATH%" /A
+IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\LICENSE" "%DIST_INSTALL_PATH%\LICENSE.txt" /A
+IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\changes.txt" "%DIST_INSTALL_PATH%\ChangeLog.txt" /A
+IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\unix\AUTHORS" "%DIST_INSTALL_PATH%\AUTHORS.txt" /A
+IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_INSTALL_SRC%\Help" "%DIST_INSTALL_PATH%\help"
 IF  %INSTALL_ALL% == 1  ECHO.
-IF  %INSTALL_ALL% == 1  ECHO -Copying Resources...
+IF  %INSTALL_ALL% == 1  ECHO -Installing Resources...
 IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\" (
     IF  %INSTALL_ALL% == 1  MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\"
 )
-IF  %INSTALL_ALL% == 1  SET DIST_DIR=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources
+IF  %INSTALL_ALL% == 1  SET DIST_INSTALL_PATH=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources
 IF  %INSTALL_ALL% == 1  ECHO.
-IF  %INSTALL_ALL% == 1  ECHO -Copying Include scripts...
-IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\include" "%DIST_DIR%\include"
+IF  %INSTALL_ALL% == 1  ECHO -Installing Include scripts...
+IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\include" "%DIST_INSTALL_PATH%\include"
 IF  %INSTALL_ALL% == 1  ECHO.
-IF  %INSTALL_ALL% == 1  ECHO -Copying Initialization files...
-IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_DIR%\ini"
-REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_SRC%\Icons" "%DIST_DIR%\Icons"
-REM IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\scenes" "%DIST_DIR%\scenes"
+IF  %INSTALL_ALL% == 1  ECHO -Installing Initialization files...
+IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_INSTALL_PATH%\ini"
 
-SET DIST_DIR=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\config
+SET DIST_INSTALL_PATH=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\config
 IF %INSTALL_32BIT% == 1 (
     SET ARCH_LABEL=[32bit]
-    SET DIST_DIR=%DIST_DIR%\i386
+    SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH%\i386
 )
 IF %INSTALL_64BIT% == 1 (
     SET ARCH_LABEL=[64bit]
-    SET DIST_DIR=%DIST_DIR%\x86_64
+    SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH%\x86_64
 )
 CALL :MAKE_CONF_AND_INI_FILES
 EXIT /b
@@ -521,10 +522,10 @@ EXIT /b
 ECHO   Generate povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 SET __HOME__=%%USERPROFILE%%
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
-IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
+IF NOT EXIST "%DIST_INSTALL_PATH%\" MKDIR "%DIST_INSTALL_PATH%\"
 ECHO   Create povray.conf...
-COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
-SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
+COPY /V /Y "..\..\distribution\povray.conf" "%DIST_INSTALL_PATH%\povray.conf" /A
+SET genConfigFile="%DIST_INSTALL_PATH%\povray.conf" ECHO
 :GENERATE povray.conf settings file
 >>%genConfigFile%.
 >>%genConfigFile% ; Default (hard coded) paths:
@@ -554,8 +555,8 @@ SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 >>%genConfigFile% ; The working directory (%CD%) is where LPub3D-Trace is called from.
 >>%genConfigFile% read+write* = .
 ECHO   Create povray.ini...
-COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
-SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
+COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_INSTALL_PATH%\povray.ini" /A
+SET genConfigFile="%DIST_INSTALL_PATH%\povray.ini" ECHO
 :GENERATE povray.ini settings file
 >>%genConfigFile%.
 >>%genConfigFile% ; Search path for #include source files or command line ini files not
@@ -581,11 +582,11 @@ EXIT /b
 ECHO.
 ECHO   Generate build check povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
-IF NOT EXIST "%DIST_DIR%\" MKDIR "%DIST_DIR%\"
-IF EXIST "%DIST_DIR%\povray.conf" COPY /V /Y "%DIST_DIR%\povray.conf" "%DIST_DIR%\povray.CHK_BAK.conf"
-ECHO   Create %DIST_DIR%\povray.conf...
-COPY /V /Y "..\..\distribution\povray.conf" "%DIST_DIR%\povray.conf" /A
-SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
+IF NOT EXIST "%CONFIG_DIR%\" MKDIR "%CONFIG_DIR%\"
+IF EXIST "%CONFIG_DIR%\povray.conf" COPY /V /Y "%CONFIG_DIR%\povray.conf" "%CONFIG_DIR%\povray.CHK_BAK.conf"
+ECHO   Create %CONFIG_DIR%\povray.conf...
+COPY /V /Y "..\..\distribution\povray.conf" "%CONFIG_DIR%\povray.conf" /A
+SET genConfigFile="%CONFIG_DIR%\povray.conf" ECHO
 :GENERATE build check povray.conf settings file
 >>%genConfigFile%.
 >>%genConfigFile% ; LPub3D-Trace build check settings...
@@ -598,10 +599,10 @@ SET genConfigFile="%DIST_DIR%\povray.conf" ECHO
 >>%genConfigFile% read* = "..\..\distribution\include"
 >>%genConfigFile% read* = "..\..\distribution\scenes"
 >>%genConfigFile% read+write* = ".\tests\space in dir name test"
-ECHO   Create %DIST_DIR%\povray.ini...
-IF EXIST "%DIST_DIR%\povray.ini" COPY /V /Y "%DIST_DIR%\povray.ini" "%DIST_DIR%\povray.CHK_BAK.ini"
-COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_DIR%\povray.ini" /A
-SET genConfigFile="%DIST_DIR%\povray.ini" ECHO
+ECHO   Create %CONFIG_DIR%\povray.ini...
+IF EXIST "%CONFIG_DIR%\povray.ini" COPY /V /Y "%CONFIG_DIR%\povray.ini" "%CONFIG_DIR%\povray.CHK_BAK.ini"
+COPY /V /Y "..\..\distribution\ini\povray.ini" "%CONFIG_DIR%\povray.ini" /A
+SET genConfigFile="%CONFIG_DIR%\povray.ini" ECHO
 :GENERATE build check povray.ini settings file
 >>%genConfigFile%.
 >>%genConfigFile% ; LPub3D-Trace build check settings...
