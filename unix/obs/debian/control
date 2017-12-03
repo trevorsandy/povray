@@ -1,0 +1,19 @@
+Source: lpub3d-trace-cui
+Section: graphics
+Priority: optional
+Maintainer: Trevor SANDY <trevor.sandy@gmail.com>
+Build-Depends: debhelper (>= 4.1.16), unzip, build-essential, autotools-dev, autoconf, pkg-config, libtool, libpng-dev, libjpeg-dev, zlib1g-dev, libopenexr-dev, libboost-dev, libboost-date-time-dev, libboost-thread-dev, libsdl2-dev, libtiff5-dev, libx11-dev
+Standards-Version: 3.9.7
+Homepage: https://trevorsandy.github.io/lpub3d-ci/
+
+Package: lpub3d-trace-cui
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: The Persistence of Vision Ray tracer creates three-dimensional,
+photo-realistic images using a rendering technique called ray tracing.
+It reads in a text file containing information describing the objects
+and lighting in a scene and generates an image of that scene from the
+view point of a camera also described in the text file. Ray tracing is
+not a fast process by any means, (the generation of a complex image can
+take several hours) but it produces very high quality images with
+realistic reflections, shading, perspective, and other effects.

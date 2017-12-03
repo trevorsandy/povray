@@ -57,6 +57,9 @@ builddoc="$build/documentation"
 required_autoconf="2.69"
 required_automake="1.9"
 
+echo "==============================================================================="
+echo "LPub3D-Trace CUI version $pov_version_base prebuild"
+echo "==============================================================================="
 
 ###############################################################################
 # Setup
@@ -717,12 +720,20 @@ pov_xwin_msg = @pov_xwin_msg@
 # This will run before 'make install'.
 build_check_lpub3duserdir = \$(HOME)/\$(lpub3duserdir)/config
 check: all
-	@if test "\$(CI)" = "true"; then \\
-		echo "Using Continuous Integration Build Environment"; \\
-		echo "Generating build check povray.conf and povray.ini files..."; \\
-		sudo \$(mkdir_p) "\$(build_check_lpub3duserdir)" && sudo chown \$(povowner) "\$(build_check_lpub3duserdir)" && sudo chgrp \$(povgroup) "\$(build_check_lpub3duserdir)"; \\
+	@if ! test -d "\$(build_check_lpub3duserdir)"; then \\
+		echo "Generating build check file path..."; \\
+		\$(mkdir_p) "\$(build_check_lpub3duserdir)" && chown \$(povowner) "\$(build_check_lpub3duserdir)" && chgrp \$(povgroup) "\$(build_check_lpub3duserdir)"; \\
+		cleanupDir="true"; \\
+	fi
+	@if ! test -f "\$(build_check_lpub3duserdir)/povray.conf"; then \\
+		echo "Generating build check povray.conf file..."; \\
 		cat \$(top_builddir)/povray.conf.check.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > "\$(build_check_lpub3duserdir)/povray.conf"; \\
+		cleanupConf="true"; \\
+	fi
+	@if ! test -f "\$(build_check_lpub3duserdir)/povray.ini"; then \\
+		echo "Generating build check povray.ini file..."; \\
 		cat \$(top_builddir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > "\$(build_check_lpub3duserdir)/povray.ini"; \\
+		cleanupIni="true"; \\
 	fi
 	@echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\
@@ -731,10 +742,17 @@ check: all
 		echo "Executing the render display window check..."; \\
 		case "\$(pov_xwin_msg)" in \\
 			*enabled*) \\
-			\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 \\
-			+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes; \\
-			;; \\
-		esac ; \\
+			\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes; ;; esac; \\
+	fi
+	@if test "\$\${cleanupDir}" = "true"; then \\
+		echo "Clenup build check povray.conf and povray.ini files..."; \\
+		rm -rf "\$(build_check_lpub3duserdir)"; \\
+	elif test "\$\${cleanupConf}" = "true"; then \\
+		echo "Clenup build check povray.ini file..."; \\
+		rm -f "\$(build_check_lpub3duserdir)/povray.conf"; \\
+	elif test "\$\${cleanupIni}" = "true"; then \\
+		echo "Clenup build check povray.ini file..."; \\
+		rm -f "\$(build_check_lpub3duserdir)/povray.ini"; \\
 	fi
 
 # Install scripts in povlibdir.
