@@ -1015,7 +1015,7 @@ namespace vfePlatform
             {
                 // fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE);
                 // perror(m_sysconf.c_str());
-                if (getenv("POV_IGNORE_SYSCONF_MSG") > 0)
+                if (getenv("POV_IGNORE_SYSCONF_MSG") != NULL)
                     fprintf(stderr, "%s: ignoring system configuration file\n", PACKAGE_NAME);
                 else {
                     fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE_NAME);
