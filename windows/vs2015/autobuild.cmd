@@ -527,7 +527,7 @@ ECHO   Create povray.conf...
 COPY /V /Y "..\..\distribution\povray.conf" "%DIST_INSTALL_PATH%\povray.conf" /A
 SET genConfigFile="%DIST_INSTALL_PATH%\povray.conf" ECHO
 :GENERATE povray.conf settings file
->>%genConfigFile%.
+>%genConfigFile%.
 >>%genConfigFile% ; Default (hard coded) paths:
 >>%genConfigFile% ; HOME        = %__HOME__%
 >>%genConfigFile% ; INSTALLDIR  = __POVSYSDIR__
@@ -558,7 +558,7 @@ ECHO   Create povray.ini...
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_INSTALL_PATH%\povray.ini" /A
 SET genConfigFile="%DIST_INSTALL_PATH%\povray.ini" ECHO
 :GENERATE povray.ini settings file
->>%genConfigFile%.
+>%genConfigFile%.
 >>%genConfigFile% ; Search path for #include source files or command line ini files not
 >>%genConfigFile% ; found in the current directory.  New directories are added to the
 >>%genConfigFile% ; search path, up to a maximum of 25.
@@ -588,7 +588,7 @@ ECHO   Create %CONFIG_DIR%\povray.conf...
 COPY /V /Y "..\..\distribution\povray.conf" "%CONFIG_DIR%\povray.conf" /A
 SET genConfigFile="%CONFIG_DIR%\povray.conf" ECHO
 :GENERATE build check povray.conf settings file
->>%genConfigFile%.
+>%genConfigFile%.
 >>%genConfigFile% ; LPub3D-Trace build check settings...
 >>%genConfigFile%.
 >>%genConfigFile% ; %%HOME%% is hard-coded to the %%USERPROFILE%% environment variable (%USERPROFILE%).

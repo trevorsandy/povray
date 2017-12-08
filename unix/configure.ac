@@ -503,10 +503,9 @@ else
     AC_MSG_CHECKING([for openexr pkgconfig at $pov_PKG_CONFIG_DIR ])
     AS_IF([ test -d "$pov_PKG_CONFIG_DIR" && test -f "$pov_PKG_CONFIG_DIR/OpenEXR.pc"],
     [
-      dnl On MacOS, the homebrew version of OpenEXR throws an undefined reference error.
-      dnl If using version compiled from git, set the local pkgconfig directory if different than default.
+      dnl If OpenEXR compiled from source (e.g. git), set the local pkgconfig directory if different from system location.
       eval "export PKG_CONFIG_PATH=\"$pov_PKG_CONFIG_DIR:$PKG_CONFIG_PATH\""
-      dnl Also set lib directory (-L) in LDFLAGS if different than default location
+      dnl Also set lib directory (-L) in LDFLAGS if different from system location
       LDFLAGS="-L$with_openexr $LDFLAGS"
       AC_MSG_RESULT([found])
     ],
