@@ -62,18 +62,6 @@ rem If verbose variable is not empty append tracing define to project build defi
 IF %VERBOSE%==1 SET PovBuildDefs=%PovBuildDefs%WIN_DEBUG=1;
 
 rem Display the define attributes to visually confirm all is well.
-ECHO.
-ECHO -Build Parameters:
-ECHO.
-IF "%APPVEYOR%" EQU "True" (
-    ECHO   BUILD_HOST..........[APPVEYOR CONTINUOUS INTEGRATION SERVICE]
-    ECHO   BUILD_ID............[%APPVEYOR_BUILD_ID%]
-    ECHO   BUILD_BRANCH........[%APPVEYOR_REPO_BRANCH%]
-    ECHO   PROJECT_NAME........[%APPVEYOR_PROJECT_NAME%]
-    ECHO   REPOSITORY_NAME.....[%APPVEYOR_REPO_NAME%]
-    ECHO   REPO_PROVIDER.......[%APPVEYOR_REPO_PROVIDER%]
-    ECHO   DIST_DIRECTORY......[%DIST_DIR_ROOT%]
-)
 ECHO   VERSION_MAJ.........[%VERSION_MAJ%]
 ECHO   VERSION_MIN.........[%VERSION_MIN%]
 ECHO   RELEASE.............[%RELEASE%]

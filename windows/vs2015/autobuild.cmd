@@ -93,6 +93,9 @@ IF %DEBUG%==1 (
     SET DEFAULT_CONFIGURATION=Release
 )
 
+ECHO.
+ECHO -Start %PACKAGE% %~nx0 with commandline args: [%*].
+
 rem Check if invalid platform flag
 IF NOT [%1]==[] (
     IF NOT "%1"=="x86" (
@@ -354,7 +357,23 @@ IF /I %MINIMUM_LOGGING% == 1 (
 
 rem Initialize the Visual Studio command line development environment
 rem Note you can change this line to your specific environment - I am using VS2017 here.
+ECHO.
+ECHO -Initialize Microsoft Build VS2017...
 CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
+
+rem Display the attributges and arguments to visually confirm all is well.
+ECHO.
+ECHO -Build Parameters:
+ECHO.
+IF "%APPVEYOR%" EQU "True" (
+    ECHO   BUILD_HOST..........[APPVEYOR CONTINUOUS INTEGRATION SERVICE]
+    ECHO   BUILD_ID............[%APPVEYOR_BUILD_ID%]
+    ECHO   BUILD_BRANCH........[%APPVEYOR_REPO_BRANCH%]
+    ECHO   PROJECT_NAME........[%APPVEYOR_PROJECT_NAME%]
+    ECHO   REPOSITORY_NAME.....[%APPVEYOR_REPO_NAME%]
+    ECHO   REPO_PROVIDER.......[%APPVEYOR_REPO_PROVIDER%]
+    ECHO   DIST_DIRECTORY......[%DIST_DIR%]
+)
 rem Set the LPub3D-Trace auto-build pre-processor defines
 CALL autobuild_defs.cmd
 rem Display the defines set (as environment variable 'PovBuildDefs') for MSbuild
@@ -465,9 +484,9 @@ IF %INSTALL_ALL% == 1 (
 ) ELSE (
 	ECHO -Installing configuration files...
 )
-IF %INSTALL_ALL% == 1 (
+IF %INSTALL_32BIT% == 1 (
     ECHO.
-    ECHO -Installing %PACKAGE%32%d%.exe...
+    ECHO -Installing %PACKAGE%32%d%.exe to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386]...
     IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
         MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
     )
@@ -475,14 +494,14 @@ IF %INSTALL_ALL% == 1 (
 )
 IF %INSTALL_64BIT% == 1 (
     ECHO.
-    ECHO -Installing %PACKAGE%64%d%.exe...
+    ECHO -Installing %PACKAGE%64%d%.exe to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64]...
     IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
         MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
     )
     COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
 )
 IF  %INSTALL_ALL% == 1  ECHO.
-IF  %INSTALL_ALL% == 1  ECHO -Installing Documentaton...
+IF  %INSTALL_ALL% == 1  ECHO -Installing Documentaton to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs]...
 IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs\" (
     IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs\"
 )
@@ -500,10 +519,10 @@ IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\" (
 )
 IF  %INSTALL_ALL% == 1  SET DIST_INSTALL_PATH=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources
 IF  %INSTALL_ALL% == 1  ECHO.
-IF  %INSTALL_ALL% == 1  ECHO -Installing Include scripts...
+IF  %INSTALL_ALL% == 1  ECHO -Installing Include scripts to [%DIST_INSTALL_PATH%\include]...
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\include" "%DIST_INSTALL_PATH%\include"
 IF  %INSTALL_ALL% == 1  ECHO.
-IF  %INSTALL_ALL% == 1  ECHO -Installing Initialization files...
+IF  %INSTALL_ALL% == 1  ECHO -Installing Initialization files to [%DIST_INSTALL_PATH%\ini]...
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_INSTALL_PATH%\ini"
 
 SET DIST_INSTALL_PATH=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\config
@@ -527,7 +546,7 @@ ECHO   Create povray.conf...
 COPY /V /Y "..\..\distribution\povray.conf" "%DIST_INSTALL_PATH%\povray.conf" /A
 SET genConfigFile="%DIST_INSTALL_PATH%\povray.conf" ECHO
 :GENERATE povray.conf settings file
->%genConfigFile%.
+>>%genConfigFile%.
 >>%genConfigFile% ; Default (hard coded) paths:
 >>%genConfigFile% ; HOME        = %__HOME__%
 >>%genConfigFile% ; INSTALLDIR  = __POVSYSDIR__
@@ -558,7 +577,7 @@ ECHO   Create povray.ini...
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_INSTALL_PATH%\povray.ini" /A
 SET genConfigFile="%DIST_INSTALL_PATH%\povray.ini" ECHO
 :GENERATE povray.ini settings file
->%genConfigFile%.
+>>%genConfigFile%.
 >>%genConfigFile% ; Search path for #include source files or command line ini files not
 >>%genConfigFile% ; found in the current directory.  New directories are added to the
 >>%genConfigFile% ; search path, up to a maximum of 25.
@@ -588,7 +607,7 @@ ECHO   Create %CONFIG_DIR%\povray.conf...
 COPY /V /Y "..\..\distribution\povray.conf" "%CONFIG_DIR%\povray.conf" /A
 SET genConfigFile="%CONFIG_DIR%\povray.conf" ECHO
 :GENERATE build check povray.conf settings file
->%genConfigFile%.
+>>%genConfigFile%.
 >>%genConfigFile% ; LPub3D-Trace build check settings...
 >>%genConfigFile%.
 >>%genConfigFile% ; %%HOME%% is hard-coded to the %%USERPROFILE%% environment variable (%USERPROFILE%).
@@ -818,6 +837,7 @@ ECHO -DEBUG - EXECUTION BYPASS
 EXIT /b
 
 :END
-ECHO -%~nx0 finished.
+ECHO.
+ECHO -%PACKAGE% v%VERSION_BASE% %~nx0 finished.
 ENDLOCAL
 EXIT /b
