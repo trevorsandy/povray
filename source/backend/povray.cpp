@@ -84,7 +84,7 @@
         extern "C"
         {
             #ifndef __STDC__
-            #define __STDC__        (1)
+            #define __STDC__        (1) // TODO - this is an ugly hack; check if it is really necessary
             #define UNDEF__STDC__
             #endif
             #ifndef AVOID_WIN32_FILEIO
@@ -293,8 +293,10 @@ void BuildInitInfo(POVMSObjectPtr msg)
     if(err == kNoErr)
         err = POVMSUtil_SetString(msg, kPOVAttrib_PlatformName, POVRAY_PLATFORM_NAME);
     if(err == kNoErr)
-        err = POVMSUtil_SetFormatString(msg, kPOVAttrib_CoreVersion,
-                                        "Persistence of Vision(tm) Ray Tracer Version %s", POV_RAY_VERSION_INFO);
+        err = POVMSUtil_SetString(msg, kPOVAttrib_CoreVersion,
+                                        "Persistence of Vision(tm) Ray Tracer Version " POV_RAY_VERSION_INFO);
+    if (err == kNoErr)
+        err = POVMSUtil_SetString(msg, kPOVAttrib_CoreGeneration, "POV-Ray v" POV_RAY_GENERATION);
     if(err == kNoErr)
         err = POVMSUtil_SetString(msg, kPOVAttrib_EnglishText,
                                   DISTRIBUTION_MESSAGE_1 "\n" DISTRIBUTION_MESSAGE_2 "\n" DISTRIBUTION_MESSAGE_3

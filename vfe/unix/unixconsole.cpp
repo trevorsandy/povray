@@ -39,13 +39,14 @@
 ///
 //******************************************************************************
 
-// C++ variants of C standard headers
+// C++ variants of C standard header files
 #include <csignal>
+#include <cstdlib>
 
-// boost headers
+// Boost header files
 #include <boost/shared_ptr.hpp>
 
-// other library headers
+// Other library header files
 #include <termios.h>
 #include <unistd.h>
 #include <sys/select.h>
@@ -247,12 +248,12 @@ static void PrintVersion(void)
     fprintf(stderr,
         "%s %s\n\n"
         "%s\n%s\n%s\n%s\n"
-		"%s\n\n"
+        "%s\n\n"
         "%s\n%s\n%s\n\n",
         PACKAGE_NAME, POV_RAY_VERSION,
         DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1, DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2, DISTRIBUTION_MESSAGE_2, DISTRIBUTION_MESSAGE_3,
         DESCRIPTION_MESSAGE_LPUB3D_TRACE_3,
-		LPUB3D_TRACE_COPYRIGHT, DISCLAIMER_MESSAGE_1, DISCLAIMER_MESSAGE_2
+        LPUB3D_TRACE_COPYRIGHT, DISCLAIMER_MESSAGE_1, DISCLAIMER_MESSAGE_2
     );
     fprintf(stderr,
         "Built-in features:\n"
@@ -283,7 +284,7 @@ static void ErrorExit(vfeSession *session)
     fprintf(stderr, "%s\n", session->GetErrorString());
     session->Shutdown();
     delete session;
-    exit(RETURN_ERROR);
+    std::exit(RETURN_ERROR);
 }
 
 static void CancelRender(vfeSession *session)
@@ -321,7 +322,7 @@ static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts,
         if (boost::starts_with(s, "+wt") || boost::starts_with(s, "-wt"))
         {
             s.erase(0, 3);
-            int n = atoi(s.c_str());
+            int n = std::atoi(s.c_str());
             if (n)
                 opts.SetThreadCount(n);
             else
@@ -420,17 +421,17 @@ int main (int argc, char **argv)
     int               argc_copy=argc; /* because it might also be updated */
 
     /*fprintf(stderr, "%s: This is a RELEASE CANDIDATE version of " PACKAGE ". General distribution is discouraged.\n", PACKAGE);*/
-	  fprintf(stderr,
-			  "\n" PACKAGE_NAME " for Linux/Mac.\n\n"
-			  PACKAGE " Ray Tracer Version " POV_RAY_VERSION_INFO ".\n\n"
-			  DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 "\n"
-			  DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 "\n"
-			  DISTRIBUTION_MESSAGE_2 ".\n"
-			  DISTRIBUTION_MESSAGE_3 "\n"
-			  DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 "\n\n"
-			  LPUB3D_TRACE_COPYRIGHT "\n"
-			  DISCLAIMER_MESSAGE_1 "\n"
-			  DISCLAIMER_MESSAGE_2 "\n\n");
+      fprintf(stderr,
+              "\n" PACKAGE_NAME " for Linux/Mac.\n\n"
+              PACKAGE " Ray Tracer Version " POV_RAY_VERSION_INFO ".\n\n"
+              DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 "\n"
+              DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 "\n"
+              DISTRIBUTION_MESSAGE_2 ".\n"
+              DISTRIBUTION_MESSAGE_3 "\n"
+              DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 "\n\n"
+              LPUB3D_TRACE_COPYRIGHT "\n"
+              DISCLAIMER_MESSAGE_1 "\n"
+              DISCLAIMER_MESSAGE_2 "\n\n");
 
     // block some signals for this thread as well as those created afterwards
     sigemptyset(&sigset);
@@ -536,7 +537,7 @@ int main (int argc, char **argv)
     }
     else
     {
-        char *s = getenv ("POVINC");
+        char *s = std::getenv ("POVINC");
         session->SetDisplayCreator(UnixDisplayCreator);
         session->GetUnixOptions()->Process_povray_ini(opts);
         if (s != NULL)

@@ -102,10 +102,22 @@
 /// experimental feature.
 #define POV_RAY_PRERELEASE          "alpha"
 
+#if defined(DOXYGEN) && !defined(POV_RAY_PRERELEASE)
+    // Work around doxygen being unable to document undefined macros.
+    #define POV_RAY_PRERELEASE (undefined)
+    #undef POV_RAY_PRERELEASE
+#endif
+
 /// @def POVRAY_IS_BETA
 /// Whether this version is a beta.
 /// Leave undefined for pre-beta, release candidate or final releases.
 //#define POVRAY_IS_BETA
+
+#if defined(DOXYGEN) && !defined(POVRAY_IS_BETA)
+    // Work around doxygen being unable to document undefined macros.
+    #define POVRAY_IS_BETA (undefined)
+    #undef POVRAY_IS_BETA
+#endif
 
 /// @def POV_RAY_HOST_VERSION
 /// Version of required host installation.
@@ -114,6 +126,12 @@
 /// host installation to be dropped into. Define as the latest installable release's major and
 /// minor version number for vX.Y.0.0 pre-beta versions, or leave undefined otherwise.
 #define POV_RAY_HOST_VERSION        "3.7"
+
+#if defined(DOXYGEN) && !defined(POV_RAY_HOST_VERSION)
+    // Work around doxygen being unable to document undefined macros.
+    #define POV_RAY_HOST_VERSION (undefined)
+    #undef POV_RAY_HOST_VERSION
+#endif
 
 /// @}
 ///
@@ -156,6 +174,16 @@
     #define POV_RAY_PATCHLEVEL_SUFFIX "." POV_RAY_PATCHLEVEL
 #endif
 
+/// @def POV_RAY_PRERELEASE_SUFFIX
+/// Pre-release identifier as a suffix string.
+/// This macro is defined to an empty string if the pre-release identifier is undefined,
+/// and includes a leading dash (`-`) otherwise.
+#if defined(POV_RAY_PRERELEASE)
+    #define POV_RAY_PRERELEASE_SUFFIX "-" POV_RAY_PRERELEASE
+#else
+    #define POV_RAY_PRERELEASE_SUFFIX ""
+#endif
+
 /// Official source code generation as string.
 /// This macro evaluates to the first two numerical components of the source code version,
 /// in the form `X.Y`, where `X` and `Y` are the major and minor version numbers respectively.
@@ -177,6 +205,12 @@
 /// respectively, `Z` is the revision, and `P` is the maintenance patch level.
 #define POV_RAY_PATCH_VERSION POV_RAY_RELEASE_VERSION POV_RAY_PATCHLEVEL_SUFFIX
 
+/// Official source code version as string.
+/// This macro evaluates to the complete official source code version string. The format is
+/// `X.Y.Z`[`.P`][`-PRE`], where `X` and `Y` are the major and minor version numbers respectively,
+/// `Z` is the revision, `P` is the maintenance patch level, and `PRE` is the pre-release tag.
+#define POV_RAY_FULL_VERSION POV_RAY_PATCH_VERSION POV_RAY_PRERELEASE_SUFFIX
+
 /// @def POV_RAY_BETA_SUFFIX
 /// Suffix to distinguish beta- from non-beta versions.
 /// For beta releases, this macro evaluates to `-beta`. Otherwise, this macro evaluates to an
@@ -185,16 +219,6 @@
     #define POV_RAY_BETA_SUFFIX "-beta"
 #else
     #define POV_RAY_BETA_SUFFIX ""
-#endif
-
-/// @def POV_RAY_BETA_PREFIX
-/// Prefix to distinguish beta- from non-beta versions.
-/// For beta releases, this macro evaluates to `Beta`. Otherwise, this macro evaluates to an
-/// empty string.
-#if defined(POVRAY_IS_BETA)
-    #define POV_RAY_BETA_PREFIX "Beta"
-#else
-    #define POV_RAY_BETA_PREFIX ""
 #endif
 
 /// @}

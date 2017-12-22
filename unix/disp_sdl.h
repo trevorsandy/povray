@@ -36,10 +36,10 @@
 ///
 //*******************************************************************************
 
-#ifdef HAVE_LIBSDL
+#ifndef POVRAY_UNIX_DISP_SDL_H
+#define POVRAY_UNIX_DISP_SDL_H
 
-#ifndef _DISP_SDL_H
-#define _DISP_SDL_H
+#ifdef HAVE_LIBSDL
 
 #include "vfe.h"
 #include "unixoptions.h"
@@ -105,9 +105,9 @@ namespace pov_frontend
             float m_display_scale;
             /// for update interval
             unsigned int m_PxCnt;
-			SDL_Window   *m_window;
-			SDL_Surface  *m_screen;
-			SDL_Surface  *m_display;
+            SDL_Window   *m_window;
+            SDL_Surface  *m_screen;
+            SDL_Surface  *m_display;
             SDL_Rect m_screen_rect;
             SDL_Rect m_update_rect;
             /// for mixing colors in scaled down display
@@ -115,6 +115,6 @@ namespace pov_frontend
     };
 }
 
-#endif /* _DISP_SDL_H */
-
 #endif /* HAVE_LIBSDL */
+
+#endif // POVRAY_UNIX_DISP_SDL_H

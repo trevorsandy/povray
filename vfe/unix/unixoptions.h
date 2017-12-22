@@ -38,8 +38,8 @@
 ///
 //*******************************************************************************
 
-#ifndef _OPTIONS_H
-#define _OPTIONS_H
+#ifndef POVRAY_VFE_UNIX_UNIXOPTIONS_H
+#define POVRAY_VFE_UNIX_UNIXOPTIONS_H
 
 #include "vfe.h"
 
@@ -367,4 +367,4 @@ namespace vfePlatform
     };
 }
 
-#endif
+#endif // POVRAY_VFE_UNIX_UNIXOPTIONS_H

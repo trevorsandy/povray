@@ -437,56 +437,56 @@ static void CleanupBenchmark(vfeWinSession *session, string& ini, string& pov)
 
 void FormatQuotedArguments(std::vector<std::string>& cmdargs, const std::string& commandline)
 {
-	int len = commandline.length();
-	bool dqot = false, sqot = false, optflag = false;
-	int arglen, adjustment, qotpos;
-	for (size_t i = 0; i < len; i++) {
-		int start = i;
-		if (commandline[i] == '\"') dqot = true;
-		else if (commandline[i] == '\'') sqot = true;
-		else if (commandline[i] == '+' || commandline[i] == '-') {
-			optflag = true; qotpos = i + 2;
-			if (qotpos < len) {
-				if (commandline[qotpos] == '\"') dqot = true;
-				else if (commandline[qotpos] == '\'') sqot = true;
-				if (dqot || sqot) i = qotpos;
-			}
-		}
+    int len = commandline.length();
+    bool dqot = false, sqot = false, optflag = false;
+    int arglen, adjustment, qotpos;
+    for (size_t i = 0; i < len; i++) {
+        int start = i;
+        if (commandline[i] == '\"') dqot = true;
+        else if (commandline[i] == '\'') sqot = true;
+        else if (commandline[i] == '+' || commandline[i] == '-') {
+            optflag = true; qotpos = i + 2;
+            if (qotpos < len) {
+                if (commandline[qotpos] == '\"') dqot = true;
+                else if (commandline[qotpos] == '\'') sqot = true;
+                if (dqot || sqot) i = qotpos;
+            }
+        }
 
-		if (dqot) {
-			i++;
-			if (!optflag) start++;
-			while (i < len && commandline[i] != '\"')
-				i++;
-			if (i < len) {
-				adjustment = i + 1;
-				dqot = false;
-				if (optflag) optflag = false;
-			}
-			arglen = adjustment - start;
-			i++;
-		}
-		else if (sqot) {
-			i++;
-			if (!optflag) start++;
-			while (i<len && commandline[i] != '\'')
-				i++;
-			if (i < len) {
-				adjustment = i + 1;
-				sqot = false;
-				if (optflag) optflag = false;
-			}
-			arglen = adjustment - start;
-			i++;
-		}
-		else {
-			while (i<len && commandline[i] != ' ')
-				i++;
-			arglen = i - start;
-		}
-		cmdargs.push_back(commandline.substr(start, arglen));
-	}
-	if (dqot || sqot) fprintf(stderr, "One of the command line quotes is open\n");
+        if (dqot) {
+            i++;
+            if (!optflag) start++;
+            while (i < len && commandline[i] != '\"')
+                i++;
+            if (i < len) {
+                adjustment = i + 1;
+                dqot = false;
+                if (optflag) optflag = false;
+            }
+            arglen = adjustment - start;
+            i++;
+        }
+        else if (sqot) {
+            i++;
+            if (!optflag) start++;
+            while (i<len && commandline[i] != '\'')
+                i++;
+            if (i < len) {
+                adjustment = i + 1;
+                sqot = false;
+                if (optflag) optflag = false;
+            }
+            arglen = adjustment - start;
+            i++;
+        }
+        else {
+            while (i<len && commandline[i] != ' ')
+                i++;
+            arglen = i - start;
+        }
+        cmdargs.push_back(commandline.substr(start, arglen));
+    }
+    if (dqot || sqot) fprintf(stderr, "One of the command line quotes is open\n");
 }
 
 // This is the console user interface build of LPub3D-Trace under Windows
@@ -568,27 +568,27 @@ extern "C" int main(int argc, char **argv)
   if (argc > 1)
   {
 #ifdef WIN_DEBUG
-	std::cerr << "ORIGINAL COMMAND LINE (" << argc << ")" << std::endl;
-	for (int i = 0; i<argc; i++) std::cerr << "- " << i+1 << ". " << argv[i] << std::endl;
+    std::cerr << "ORIGINAL COMMAND LINE (" << argc << ")" << std::endl;
+    for (int i = 0; i<argc; i++) std::cerr << "- " << i+1 << ". " << argv[i] << std::endl;
 #endif
-	std::string commandline;
-	for (int i = 0; i<argc; i++) commandline.append(std::string(argv[i]).append(" "));
-	std::vector<std::string> commandargs;
-	FormatQuotedArguments(commandargs, commandline);
+    std::string commandline;
+    for (int i = 0; i<argc; i++) commandline.append(std::string(argv[i]).append(" "));
+    std::vector<std::string> commandargs;
+    FormatQuotedArguments(commandargs, commandline);
 
-	int n_argc = commandargs.size();
-	char **n_argv = (char **)malloc((n_argc + 1) * sizeof(char *));
-	for (int i = 0; i<n_argc; i++)
-	{
-	  n_argv[i] = (char *)malloc(strlen(commandargs[i].c_str()) + 1);
-	  std::strcpy(n_argv[i], commandargs[i].c_str());
-	}
-	n_argv[n_argc] = NULL;
-	argc = n_argc;
-	argv = n_argv;
+    int n_argc = commandargs.size();
+    char **n_argv = (char **)malloc((n_argc + 1) * sizeof(char *));
+    for (int i = 0; i<n_argc; i++)
+    {
+      n_argv[i] = (char *)malloc(strlen(commandargs[i].c_str()) + 1);
+      std::strcpy(n_argv[i], commandargs[i].c_str());
+    }
+    n_argv[n_argc] = NULL;
+    argc = n_argc;
+    argv = n_argv;
 #ifdef WIN_DEBUG
-	std::cerr << "FORMATTED COMMAND LINE (" << argc << ")" << std::endl;
-	for (int i = 0; i<argc; i++) std::cerr << "- " << i + 1 << ". " << argv[i] << std::endl;
+    std::cerr << "FORMATTED COMMAND LINE (" << argc << ")" << std::endl;
+    for (int i = 0; i<argc; i++) std::cerr << "- " << i + 1 << ". " << argv[i] << std::endl;
 #endif
   }
 
@@ -618,10 +618,10 @@ extern "C" int main(int argc, char **argv)
   }
   else if (session->GetWinConOptions()->isOptionSet("general", "generation"))
   {
-	session->Shutdown();
-	PrintGeneration();
-	delete session;
-	return RETURN_OK;
+    session->Shutdown();
+    PrintGeneration();
+    delete session;
+    return RETURN_OK;
   }
   else if (session->GetWinConOptions()->isOptionSet("general", "benchmark"))
   {
@@ -646,7 +646,7 @@ extern "C" int main(int argc, char **argv)
   }
   else
   {
-    s = getenv ("POVINC");
+    s = std::getenv ("POVINC");
     session->SetDisplayCreator(WinConDisplayCreator);
     session->GetWinConOptions()->Process_povray_ini(opts);
     if (s != NULL)
