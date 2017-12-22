@@ -40,8 +40,8 @@
 ///
 //*******************************************************************************
 
-#ifndef _OPTIONS_H
-#define _OPTIONS_H
+#ifndef POVRAY_VFE_WINDOWS_WINOPTIONS_H
+#define POVRAY_VFE_WINDOWS_WINOPTIONS_H
 
 #include "vfe.h"
 
@@ -128,12 +128,12 @@ namespace vfePlatform
             The options are stored in the list m_user_options.
 
             The constructor sets up the locations of the configuration files, adds
-			the standard options to the list and processes the povray.conf files.
-			The io-restrictions settings from those files are read with the old
-			proven system and stored in their own list (m_permitted_paths).  At the
-			end these are transferred into the corresponding vfeSession fields.
-			All unknown options in the povray.conf files are read into a temporary
-			list (m_custom_conf_options).
+            the standard options to the list and processes the povray.conf files.
+            The io-restrictions settings from those files are read with the old
+            proven system and stored in their own list (m_permitted_paths).  At the
+            end these are transferred into the corresponding vfeSession fields.
+            All unknown options in the povray.conf files are read into a temporary
+            list (m_custom_conf_options).
 
             The actual options processing is done in ProcessOptions(). There all
             options from the povray.conf files are transferred into the list.  Then

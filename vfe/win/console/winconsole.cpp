@@ -44,11 +44,14 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
-// Windows standard headers
+// Windows standard header files
 #include <windows.h>
 #include <stdio.h>
 
-// boost headers
+// C++ variants of C standard header files
+#include <cstdlib>
+
+// boost header files
 #include <boost/shared_ptr.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/thread.hpp>
@@ -273,7 +276,7 @@ void ErrorExit(vfeSession *session)
   fprintf (stderr, "%s\n", session->GetErrorString());
   session->Shutdown();
   delete session;
-  exit (1);
+  std::exit (1);
 }
 
 void BenchMarkErrorExit(LPSTR lpszMessage)
@@ -319,7 +322,7 @@ static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts,
     if (boost::starts_with(s, "+wt") || boost::starts_with(s, "-wt"))
     {
       s.erase(0, 3);
-      int n = atoi(s.c_str());
+      int n = std::atoi(s.c_str());
       if (n)
         opts.SetThreadCount(n);
       else

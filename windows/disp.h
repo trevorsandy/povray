@@ -37,8 +37,8 @@
 ///
 //*******************************************************************************
 
-#ifndef _DISP_H
-#define _DISP_H
+#ifndef POVRAY_WINDOWS_DISP_H
+#define POVRAY_WINDOWS_DISP_H
 
 #include "vfe.h"
 

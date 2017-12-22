@@ -42,10 +42,19 @@
 //*******************************************************************************
 
 #include "winoptions.h"
+
+// C++ variants of C standard header files
+#include <cstdlib>
+
+// C++ standard header files
 #include <fstream>
-#include <sys/stat.h>
+
+// Boost header files
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+
+// Other library header files
+#include <sys/stat.h>
 
 namespace vfePlatform
 {
@@ -69,13 +78,13 @@ namespace vfePlatform
     WinConOptionsProcessor::WinConOptionsProcessor(vfeSession *session) :
         m_Session(session)
     {
-		// User's home directory
-		m_home = "";
-		char* homeBuffer = new char[MAX_PATH];
-		if ((homeBuffer = getenv("USERPROFILE")) > 0)
-			m_home = homeBuffer;
-		else
-			fprintf(stderr, "%s: Could not get the user's home directory.\n", PACKAGE_NAME);
+        // User's home directory
+        m_home = "";
+        char* homeBuffer = new char[MAX_PATH];
+        if ((homeBuffer = std::getenv("USERPROFILE")) > 0)
+            m_home = homeBuffer;
+        else
+            fprintf(stderr, "%s: Could not get the user's home directory.\n", PACKAGE_NAME);
 
         // Default values for I/O restrictions: everything is allowed.
         // Any restrictions must come from system or user configuration.
@@ -153,26 +162,26 @@ namespace vfePlatform
 
     string WinConOptionsProcessor::GetTemporaryPath(void)
     {
-		string path = QueryOptionString("general", "temppath");
-		if (path.length() == 0)
-		{
-			char str[MAX_PATH];
-			if (GetTempPath(sizeof(str) - 7, str) == 0)
-				throw vfeException("Could not get temp dir from Windows API");
-			strcat(str, "povwin\\");
+        string path = QueryOptionString("general", "temppath");
+        if (path.length() == 0)
+        {
+            char str[MAX_PATH];
+            if (GetTempPath(sizeof(str) - 7, str) == 0)
+                throw vfeException("Could not get temp dir from Windows API");
+            strcat(str, "povwin\\");
 
-			// if we fail to create our temp dir, just use the default one
-			if (CreateDirectory(str, NULL) == 0 && GetLastError() != ERROR_ALREADY_EXISTS)
-				if (GetTempPath(sizeof(str), str))
-				{
-					path = str;
-					return path;
-				}
-			path = win_getcwd();
-		}
-		if (path[path.length() - 1] != '\\')
-			path = path + "\\";
-		return path;
+            // if we fail to create our temp dir, just use the default one
+            if (CreateDirectory(str, NULL) == 0 && GetLastError() != ERROR_ALREADY_EXISTS)
+                if (GetTempPath(sizeof(str), str))
+                {
+                    path = str;
+                    return path;
+                }
+            path = win_getcwd();
+        }
+        if (path[path.length() - 1] != '\\')
+            path = path + "\\";
+        return path;
     }
 
     void WinConOptionsProcessor::PrintOptions(void)
@@ -318,7 +327,7 @@ namespace vfePlatform
             // environment variables:
             if ((*iter).EnvVariable != "")
             {
-                char *tmp = getenv((*iter).EnvVariable.c_str());
+                char *tmp = std::getenv((*iter).EnvVariable.c_str());
                 if (tmp) // variable defined?
                     (*iter).Value = tmp;
             }
@@ -396,19 +405,19 @@ namespace vfePlatform
     }
 
     // based on v3.6 UNIX_getcwd()
-	string WinConOptionsProcessor::win_getcwd(void)
-	{
-		string m_cwd = "";
-		char* cwdBuffer = new char[MAX_PATH]; // must not be NULL
-		if ((cwdBuffer = _getcwd(NULL, 0)) == NULL)
-		{
-			fprintf(stderr, "%s: Could not get the user's home directory.\n", PACKAGE_NAME);
-			return m_cwd;
-		}
-		m_cwd = cwdBuffer + string("\\");  // add final slash
-		free(cwdBuffer);
-		return m_cwd;
-	}
+    string WinConOptionsProcessor::win_getcwd(void)
+    {
+        string m_cwd = "";
+        char* cwdBuffer = new char[MAX_PATH]; // must not be NULL
+        if ((cwdBuffer = _getcwd(NULL, 0)) == NULL)
+        {
+            fprintf(stderr, "%s: Could not get the user's home directory.\n", PACKAGE_NAME);
+            return m_cwd;
+        }
+        m_cwd = cwdBuffer + string("\\");  // add final slash
+        free(cwdBuffer);
+        return m_cwd;
+    }
 
     // based on v3.6 unix_basename()
     string WinConOptionsProcessor::basename(const string &path)
@@ -861,7 +870,7 @@ namespace vfePlatform
                 }
 
                 m_shellout = shellout;
-				gShelloutsPermittedWinCon = shellout == SHL_ALLOWED;
+                gShelloutsPermittedWinCon = shellout == SHL_ALLOWED;
             }  // shellout security
 
             // permitted paths
@@ -904,17 +913,17 @@ namespace vfePlatform
                 m_permitted_paths = paths;  // assign new paths
             }
         }
-		else
-		{
-			// If only system configuration file exist, assign permitted paths
-			if (!file_exist(m_userconf))
-			{
-				m_permitted_paths = paths;  // assign new paths
+        else
+        {
+            // If only system configuration file exist, assign permitted paths
+            if (!file_exist(m_userconf))
+            {
+                m_permitted_paths = paths;  // assign new paths
 #ifdef WIN_DEBUG
-				cerr << PACKAGE_NAME << ": user configuration file does not exist. Using system permitted paths." << endl;
+                cerr << PACKAGE_NAME << ": user configuration file does not exist. Using system permitted paths." << endl;
 #endif
-			}
-		}
+            }
+        }
     }
 
     // based on v3.6 unix_process_povray_ini()
@@ -927,7 +936,7 @@ namespace vfePlatform
 
         // soften the sysconf is missing message
         m_soften_sysconf_message = false;
-        if (getenv("POV_SYSCONF_MSG") > 0)
+        if (std::getenv("POV_SYSCONF_MSG") > 0)
             m_soften_sysconf_message = true;
 
         // read system configuration file
@@ -943,7 +952,7 @@ namespace vfePlatform
             {
                 // fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE);
                 // perror(m_sysconf.c_str());
-                if (getenv("POV_IGNORE_SYSCONF_MSG") > 0)
+                if (std::getenv("POV_IGNORE_SYSCONF_MSG") > 0)
                     fprintf(stderr, "%s: ignoring system configuration file\n", PACKAGE_NAME);
                 else {
                     fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE_NAME);
@@ -1011,18 +1020,18 @@ namespace vfePlatform
     void WinConOptionsProcessor::Process_povray_ini(vfeRenderOptions &opts)
     {
 #ifdef WIN_DEBUG
-		cerr << "READ POVINI" << endl;
+        cerr << "READ POVINI" << endl;
 #endif
-		// try the file pointed to by POVINI
+        // try the file pointed to by POVINI
         string povini;
-        char * povini_c = getenv("POVINI");
+        char * povini_c = std::getenv("POVINI");
         if (povini_c)
         {
             povini = povini_c;
             if (file_exist(povini))
             {
 #ifdef WIN_DEBUG
-				cerr << "  Using INI Environment Varialbe: " << povini << endl;
+                cerr << "  Using INI Environment Varialbe: " << povini << endl;
 #endif
                 opts.AddINI(povini);
 
@@ -1040,7 +1049,7 @@ namespace vfePlatform
         if (file_exist(povini))
         {
 #ifdef WIN_DEBUG
-			cerr << "  Using current directory INI at: " << povini << endl;
+            cerr << "  Using current directory INI at: " << povini << endl;
 #endif
             opts.AddINI(povini);
             return;
@@ -1050,7 +1059,7 @@ namespace vfePlatform
         if ((m_home.length() != 0) && file_exist(m_userini))
         {
 #ifdef WIN_DEBUG
-			cerr << "  Using user INI at: " << m_userini << endl;
+            cerr << "  Using user INI at: " << m_userini << endl;
 #endif
             opts.AddINI(m_userini);
             return;
@@ -1058,7 +1067,7 @@ namespace vfePlatform
         if (file_exist(m_sysini))
         {
 #ifdef WIN_DEBUG
-			cerr << "  Using system INI at: " << m_sysini << endl;
+            cerr << "  Using system INI at: " << m_sysini << endl;
 #endif
             opts.AddINI(m_sysini);
             return;
@@ -1068,7 +1077,7 @@ namespace vfePlatform
         if ((m_home.length() != 0) && file_exist(m_userini_old))
         {
 #ifdef WIN_DEBUG
-			cerr << "  Using legacy user INI at: " << m_userini << endl;
+            cerr << "  Using legacy user INI at: " << m_userini << endl;
 #endif
             opts.AddINI(m_userini_old);
             return;
@@ -1076,24 +1085,24 @@ namespace vfePlatform
         if (file_exist(m_sysini_old))
         {
 #ifdef WIN_DEBUG
-			cerr << "  Using legacy system INI at: " << m_sysini << endl;
+            cerr << "  Using legacy system INI at: " << m_sysini << endl;
 #endif
             opts.AddINI(m_sysini_old);
             return;
         }
 
-		for (list<WinPath>::iterator iter = m_permitted_paths.begin(); iter != m_permitted_paths.end(); iter++)
-		{
-			string iniFile = iter->str + "povray.ini";
-			if (file_exist(iniFile))
-			{
+        for (list<WinPath>::iterator iter = m_permitted_paths.begin(); iter != m_permitted_paths.end(); iter++)
+        {
+            string iniFile = iter->str + "povray.ini";
+            if (file_exist(iniFile))
+            {
 #ifdef WIN_DEBUG
-				cerr << "  Using INI at permitted path: " << iniFile << endl;
+                cerr << "  Using INI at permitted path: " << iniFile << endl;
 #endif
-				opts.AddINI(iniFile);
-				return;
-			}
-		}
+                opts.AddINI(iniFile);
+                return;
+            }
+        }
 
         // warn that no INI file was found and add minimal library_path setting
         fprintf(stderr, "%s: cannot open an INI file, adding default library path\n%s\\ini\n", PACKAGE_NAME, POVLIBDIR);
