@@ -6538,7 +6538,7 @@ TrueTypeFont *Parser::OpenFontFile(const char *asciifn, const int font_id)
         /* First look to see if we have already opened this font */
 
         for(vector<TrueTypeFont*>::iterator iFont = sceneData->TTFonts.begin(); iFont != sceneData->TTFonts.end(); ++iFont)
-            if(UCS2_strcmp(formalFilename.c_str(), (*iFont)->filename) == 0)
+            if(formalFilename == (*iFont)->filename)
             {
                 font = *iFont;
                 break;
@@ -6559,7 +6559,7 @@ TrueTypeFont *Parser::OpenFontFile(const char *asciifn, const int font_id)
         else
         {
             #ifdef TTF_DEBUG
-            Debug_Info("Using cached font info for %s\n", font->filename);
+            Debug_Info("Using cached font info for %s\n", font->filename.c_str());
             #endif
         }
     }
@@ -6584,7 +6584,7 @@ TrueTypeFont *Parser::OpenFontFile(const char *asciifn, const int font_id)
             fp = Internal_Font_File(font_id);
         }
 
-        font = new TrueTypeFont(UCS2_strdup(formalFilename.c_str()), fp, sceneData->stringEncoding);
+        font = new TrueTypeFont(formalFilename, fp, sceneData->stringEncoding);
 
         sceneData->TTFonts.push_back(font);
     }
