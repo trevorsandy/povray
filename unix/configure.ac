@@ -545,7 +545,7 @@ else
     test x"$x_libraries" = x"NONE" && x_libraries="/usr/lib"
   fi
 
-  pov_xwin_msg="disabled"
+  pov_xwin_msg="enabled" # TESTING X11 ON SUSE pov_xwin_msg="disabled".
   AC_PATH_XTRA
   if test x"$have_x" = x"yes"; then
     CPPFLAGS="$CPPFLAGS $X_CFLAGS"                # append
