@@ -360,12 +360,15 @@ for extralib in '' '-lboost_system'
 do
   LIBS=$SAVED_LIBS
   LIBS="$LIBS $extralib"
-AC_RUN_IFELSE(
-  [AC_LANG_PROGRAM([[
-#include <boost/thread/thread.hpp>
-    ]],
-    [[boost::defer_lock_t(); return 0;]])],
-  [
+  AC_RUN_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <boost/thread/thread.hpp>
+    ]],[[
+      boost::mutex m;
+      boost::defer_lock_t();
+      return 0;
+    ]])
+  ],[
     AC_MSG_RESULT([yes])
     BOOST_THREAD_LIB="$BOOST_THREAD_LIB $extralib"
     boost_thread_links=1
@@ -374,20 +377,20 @@ AC_RUN_IFELSE(
   	LIBS="$LIBS -lboost_system"
     AC_COMPILE_IFELSE(
       [AC_LANG_PROGRAM([[
-#include <boost/thread/thread.hpp>
-        ]],
-        [[boost::defer_lock_t(); return 0;]])],
-      [
+        #include <boost/thread/thread.hpp>
+      ]],[[
+        boost::mutex m;
+        boost::defer_lock_t();
+        return 0;
+      ]])
+    ],[
         AC_MSG_RESULT([cross-compiling... yes])
         BOOST_THREAD_LIB="$BOOST_THREAD_LIB -lboost_system"
         boost_thread_links=1
-      ],
-      [
+    ],[
         AC_MSG_RESULT([cross-compiling... no])
-      ]
-    )
-  ]
-)
+    ])
+  ])
   if test $boost_thread_links = '1'; then
     break
   fi
@@ -630,7 +633,7 @@ else
 
       AS_IF([ test -f "$pov_sdl2_h" ],
 	    [
-	      pov_check_libsdl2_src=“ok”
+	      pov_check_libsdl2_src="ok"
 	      AC_MSG_RESULT([yes, using SDL2 v$pov_sdl2_version built from source])
 	      AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
 	    ],
@@ -1615,6 +1618,7 @@ Compilation settings:
   Linker flags:        $LDFLAGS
   CC parameters:       $CC
   CXX parameters:      $CXX
+  Libraries:           $LIBS
 
 Type 'make' to build $PACKAGE_NAME
 Type 'make check' to build $PACKAGE_NAME and run a test render.

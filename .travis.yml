@@ -66,9 +66,7 @@ before_install:
       fi
 
 install:
-  - cd unix
-  - chmod +x prebuild3rdparty.sh && ./prebuild3rdparty.sh
-  - cd ..
+  - chmod +x unix/prebuild3rdparty.sh && ./unix/prebuild3rdparty.sh
   - ./configure COMPILED_BY="Trevor SANDY <trevor.sandy@gmail.com> using Travis CI for LPub3D." --prefix="$(pwd)/${POV_DIST_DIR}" LPUB3D_3RD_PARTY="yes" --with-libsdl2 --enable-watch-cursor
   - make check
   - make install
