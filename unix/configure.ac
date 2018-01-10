@@ -398,6 +398,14 @@ done
 if test $boost_thread_links != '1'; then
   AC_MSG_RESULT([no])
   AC_MSG_FAILURE([cannot link with the boost thread library])
+else
+  # Note: if using optimization flag lower than -O2, boost library -lboost_date_time must be added to LIBS.
+  # This library sneakily appears to work as a header-only library at optimization levels -O2 and higher, due to inlining.
+  AC_MSG_CHECKING([whether boost_date_time library should be added to LIBS])
+  [ $(echo $CXXFLAGS | grep -E '(-O2|-O3)') ] && \
+  AC_MSG_RESULT([no, optimization higher than -O1 detected]) || \
+  AC_MSG_RESULT([yes, optimization lower than -O2 detected]) && \
+  BOOST_THREAD_LIB="$BOOST_THREAD_LIB -lboost_date_time"
 fi
 
 AC_DEFINE([USE_OFFICIAL_BOOST], [], [Use the official Boost libraries.])
