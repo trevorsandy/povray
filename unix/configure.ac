@@ -636,6 +636,7 @@ else
 	      pov_check_libsdl2_src="ok"
 	      AC_MSG_RESULT([yes, using SDL2 v$pov_sdl2_version built from source])
 	      AC_DEFINE_UNQUOTED([HAVE_LIBSDL], [1], [Define to 1 if you have the SDL2 library])
+        AC_DEFINE_UNQUOTED([LIBSDL_BLT_FRM_SRC], [1], [Define to 1 when SDL2 library built from source])
 	    ],
 	    [
 	      AC_MSG_RESULT([no, SDL.h header not found])
@@ -1583,6 +1584,7 @@ Compilation settings:
   Linker flags:        $LDFLAGS
   CC parameters:       $CC
   CXX parameters:      $CXX
+  Libraries:           $LIBS
 
 Type 'make' to build $PACKAGE_NAME
 Type 'make check' to build $PACKAGE_NAME and run a test render.

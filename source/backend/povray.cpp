@@ -115,8 +115,16 @@
     // in creating an entire new classification for it right now.
     #include <boost/version.hpp>
 
+    // get the SDL version from its system header when dynamically loading
+    // or statically set the version when building SDL from source
     #ifndef LIBSDL_MISSING
-        #include <SDL_version.h>
+        #ifndef LIBSDL_BLT_FRM_SRC
+            #include <SDL_version.h>
+        #else
+            #define SDL_MAJOR_VERSION   2
+            #define SDL_MINOR_VERSION   0
+            #define SDL_PATCHLEVEL      5
+        #endif
     #endif
 
 #endif
@@ -497,10 +505,15 @@ void BuildInitInfo(POVMSObjectPtr msg)
         err = POVMSAttr_New(&attr);
         if(err == kNoErr)
         {
-            SDL_version sdl_linked_version;
-            SDL_GetVersion(&sdl_linked_version);
-            const char *tempstr = pov_tsprintf("SDL2 %d.%d.%d, Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>",
-            sdl_linked_version.major, sdl_linked_version.minor, sdl_linked_version.patch);
+            #ifndef LIBSDL_BLT_FRM_SRC
+                SDL_version sdl_linked_version;
+                SDL_GetVersion(&sdl_linked_version);
+                const char *tempstr = pov_tsprintf("SDL2 %d.%d.%d, Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>",
+                sdl_linked_version.major, sdl_linked_version.minor, sdl_linked_version.patch);
+            #else
+                const char *tempstr = pov_tsprintf("SDL2 %d.%d.%d, Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>",
+                SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
+            #endif
 
             err = POVMSAttr_Set(&attr, kPOVMSType_CString, reinterpret_cast<const void *>(tempstr), (int) strlen(tempstr) + 1);
             if(err == kNoErr)
