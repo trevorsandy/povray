@@ -113,12 +113,12 @@ AX_ARG_WITH([--with-libmkl],              [DIR], [use the Intel(R) Math Kernel L
 AX_ARG_WITH([--with-openexr],             [DIR], [use the OpenEXR library (in directory DIR)])
 AX_ARG_WITH([--with-macosx-sdk],          [DIR], [use the MacOS SDK (in directory DIR)])
 AX_ARG_WITH([--with-macosx-version-min],  [VER], [use the MacOS SDK deployment target (version)])
+AX_ARG_WITH([--with-boost-date-time],     [],    [add boost_date_time library to LIBS])
 
 AC_ARG_VAR([COMPILED_BY], [customize the "unofficial version" message (required argument)])
 AC_ARG_VAR([NON_REDISTRIBUTABLE_BUILD], [see the installation documentation])
 AC_ARG_VAR([C99_COMPATIBLE_RADIOSITY], [adapt radiosity code to non-IEEE 754 floating point, requires ISO C99 compiler and library (see octree.cpp for details)])
 AC_ARG_VAR([LPUB3D_3RD_PARTY], [create LPub3D 3rd party install bundle])
-
 
 ###############################################################################
 
@@ -399,13 +399,19 @@ if test $boost_thread_links != '1'; then
   AC_MSG_RESULT([no])
   AC_MSG_FAILURE([cannot link with the boost thread library])
 else
-  # Note: if using optimization flag lower than -O2, boost library -lboost_date_time must be added to LIBS.
-  # This library sneakily appears to work as a header-only library at optimization levels -O2 and higher, due to inlining.
-  AC_MSG_CHECKING([whether boost_date_time library should be added to LIBS])
-  [ $(echo $CXXFLAGS | grep -E '(-O2|-O3)') ] && \
-  AC_MSG_RESULT([no, optimization higher than -O1 detected]) || \
-  AC_MSG_RESULT([yes, optimization lower than -O2 detected]) && \
-  BOOST_THREAD_LIB="$BOOST_THREAD_LIB -lboost_date_time"
+  # The boost_date_time library sneakily appears to work as a header-only
+  # library at optimization levels -O2 and higher, due to inlining.
+  # If/When it does not work it is possible to force adding it to LIBS.
+  AC_MSG_CHECKING([whether to add boost_date_time library to LIBS...])
+  ax_with_boost_date_time="with_boost_date_time"
+  if test x"$ax_with_boost_date_time" = x"no"; then
+    AC_MSG_RESULT([no])
+  elif test x"$ax_with_boost_date_time" = x"yes"; then
+    AC_MSG_RESULT([yes])
+    BOOST_THREAD_LIB="$BOOST_THREAD_LIB -lboost_date_time"
+  else
+    AC_MSG_RESULT([no])
+  fi  # check with_boost_date_time
 fi
 
 AC_DEFINE([USE_OFFICIAL_BOOST], [], [Use the official Boost libraries.])
