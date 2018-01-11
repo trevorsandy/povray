@@ -401,14 +401,14 @@ if test $boost_thread_links != '1'; then
 else
   # The boost_date_time library sneakily appears to work as a header-only
   # library at optimization levels -O2 and higher, due to inlining.
-  # If/When it does not work it is possible to force adding it to LIBS.
+  # If/When it does not work it is possible to specify adding it to LIBS.
   AC_MSG_CHECKING([whether to add boost_date_time library to LIBS...])
   ax_with_boost_date_time="$with_boost_date_time"
   if test x"$ax_with_boost_date_time" = x"no"; then
     AC_MSG_RESULT([no])
   elif test x"$ax_with_boost_date_time" = x"yes"; then
     AC_MSG_RESULT([yes])
-    BOOST_THREAD_LIB="$BOOST_THREAD_LIB -lboost_date_time"
+    LIBS="$LIBS -lboost_date_time"
   else
     AC_MSG_RESULT([no])
   fi  # check with_boost_date_time
