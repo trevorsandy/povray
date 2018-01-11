@@ -403,7 +403,7 @@ else
   # library at optimization levels -O2 and higher, due to inlining.
   # If/When it does not work it is possible to force adding it to LIBS.
   AC_MSG_CHECKING([whether to add boost_date_time library to LIBS...])
-  ax_with_boost_date_time="with_boost_date_time"
+  ax_with_boost_date_time="$with_boost_date_time"
   if test x"$ax_with_boost_date_time" = x"no"; then
     AC_MSG_RESULT([no])
   elif test x"$ax_with_boost_date_time" = x"yes"; then
