@@ -173,6 +173,30 @@ UCS2 *Parser::Parse_String(bool pathname, bool require)
 }
 
 
+//****************************************************************************
+
+
+std::string Parser::Parse_ASCIIString(bool pathname, bool require)
+{
+    UCS2 *cstr = Parse_String(pathname, require);
+    std::string ret(UCS2toASCIIString(cstr));
+    POV_FREE(cstr);
+    return ret;
+}
+
+
+//****************************************************************************
+
+
+UCS2String Parser::Parse_UCS2String(bool pathname, bool require)
+{
+    UCS2 *cstr = Parse_String(pathname, require);
+    UCS2String ret(cstr);
+    POV_FREE(cstr);
+    return ret;
+}
+
+
 /*****************************************************************************
  *
  * FUNCTION
