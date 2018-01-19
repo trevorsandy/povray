@@ -113,7 +113,6 @@ AX_ARG_WITH([--with-libmkl],              [DIR], [use the Intel(R) Math Kernel L
 AX_ARG_WITH([--with-openexr],             [DIR], [use the OpenEXR library (in directory DIR)])
 AX_ARG_WITH([--with-macosx-sdk],          [DIR], [use the MacOS SDK (in directory DIR)])
 AX_ARG_WITH([--with-macosx-version-min],  [VER], [use the MacOS SDK deployment target (version)])
-AX_ARG_WITH([--with-boost-date-time],     [],    [add boost_date_time library to LIBS])
 
 AC_ARG_VAR([COMPILED_BY], [customize the "unofficial version" message (required argument)])
 AC_ARG_VAR([NON_REDISTRIBUTABLE_BUILD], [see the installation documentation])
@@ -398,20 +397,6 @@ done
 if test $boost_thread_links != '1'; then
   AC_MSG_RESULT([no])
   AC_MSG_FAILURE([cannot link with the boost thread library])
-else
-  # The boost_date_time library sneakily appears to work as a header-only
-  # library at optimization levels -O2 and higher, due to inlining.
-  # If/When it does not work it is possible to specify adding it to LIBS.
-  AC_MSG_CHECKING([whether to add boost_date_time library to LIBS...])
-  ax_with_boost_date_time="$with_boost_date_time"
-  if test x"$ax_with_boost_date_time" = x"no"; then
-    AC_MSG_RESULT([no])
-  elif test x"$ax_with_boost_date_time" = x"yes"; then
-    AC_MSG_RESULT([yes])
-    LIBS="$LIBS -lboost_date_time"
-  else
-    AC_MSG_RESULT([no])
-  fi  # check with_boost_date_time
 fi
 
 AC_DEFINE([USE_OFFICIAL_BOOST], [], [Use the official Boost libraries.])
