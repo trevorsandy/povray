@@ -746,7 +746,6 @@ check: all
 		echo "Generating build check povray.ini file..."; \\
 		cat \$(top_builddir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > "\$(build_check_lpub3duserdir)/povray.ini"; \\
 	fi
-	@export POV_IGNORE_SYSCONF_MSG="yes"
 	@echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\
 	+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes
