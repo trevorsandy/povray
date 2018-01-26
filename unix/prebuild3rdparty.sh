@@ -735,7 +735,7 @@ pov_xwin_msg = @pov_xwin_msg@
 build_check_lpub3duserdir = \$(HOME)/\$(lpub3duserdir)/config
 check: all
 	@if ! test -d "\$(lpub3dbase)" && ! test -d "\$(build_check_lpub3duserdir)"; then \\
-		echo "Generating build check file path..."; \\
+		echo && echo "Generating build check file path..."; \\
 		\$(mkdir_p) "\$(build_check_lpub3duserdir)" && chown \$(povowner) "\$(build_check_lpub3duserdir)" && chgrp \$(povgroup) "\$(build_check_lpub3duserdir)"; \\
 	fi
 	@if ! test -f "\$(build_check_lpub3duserdir)/povray.conf"; then \\
@@ -746,10 +746,11 @@ check: all
 		echo "Generating build check povray.ini file..."; \\
 		cat \$(top_builddir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > "\$(build_check_lpub3duserdir)/povray.ini"; \\
 	fi
+	@export POV_IGNORE_SYSCONF_MSG="yes"
 	@echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\
 	+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes
-	@if ! test "\$(CI)" = "true"; then \\
+	@if ! test "\$(CI)" = "true" && ! test "\$(OBS)" = "true"; then \\
 		echo "Executing the render display window check..."; \\
 		case "\$(pov_xwin_msg)" in \\
 			*enabled*) \\
