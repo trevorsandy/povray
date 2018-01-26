@@ -291,7 +291,7 @@ namespace pov_base
 /* Description strings */
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE_NAME " provides a rich Windows console user interface (CUI)"
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 " mirroring the POV-Ray Unix console functionality."
-#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE_NAME " is developed by maintained by Trevor SANDY."
+#define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE_NAME " is developed and maintained by Trevor SANDY."
 /* Copyright string. */
 #define LPUB3D_TRACE_COPYRIGHT "Copyright 2017 Trevor SANDY"
 

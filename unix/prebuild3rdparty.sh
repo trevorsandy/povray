@@ -699,16 +699,20 @@ povgroup = @povgroup@
 
 # Povray conf and ini paths
 if MACOS_BUILD
-datapath = Library/Application\ Support/LPub3D\ Software/LPub3D/3rdParty
 sysapppath = /Applications/LPub3D.app/Contents/3rdParty
+lpub3dbase = Library/Application Support/LPub3D Software
 else
-datapath = .local/share/LPub3D\ Software/LPub3D/3rdParty
 sysapppath = /usr/share/lpub3d/3rdParty
+lpub3dbase = .local/share/LPub3D\ Software
 endif
+datapath = \$(lpub3dbase)/LPub3D/3rdParty
 userdatapath = \$(HOME)/\$(datapath)
 lpub3duserdir = \$(datapath)/@PACKAGE@-@VERSION_BASE@
 lpub3dsysdir = \$(sysapppath)/@PACKAGE@-@VERSION_BASE@
 lpub3dlibdir = \$(lpub3dsysdir)/resources
+cleanuptestdir = @cleanuptestdir@
+cleanuptestini = @cleanuptestini@
+cleanuptestconf = @cleanuptestconf@
 
 # Directories to build.
 SUBDIRS = source vfe platform unix
@@ -730,20 +734,17 @@ pov_xwin_msg = @pov_xwin_msg@
 # This will run before 'make install'.
 build_check_lpub3duserdir = \$(HOME)/\$(lpub3duserdir)/config
 check: all
-	@if ! test -d "\$(build_check_lpub3duserdir)"; then \\
+	@if ! test -d "\$(lpub3dbase)" && ! test -d "\$(build_check_lpub3duserdir)"; then \\
 		echo "Generating build check file path..."; \\
 		\$(mkdir_p) "\$(build_check_lpub3duserdir)" && chown \$(povowner) "\$(build_check_lpub3duserdir)" && chgrp \$(povgroup) "\$(build_check_lpub3duserdir)"; \\
-		cleanupDir="true"; \\
 	fi
 	@if ! test -f "\$(build_check_lpub3duserdir)/povray.conf"; then \\
 		echo "Generating build check povray.conf file..."; \\
 		cat \$(top_builddir)/povray.conf.check.in | sed -e "s,__HOME__,\\\$(HOME),g" -e "s,__POVSYSDIR__,\$(lpub3dsysdir),g" -e "s,__POVUSERDIR__,\$(lpub3duserdir),g" > "\$(build_check_lpub3duserdir)/povray.conf"; \\
-		cleanupConf="true"; \\
 	fi
 	@if ! test -f "\$(build_check_lpub3duserdir)/povray.ini"; then \\
 		echo "Generating build check povray.ini file..."; \\
 		cat \$(top_builddir)/povray.ini.in | sed "s,__POVLIBDIR__,\$(lpub3dlibdir),g" > "\$(build_check_lpub3duserdir)/povray.ini"; \\
-		cleanupIni="true"; \\
 	fi
 	@echo "Executing render output file check..."; \\
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\
@@ -752,18 +753,22 @@ check: all
 		echo "Executing the render display window check..."; \\
 		case "\$(pov_xwin_msg)" in \\
 			*enabled*) \\
-			\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 +L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes; ;; esac; \\
+			\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov -f +d +p +v +w320 +h240 +a0.3 \\
+			+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes; ;;	esac; \\
 	fi
-	@if test "\$\${cleanupDir}" = "true"; then \\
-		echo "Clenup build check povray.conf and povray.ini files..."; \\
-		rm -rf "\$(build_check_lpub3duserdir)"; \\
-	elif test "\$\${cleanupConf}" = "true"; then \\
-		echo "Clenup build check povray.ini file..."; \\
-		rm -f "\$(build_check_lpub3duserdir)/povray.conf"; \\
-	elif test "\$\${cleanupIni}" = "true"; then \\
-		echo "Clenup build check povray.ini file..."; \\
-		rm -f "\$(build_check_lpub3duserdir)/povray.ini"; \\
-	fi
+	@if test "\$(cleanuptestdir)" = "true"; then \\
+		echo "Cleanup build check povray.conf and povray.ini files..."; \\
+		rm -rf "\$(HOME)/\$(lpub3dbase)"; \\
+	else \\
+		if test "\$(cleanuptestconf)" = "true"; then \\
+			echo "Cleanup build check povray.conf file..."; \\
+			rm -f "\$(build_check_lpub3duserdir)/povray.conf"; \\
+		fi; \\
+		if test "\$(cleanuptestini)" = "true"; then \\
+			echo "Cleanup build check povray.ini file..."; \\
+			rm -f "\$(build_check_lpub3duserdir)/povray.ini"; \\
+		fi; \\
+	fi; echo
 
 # Install scripts in povlibdir.
 nobase_povlib_SCRIPTS = `echo $scriptfiles`

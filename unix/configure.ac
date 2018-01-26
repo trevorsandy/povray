@@ -192,10 +192,33 @@ AM_PROG_AR
 case "$build" in
   *darwin*)
     ax_MacOS_build="yes"
-    AC_DEFINE([ALTMAIN], [], [Building on MacOS, use vfe main.])
+    AC_DEFINE([ALTMAIN], [], [Building on macOS, use vfe main.])
+    AC_DEFINE([MACOS_BUILD], [], [Use macOS file paths for .conf and ini files.])
   ;;
 esac
 AM_CONDITIONAL([MACOS_BUILD], [test x"$ax_MacOS_build" = x"yes"])
+
+# Set test configuration files cleanup flag
+cleanuptestdir="false"
+cleanuptestini="false"
+cleanuptestconf="false"
+if test x"$ax_MacOS_build" = x"yes"; then
+  lpub3dbasedir="${HOME}/Library/Application Support/LPub3D Software"
+else
+  lpub3dbasedir="${HOME}/.local/share/LPub3D\ Software"
+fi
+if ! test -d "$lpub3dbasedir"; then
+  cleanuptestdir="true"
+fi
+if ! test -f "${lpub3dbasedir}/LPub3D/3rdParty/$PACKAGE-$VERSION_BASE/config/povray.ini"; then
+  cleanuptestini="true"
+fi
+if ! test -f "${lpub3dbasedir}/LPub3D/3rdParty/$PACKAGE-$VERSION_BASE/config/povray.conf"; then
+  cleanuptestconf="true"
+fi
+AC_SUBST([cleanuptestdir])
+AC_SUBST([cleanuptestini])
+AC_SUBST([cleanuptestconf])
 
 # propagate the host platform
 AS_IF([ test x"$host_cpu" = x"i686" ],

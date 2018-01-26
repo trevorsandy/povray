@@ -60,7 +60,7 @@ using boost::to_lower_copy;
  * These constants don't have to be in config.h .
  */
 
-#ifdef LPUB3D_OSX_BUILD
+#ifdef MACOS_BUILD
 # ifndef LPUB3D_TRACE_SYS_PATH
 #  define LPUB3D_TRACE_SYS_PATH "/Applications/LPub3D.app/Contents/3rdParty/" PACKAGE "-" VERSION_BASE "/resources"
 # endif
