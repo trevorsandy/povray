@@ -405,12 +405,10 @@ ECHO.
 rem Launch msbuild
 %COMMAND_LINE%
 rem Perform build check if specified
-IF %CHECK%==1 CALL :BUILD_CHECK %PLATFORM%
-rem Package 3rd party install content
+IF %CHECK% == 1 CALL :BUILD_CHECK %PLATFORM%
+rem Perform 3rd party install if specified
 IF %THIRD_INSTALL% == 1 (
-    IF %PLATFORM% == Win32 SET INSTALL_32BIT=1
-    IF %PLATFORM% == x64 SET INSTALL_64BIT=1
-    CALL :3RD_PARTY_INSTALL
+    CALL :3RD_PARTY_INSTALL %PLATFORM%
 )
 GOTO :END
 
@@ -427,7 +425,7 @@ FOR %%P IN ( Win32, x64 ) DO (
     ECHO --%BUILD_LBL% %%P Platform...
     ECHO.
     ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
-    IF NOT %MINIMUM_LOGGING%==1 ECHO.
+    IF NOT %MINIMUM_LOGGING% == 1 ECHO.
     rem Launch msbuild
     !COMMAND_LINE!
     rem Perform build check if specified
@@ -436,15 +434,13 @@ FOR %%P IN ( Win32, x64 ) DO (
 )
 rem Perform 3rd party install if specified
 IF %THIRD_INSTALL% == 1 (
-    SET INSTALL_32BIT=1
-    SET INSTALL_64BIT=1
-    CALL :3RD_PARTY_INSTALL
+    CALL :3RD_PARTY_INSTALL %PLATFORM%
 )
 GOTO :END
 
 :BUILD_CHECK
-IF %1==Win32 SET PL=32
-IF %1==x64 SET PL=64
+IF %1 == Win32 SET PL=32
+IF %1 == x64 SET PL=64
 ECHO.
 ECHO --Build check - %CONFIGURATION% Configuration, %PL%bit Platform...
 rem Version major and minor pulled in from autobuild_defs
@@ -476,6 +472,12 @@ FOR %%I IN ( conf, ini ) DO (
 EXIT /b
 
 :3RD_PARTY_INSTALL
+IF %1 == Win32 SET INSTALL_32BIT=1
+IF %1 == x64 SET INSTALL_64BIT=1
+IF %1 == -allcui (
+    SET INSTALL_32BIT=1
+    SET INSTALL_64BIT=1
+)
 rem Version major and minor pulled in from autobuild_defs
 SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 ECHO.
@@ -483,22 +485,6 @@ IF %INSTALL_ALL% == 1 (
 	ECHO -Installing all distribution files...
 ) ELSE (
 	ECHO -Installing configuration files...
-)
-IF %INSTALL_32BIT% == 1 (
-    ECHO.
-    ECHO -Installing %PACKAGE%32%d%.exe to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386]...
-    IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
-        MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
-    )
-    COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
-)
-IF %INSTALL_64BIT% == 1 (
-    ECHO.
-    ECHO -Installing %PACKAGE%64%d%.exe to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64]...
-    IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
-        MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
-    )
-    COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
 )
 IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Installing Documentaton to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs]...
@@ -525,20 +511,35 @@ IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Installing Initialization files to [%DIST_INSTALL_PATH%\ini]...
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "..\..\distribution\ini" "%DIST_INSTALL_PATH%\ini"
 
-SET DIST_INSTALL_PATH=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\config
+SET DIST_INSTALL_PATH_PREFIX=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\config
 IF %INSTALL_32BIT% == 1 (
-    SET ARCH_LABEL=[32bit]
-    SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH%\i386
+    ECHO.
+    ECHO -Installing %PACKAGE%32%d%.exe to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386]...
+    IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
+        MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
+    )
+    COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
+	SET ARCH_LABEL=[32bit]
+	SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\i386
+	ECHO.
+	CALL :MAKE_CONF_AND_INI_FILES
 )
 IF %INSTALL_64BIT% == 1 (
-    SET ARCH_LABEL=[64bit]
-    SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH%\x86_64
+    ECHO.
+    ECHO -Installing %PACKAGE%64%d%.exe to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64]...
+    IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
+        MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
+    )
+    COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
+	SET ARCH_LABEL=[64bit]
+	SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\x86_64
+	ECHO.
+	CALL :MAKE_CONF_AND_INI_FILES
 )
-CALL :MAKE_CONF_AND_INI_FILES
 EXIT /b
 
 :MAKE_CONF_AND_INI_FILES
-ECHO   Generate povray.conf and povray.ini files for %ARCH_LABEL% target platform...
+ECHO -Generate povray.conf and povray.ini files for %ARCH_LABEL% target platform...
 SET __HOME__=%%USERPROFILE%%
 SET __POVUSERDIR__=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
 IF NOT EXIST "%DIST_INSTALL_PATH%\" MKDIR "%DIST_INSTALL_PATH%\"
