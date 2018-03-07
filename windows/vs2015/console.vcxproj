@@ -460,6 +460,9 @@
     <ClInclude Include="..\disp_text.h" />
     <ClInclude Include="..\povconfig\syspovconfig.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="console_resource.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

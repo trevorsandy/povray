@@ -1,0 +1,37 @@
+#include <windows.h>
+
+IDI_ICON1	ICON	DISCARDABLE	"console.ico"
+
+VS_VERSION_INFO VERSIONINFO
+	FILEVERSION 3,8,0,0
+	PRODUCTVERSION 3,8,0,0
+	FILEFLAGSMASK 0x0L
+#ifdef _DEBUG
+	FILEFLAGS 0x3L
+#else
+	FILEFLAGS 0x2L
+#endif
+	FILEOS 0x4L
+	FILETYPE 0x1L
+	FILESUBTYPE 0x0L
+	BEGIN
+		BLOCK "StringFileInfo"
+		BEGIN
+			BLOCK "040904e4"
+			BEGIN
+				VALUE "CompanyName", "LPub3D Software\0"
+				VALUE "FileDescription", "LPub3D-Trace (POV-Ray) CUI for Windows.\0"
+				VALUE "FileVersion", "3.8.0.0\0"
+				VALUE "LegalCopyright", "Copyright (c) 2018 Trevor SANDY\0"
+				VALUE "OriginalFilename", "lpub3d_trace_cui.exe\0"
+				VALUE "ProductName", "LPub3D-Trace-CUI\0"
+				VALUE "ProductVersion", "3.8.0.0\0"
+			END
+		END
+		BLOCK "VarFileInfo"
+		BEGIN
+			VALUE "Translation", 0x0409, 1252
+		END
+	END
+/* End of Version info */
+
