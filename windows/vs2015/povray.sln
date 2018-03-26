@@ -36,8 +36,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Boost Libraries", "Boost Li
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "boost_thread", "boost_thread.vcxproj", "{10B193D4-E27B-4438-A825-BFB3D2B4C74D}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "boost_date_time", "boost_date_time.vcxproj", "{35A2DC31-84BC-4F7A-9C93-1D072432AD79}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenEXR Libraries", "OpenEXR Libraries", "{30F7FB89-B9D5-473E-A14D-6A00700C1EA9}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "OpenEXR IlmImf", "openexr_IlmImf.vcxproj", "{7DF42126-D237-41D3-9ABE-A3ACC8BAC56E}"
