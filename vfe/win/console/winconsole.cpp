@@ -571,6 +571,7 @@ extern "C" int main(int argc, char **argv)
     for (int i = 0; i<argc; i++) std::cerr << "- " << i+1 << ". " << argv[i] << std::endl;
 #endif
     std::string commandline;
+    std::vector<std::string> commandargs;
     for (int i = 0; i < argc; i++)
     {
       if (i == 0)
@@ -578,7 +579,6 @@ extern "C" int main(int argc, char **argv)
       else
       commandline.append(std::string(argv[i]).append(" "));
     }
-    std::vector<std::string> commandargs;
     FormatQuotedArguments(commandargs, commandline);
 
     int n_argc = commandargs.size();
