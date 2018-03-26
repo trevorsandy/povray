@@ -431,13 +431,11 @@ static void CleanupBenchmark(vfeWinSession *session, string& ini, string& pov)
   session->DeleteTemporaryFile(ASCIItoUCS2String(pov.c_str()));
 }
 
-// Format quoted command line arguments
-// Spaces single and double quoted arguments are tokenized
+// Tokenize quoted command line arguments
+// Single and double quoted arguments stored in a string vector
 // Quotes can start before or after the '+|-' character e.g.
 // "+Idir with space in the name/f o o.pov" or
 // +I"dir with space in the name/f o o.pov"
-// Also, the entire command line string can be quited.
-
 void FormatQuotedArguments(std::vector<std::string>& cmdargs, const std::string& commandline)
 {
     int len = commandline.length();
@@ -458,7 +456,6 @@ void FormatQuotedArguments(std::vector<std::string>& cmdargs, const std::string&
 
         if (dqot) {
             i++;
-            if (!optflag) start++;
             while (i < len && commandline[i] != '\"')
                 i++;
             if (i < len) {
@@ -471,7 +468,6 @@ void FormatQuotedArguments(std::vector<std::string>& cmdargs, const std::string&
         }
         else if (sqot) {
             i++;
-            if (!optflag) start++;
             while (i<len && commandline[i] != '\'')
                 i++;
             if (i < len) {
@@ -575,7 +571,13 @@ extern "C" int main(int argc, char **argv)
     for (int i = 0; i<argc; i++) std::cerr << "- " << i+1 << ". " << argv[i] << std::endl;
 #endif
     std::string commandline;
-    for (int i = 0; i<argc; i++) commandline.append(std::string(argv[i]).append(" "));
+    for (int i = 0; i < argc; i++)
+    {
+      if (i == 0)
+      commandargs.push_back(std::string(argv[i]));
+      else
+      commandline.append(std::string(argv[i]).append(" "));
+    }
     std::vector<std::string> commandargs;
     FormatQuotedArguments(commandargs, commandline);
 
