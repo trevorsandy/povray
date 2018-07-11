@@ -7,7 +7,7 @@ rem needed to build the solution/project.
 rem This script is intended to be called from autobuild.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: November 19, 2017
+rem  Last Update: July 12, 2018
 rem  Copyright (c) 2017 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -29,6 +29,7 @@ rem These are not fixed. You can change as you like
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MAJOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MAJ=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MINOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MIN=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PRERELEASE" %VERSION_H%') DO SET RELEASE=%%i
+IF [%RELEASE%]==[] SET RELEASE=alpha
 rem Get the latest version tag sha - if not available locally, try remote
 IF "%APPVEYOR%" EQU "True" (
     SET GIT_SHA=%APPVEYOR_REPO_COMMIT:~0,7%

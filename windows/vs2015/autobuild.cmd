@@ -10,8 +10,8 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: November 23, 2017
-rem  Copyright (c) 2017 by Trevor SANDY
+rem  Last Update: July 11, 2018
+rem  Copyright (c) 2018 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
 rem but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -35,6 +35,7 @@ IF "%APPVEYOR%" EQU "True" (
     SET DISP_WIN=+d
     SET DIST_DIR=..\..\..\lpub3d_windows_3rdparty
 )
+SET LP3D_VCVARSALL=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
 SET VERSION_BASE=3.8
@@ -355,12 +356,6 @@ IF /I %MINIMUM_LOGGING% == 1 (
     SET LOGGING_FLAGS=/clp:ErrorsOnly /nologo
 )
 
-rem Initialize the Visual Studio command line development environment
-rem Note you can change this line to your specific environment - I am using VS2017 here.
-ECHO.
-ECHO -Initialize Microsoft Build VS2017...
-CALL "C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\VsDevCmd.bat"
-
 rem Display the attributges and arguments to visually confirm all is well.
 ECHO.
 ECHO -Build Parameters:
@@ -374,11 +369,6 @@ IF "%APPVEYOR%" EQU "True" (
     ECHO   REPO_PROVIDER.......[%APPVEYOR_REPO_PROVIDER%]
     ECHO   DIST_DIRECTORY......[%DIST_DIR%]
 )
-rem Set the LPub3D-Trace auto-build pre-processor defines
-CALL autobuild_defs.cmd
-rem Display the defines set (as environment variable 'PovBuildDefs') for MSbuild
-ECHO.
-ECHO   BUILD_DEFINES.....[%PovBuildDefs%]
 
 rem Display build project message
 CALL :PROJECT_MESSAGE %CONSOLE%
@@ -393,6 +383,9 @@ rem Check if build all platforms
 IF /I "%PLATFORM%"=="-allcui" (
     GOTO :BUILD_ALL_CUI
 )
+
+rem Configure buid arguments and set environment variables
+CALL :CONFIGURE_BUILD_ENV
 
 rem Assemble command line
 SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
@@ -418,12 +411,15 @@ ECHO.
 ECHO -%BUILD_LBL% x86 and x86_64 CUI Platforms for %CONFIGURATION% Configuration...
 rem Launch msbuild across all CUI platform builds
 FOR %%P IN ( Win32, x64 ) DO (
-    SETLOCAL ENABLEDELAYEDEXPANSION
-    rem Assemble command line
-    SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
     ECHO.
     ECHO --%BUILD_LBL% %%P Platform...
     ECHO.
+    rem Initialize the Visual Studio command line development environment
+    SET PLATFORM=%%P
+    CALL :CONFIGURE_BUILD_ENV
+    rem Assemble command line parameters
+    SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
+    SETLOCAL ENABLEDELAYEDEXPANSION
     ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
     IF NOT %MINIMUM_LOGGING% == 1 ECHO.
     rem Launch msbuild
@@ -437,6 +433,31 @@ IF %THIRD_INSTALL% == 1 (
     CALL :3RD_PARTY_INSTALL %PLATFORM%
 )
 GOTO :END
+
+:CONFIGURE_BUILD_ENV
+ECHO.
+ECHO -Configure %PACKAGE% %PLATFORM% build environment...
+IF "%PATH_PREPENDED%" NEQ "True" (
+  IF %PLATFORM% EQU Win32 (
+    ECHO.
+    CALL "%LP3D_VCVARSALL%\vcvars32.bat" -vcvars_ver=14.0
+  ) ELSE (
+    ECHO.
+    CALL "%LP3D_VCVARSALL%\vcvars64.bat" -vcvars_ver=14.0
+  )
+  rem Display MSVC Compiler settings
+  cl -Bv
+  ECHO.
+) ELSE (
+  ECHO.
+  ECHO -%PLATFORM% build environment already configured...
+)
+rem Set the LPub3D-Trace auto-build pre-processor defines
+CALL autobuild_defs.cmd
+rem Display the defines set (as environment variable 'PovBuildDefs') for MSbuild
+ECHO.
+ECHO   BUILD_DEFINES.....[%PovBuildDefs%]
+EXIT /b
 
 :BUILD_CHECK
 IF %1 == Win32 SET PL=32
@@ -523,7 +544,7 @@ IF %INSTALL_32BIT% == 1 (
 	SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\i386
 	ECHO.
 )
-IF %INSTALL_32BIT% == 1 CALL :MAKE_CONF_AND_INI_FILES 
+IF %INSTALL_32BIT% == 1 CALL :MAKE_CONF_AND_INI_FILES
 IF %INSTALL_64BIT% == 1 (
     ECHO.
     ECHO -Installing %PACKAGE%64%d%.exe to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64]...
