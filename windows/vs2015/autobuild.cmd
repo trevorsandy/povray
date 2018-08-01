@@ -10,7 +10,7 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: July 11, 2018
+rem  Last Update: July 20, 2018
 rem  Copyright (c) 2018 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -18,6 +18,8 @@ rem but WITHOUT ANY WARRANTY; without even the implied warranty of
 rem MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 rem It is expected that this script will reside in .\windows\vs2015
+
+SET start=%time%
 
 rem Static defaults
 IF "%APPVEYOR%" EQU "True" (
@@ -860,6 +862,21 @@ EXIT /b
 
 :END
 ECHO.
-ECHO -%PACKAGE% v%VERSION_BASE% %~nx0 finished.
+ECHO -%~nx0 [%PACKAGE% v%VERSION_BASE%] finished.
+SET end=%time%
+SET options="tokens=1-4 delims=:.,"
+FOR /f %options% %%a IN ("%start%") DO SET start_h=%%a&SET /a start_m=100%%b %% 100&SET /a start_s=100%%c %% 100&SET /a start_ms=100%%d %% 100
+FOR /f %options% %%a IN ("%end%") DO SET end_h=%%a&SET /a end_m=100%%b %% 100&SET /a end_s=100%%c %% 100&SET /a end_ms=100%%d %% 100
+
+SET /a hours=%end_h%-%start_h%
+SET /a mins=%end_m%-%start_m%
+SET /a secs=%end_s%-%start_s%
+SET /a ms=%end_ms%-%start_ms%
+IF %ms% lss 0 SET /a secs = %secs% - 1 & SET /a ms = 100%ms%
+IF %secs% lss 0 SET /a mins = %mins% - 1 & SET /a secs = 60%secs%
+IF %mins% lss 0 SET /a hours = %hours% - 1 & SET /a mins = 60%mins%
+IF %hours% lss 0 SET /a hours = 24%hours%
+IF 1%ms% lss 100 SET ms=0%ms%
+ECHO -Elapsed build time %hours%:%mins%:%secs%.%ms%
 ENDLOCAL
 EXIT /b
