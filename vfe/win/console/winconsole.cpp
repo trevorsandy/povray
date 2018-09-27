@@ -149,7 +149,7 @@ static vfeDisplay *WinConDisplayCreator(unsigned int width, unsigned int height,
   {
 #ifdef HAVE_LIBSDL
   case DISP_MODE_SDL:
-    if (display != NULL && display->GetWidth() == width && display->GetHeight() == height)
+    if (display != nullptr && display->GetWidth() == width && display->GetHeight() == height)
     {
       WinConDisplay *p = new WinConSDLDisplay(width, height, gamma, session, false);
       if (p->TakeOver(display))
@@ -163,7 +163,7 @@ static vfeDisplay *WinConDisplayCreator(unsigned int width, unsigned int height,
     return new WinConTextDisplay(width, height, gamma, session, visible);
     break;
   default:
-    return NULL;
+    return nullptr;
   }
 }
 
@@ -206,7 +206,7 @@ static void PrintStatusChanged (vfeSession *session, State force = kUnknown)
       break;
     case kRendering:
 #ifdef HAVE_LIBSDL
-      if ((gDisplay != NULL) && (gDisplayMode == DISP_MODE_SDL))
+      if ((gDisplay != nullptr) && (gDisplayMode == DISP_MODE_SDL))
       {
           fprintf (stderr, "==== [Rendering... Press p to pause, q to quit] ============================\n");
       }
@@ -220,7 +220,7 @@ static void PrintStatusChanged (vfeSession *session, State force = kUnknown)
       break;
     case kPausedRendering:
 #ifdef HAVE_LIBSDL
-      if ((gDisplay != NULL) && (gDisplayMode == DISP_MODE_SDL))
+      if ((gDisplay != nullptr) && (gDisplayMode == DISP_MODE_SDL))
       {
           fprintf (stderr, "==== [Paused... Press p to resume] =========================================\n");
       }
@@ -231,6 +231,9 @@ static void PrintStatusChanged (vfeSession *session, State force = kUnknown)
 #else
       fprintf (stderr, "==== [Paused...] ===========================================================\n");
 #endif
+      break;
+    default:
+      // Do nothing special.
       break;
   }
 }
@@ -534,7 +537,7 @@ extern "C" int main(int argc, char **argv)
 
   // create display session
   session = new vfeWinSession();
-  if (session->Initialize(NULL, NULL) != vfeNoError)
+  if (session->Initialize(nullptr, nullptr) != vfeNoError)
     ErrorExit(session);
 
   // display mode registration
@@ -588,7 +591,7 @@ extern "C" int main(int argc, char **argv)
       n_argv[i] = (char *)malloc(strlen(commandargs[i].c_str()) + 1);
       std::strcpy(n_argv[i], commandargs[i].c_str());
     }
-    n_argv[n_argc] = NULL;
+    n_argv[n_argc] = nullptr;
     argc = n_argc;
     argv = n_argv;
 #ifdef WIN_DEBUG
@@ -654,7 +657,7 @@ extern "C" int main(int argc, char **argv)
     s = std::getenv ("POVINC");
     session->SetDisplayCreator(WinConDisplayCreator);
     session->GetWinConOptions()->Process_povray_ini(opts);
-    if (s != NULL)
+    if (s != nullptr)
       opts.AddLibraryPath (s);
     while (*++argv)
       opts.AddCommand (*argv);
@@ -695,7 +698,7 @@ extern "C" int main(int argc, char **argv)
     if (flags & stBackendStateChanged)
       PrintStatusChanged(session);
 
-    if (GetRenderWindow() != NULL)
+    if (GetRenderWindow() != nullptr)
     {
       // early exit
       if (GetRenderWindow()->HandleEvents())
@@ -721,7 +724,7 @@ extern "C" int main(int argc, char **argv)
   }
 
   // pause when done for single or last frame of an animation
-  if (session->Failed() == false && GetRenderWindow() != NULL && session->GetBoolOption("Pause_When_Done", false))
+  if (session->Failed() == false && GetRenderWindow() != nullptr && session->GetBoolOption("Pause_When_Done", false))
   {
     PrintStatusChanged(session, kPausedRendering);
     PauseWhenDone(session);

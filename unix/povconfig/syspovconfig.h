@@ -358,6 +358,6 @@ const int NULL=0;
 /* Description strings */
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE " is developed and maintained by Trevor SANDY."
 /* Copyright string. */
-#define LPUB3D_TRACE_COPYRIGHT "Copyright 2017 Trevor SANDY"
+#define LPUB3D_TRACE_COPYRIGHT "Copyright 2018 Trevor SANDY"
 
 #endif // POVRAY_UNIX_SYSPOVCONFIG_H

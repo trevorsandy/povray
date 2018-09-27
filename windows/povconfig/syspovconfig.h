@@ -296,7 +296,7 @@ namespace pov_base
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 " mirroring the POV-Ray Unix console functionality."
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE_NAME " is developed and maintained by Trevor SANDY."
 /* Copyright string. */
-#define LPUB3D_TRACE_COPYRIGHT "Copyright 2017 Trevor SANDY"
+#define LPUB3D_TRACE_COPYRIGHT "Copyright 2018 Trevor SANDY"
 
 #define POV_MALLOC(size,msg)                malloc (size)
 #define POV_REALLOC(ptr,size,msg)           realloc ((ptr), (size))

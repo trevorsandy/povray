@@ -61,6 +61,10 @@ namespace pov_parser
 using namespace pov_base;
 using namespace pov;
 
+#if POV_DEBUG
+unsigned int gBreakpointCounter = 0;
+#endif
+
 /*****************************************************************************
 * Local preprocessor defines
 ******************************************************************************/
@@ -87,20 +91,20 @@ using namespace pov;
 
 void Parser::Initialize_Tokenizer()
 {
-    IStream *rfile = NULL;
+    IStream *rfile = nullptr;
     UCS2String actualFileName;
     int c;
 
     pre_init_tokenizer ();
 
     rfile = Locate_File(sceneData->inputFile.c_str(),POV_File_Text_POV,actualFileName,true);
-    if(rfile != NULL)
+    if (rfile != nullptr)
     {
         Input_File->In_File = new IBufferedTextStream(sceneData->inputFile.c_str(), rfile);
         sceneData->inputFile = actualFileName;
     }
 
-    if (Input_File->In_File == NULL)
+    if (Input_File->In_File == nullptr)
     {
         Error ("Cannot open input file.");
     }
@@ -125,6 +129,10 @@ void Parser::Initialize_Tokenizer()
     for(c = Echo_getc(); c > 127; c = Echo_getc())
         sceneData->stringEncoding = kStringEncoding_UTF8; // switch to UTF-8 automatically [trf]
     Echo_ungetc(c);
+
+#if POV_DEBUG
+    gBreakpointCounter = 0;
+#endif
 }
 
 
@@ -154,12 +162,12 @@ void Parser::pre_init_tokenizer ()
     Token.Token_File_Pos.lineno = 0;
     Token.Token_File_Pos.offset = 0;
     Token.Token_Col_No = 0;
-    Token.Token_String  = NULL;
+    Token.Token_String  = nullptr;
     Token.freeString    = false;
     Token.Unget_Token   = false;
     Token.End_Of_File   = false;
-    Token.Data = NULL;
-    Token.FileHandle = NULL;
+    Token.Data = nullptr;
+    Token.FileHandle = nullptr;
 
     line_count = 10;
     token_count = 0;
@@ -167,8 +175,8 @@ void Parser::pre_init_tokenizer ()
     Include_File_Index = 0;
     Echo_Indx=0;
 
-    // make sure these are NULL otherwise cleanup() will crash if we terminate early
-    Default_Texture = NULL;
+    // make sure these are `nullptr` otherwise cleanup() will crash if we terminate early
+    Default_Texture = nullptr;
 
     CS_Index            = 0;
     Skipping            = false;
@@ -177,11 +185,11 @@ void Parser::pre_init_tokenizer ()
     Parsing_Directive   = false;
     parseRawIdentifiers = false;
     parseOptionalRValue = false;
-    Cond_Stack          = NULL;
+    Cond_Stack          = nullptr;
     Table_Index         = -1;
 
     Input_File = &Include_Files[0];
-    Include_Files[0].In_File = NULL;
+    Include_Files[0].In_File = nullptr;
 
     // TODO - on modern machines it may be faster to do the comparisons for each token
     //        than to access the conversion table.
@@ -227,17 +235,17 @@ void Parser::pre_init_tokenizer ()
 
 void Parser::Terminate_Tokenizer()
 {
-    Token.FileHandle = NULL;
+    Token.FileHandle = nullptr;
 
     while(Table_Index >= 0)
     {
         Destroy_Table(Table_Index--);
     }
 
-    if(Input_File->In_File != NULL)
+    if (Input_File->In_File != nullptr)
     {
         delete Input_File->In_File;
-        Input_File->In_File = NULL;
+        Input_File->In_File = nullptr;
         Got_EOF = false;
     }
 
@@ -245,15 +253,15 @@ void Parser::Terminate_Tokenizer()
     {
         Input_File = &Include_Files[Include_File_Index--];
 
-        if(Input_File->In_File != NULL)
+        if (Input_File->In_File != nullptr)
         {
             delete Input_File->In_File;
-            Input_File->In_File = NULL;
+            Input_File->In_File = nullptr;
             Got_EOF = false;
         }
     }
 
-    if(Cond_Stack != NULL)
+    if (Cond_Stack != nullptr)
     {
         for(int i = 0; i <= CS_Index; i++)
         {
@@ -262,16 +270,16 @@ void Parser::Terminate_Tokenizer()
         }
         POV_FREE(Cond_Stack);
 
-        Cond_Stack = NULL;
+        Cond_Stack = nullptr;
     }
 
-    if((String != NULL) && (String != String_Fast_Buffer))
+    if ((String != nullptr) && (String != String_Fast_Buffer))
         POV_FREE(String);
-    String=NULL;
+    String = nullptr;
 
-    if((String2 != NULL) && (String2 != String_Fast_Buffer))
+    if ((String2 != nullptr) && (String2 != String_Fast_Buffer))
         POV_FREE(String2);
-    String2=NULL;
+    String2 = nullptr;
 }
 
 
@@ -366,16 +374,16 @@ void Parser::Get_Token ()
             }
 
             if (Input_File->In_File == Token.FileHandle)
-                Token.FileHandle = NULL;
+                Token.FileHandle = nullptr;
 
             delete Input_File->In_File; /* added to fix open file buildup JLN 12/91 */
-            Input_File->In_File = NULL;
+            Input_File->In_File = nullptr;
             Got_EOF=false;
 
             Destroy_Table(Table_Index--);
 
             Input_File = &Include_Files[--Include_File_Index];
-            if (Token.FileHandle == NULL)
+            if (Token.FileHandle == nullptr)
                 Token.FileHandle = Input_File->In_File;
 
             continue;
@@ -904,7 +912,7 @@ int Parser::Parse_C_Comments()
 
 inline void Parser::Begin_String()
 {
-    if((String != NULL) && (String != String_Fast_Buffer))
+    if ((String != nullptr) && (String != String_Fast_Buffer))
         POV_FREE(String);
 
     String = reinterpret_cast<char *>(POV_MALLOC(256, "C String"));
@@ -999,7 +1007,7 @@ inline void Parser::End_String()
 
 inline void Parser::Begin_String_Fast()
 {
-    if((String != NULL) && (String != String_Fast_Buffer))
+    if ((String != nullptr) && (String != String_Fast_Buffer))
         POV_FREE(String);
 
     String = String_Fast_Buffer;
@@ -1333,13 +1341,15 @@ bool Parser::Read_Float()
 void Parser::Read_Symbol()
 {
     int c;
-    int Local_Index,i,j,k;
+    int Local_Index, i;
+    size_t j;
+    int k;
     POV_ARRAY *a;
     SYM_ENTRY *Temp_Entry;
     POV_PARAM *Par;
     DBL val;
-    SYM_TABLE *table = NULL;
-    char *dictIndex = NULL;
+    SYM_TABLE *table = nullptr;
+    char *dictIndex = nullptr;
     int pseudoDictionary = -1;
 
     Begin_String_Fast();
@@ -1368,7 +1378,8 @@ void Parser::Read_Symbol()
     End_String_Fast();
 
     /* If its a reserved keyword, write it and return */
-    if ( (Temp_Entry = Find_Symbol(SYM_TABLE_RESERVED,String)) != NULL)
+    Temp_Entry = Find_Symbol(SYM_TABLE_RESERVED, String);
+    if (Temp_Entry != nullptr)
     {
         if (!Parsing_Directive && (Temp_Entry->Token_Number == LOCAL_TOKEN))
         {
@@ -1400,7 +1411,7 @@ void Parser::Read_Symbol()
             Token.NumberPtr = &(Temp_Entry->Token_Number);
             Token.DataPtr   = &(Temp_Entry->Data);
 
-            table = NULL;
+            table = nullptr;
         }
         else
         {
@@ -1410,7 +1421,8 @@ void Parser::Read_Symbol()
             for (Local_Index = firstIndex; Local_Index >= lastIndex; Local_Index--)
             {
                 /* See if it's a previously declared identifier. */
-                if ((Temp_Entry = Find_Symbol(Local_Index,String)) != NULL)
+                Temp_Entry = Find_Symbol(Local_Index, String);
+                if (Temp_Entry != nullptr)
                 {
                     if (Temp_Entry->deprecated && !Temp_Entry->deprecatedShown)
                     {
@@ -1479,7 +1491,12 @@ void Parser::Read_Symbol()
                             a = reinterpret_cast<POV_ARRAY *>(*(Token.DataPtr));
                             j = 0;
 
-                            for (i=0; i <= a->Dims; i++)
+                            if (a == nullptr)
+                                // This happens in e.g. `#declare Foo[A][B]=...` when `Foo` is an
+                                // array of arrays and `Foo[A]` is uninitialized.
+                                Error("Attempt to access uninitialized nested array.");
+
+                            for (i=0; i <= a->maxDim; i++)
                             {
                                 Parse_Square_Begin();
                                 val=Parse_Float();
@@ -1494,9 +1511,9 @@ void Parser::Read_Symbol()
                                 {
                                     if (a->resizable)
                                     {
-                                        POV_PARSER_ASSERT (a->Dims == 0);
-                                        a->DataPtrs.resize (k+1);
-                                        a->Sizes[0] = a->DataPtrs.size();
+                                        POV_PARSER_ASSERT (a->maxDim == 0);
+                                        if (a->DataPtrs.size() <= k)
+                                            a->GrowTo(k + 1);
                                     }
                                     else
                                         Error("Array subscript out of range");
@@ -1507,16 +1524,18 @@ void Parser::Read_Symbol()
 
                             if (!LValue_Ok && !Inside_Ifdef)
                             {
-                                if (a->DataPtrs[j] == NULL)
+                                // Note that this does not (and must not) trigger in e.g.
+                                // `#declare Foo[A][B]=...` when `Foo` is an array of arrays and
+                                // `Foo[A]` is uninitialized, because until now we've only seen
+                                // `#declare Foo[A]`, which is no reason for concern as it may
+                                // just as well be part of `#declare Foo[A]=...` which is fine.
+                                if (!a->HasElement(j))
                                     Error("Attempt to access uninitialized array element.");
                             }
 
                             Token.DataPtr = &(a->DataPtrs[j]);
-                            Token.is_mixed_array_elem = !a->Types.empty();
-                            if (Token.is_mixed_array_elem)
-                                Token.NumberPtr = &(a->Types[j]);
-                            else
-                                Token.NumberPtr = &(a->Type);
+                            Token.is_mixed_array_elem = a->mixedType;
+                            Token.NumberPtr = &(a->ElementType(j));
                             Token.Token_Id = *Token.NumberPtr;
                             Token.is_array_elem = true;
                             Token.is_dictionary_elem = false;
@@ -1547,7 +1566,7 @@ void Parser::Read_Symbol()
 
                             if (c =='.')
                             {
-                                if (table == NULL)
+                                if (table == nullptr)
                                 {
                                     POV_PARSER_ASSERT (Token.is_array_elem);
                                     Error ("Attempt to access uninitialized array element.");
@@ -1566,7 +1585,7 @@ void Parser::Read_Symbol()
                             }
                             else if (c == '[')
                             {
-                                if (table == NULL)
+                                if (table == nullptr)
                                 {
                                     POV_PARSER_ASSERT (Token.is_array_elem);
                                     Error ("Attempt to access uninitialized array element.");
@@ -1595,8 +1614,8 @@ void Parser::Read_Symbol()
                                 if (!LValue_Ok && !Inside_Ifdef && !parseOptionalRValue)
                                     Error ("Attempt to access uninitialized dictionary element.");
                                 Token.Token_Id  = IDENTIFIER_TOKEN;
-                                Token.DataPtr   = NULL;
-                                Token.NumberPtr = NULL;
+                                Token.DataPtr   = nullptr;
+                                Token.NumberPtr = nullptr;
                             }
                             Token.is_array_elem = false;
                             Token.is_mixed_array_elem = false;
@@ -1627,10 +1646,10 @@ void Parser::Read_Symbol()
 
             Write_Token (Token.Token_Id, Token.Token_Col_No, table);
 
-            if (Token.DataPtr != NULL)
+            if (Token.DataPtr != nullptr)
                 Token.Data = *(Token.DataPtr);
             Token.context = Local_Index;
-            if (dictIndex != NULL)
+            if (dictIndex != nullptr)
             {
                 Token.Token_String = dictIndex;
                 Token.freeString = true;
@@ -1653,7 +1672,7 @@ inline void Parser::Write_Token (TOKEN Token_Id, int col, SYM_TABLE *table)
     Token.Token_Col_No   = col;
     Token.FileHandle     = Input_File->In_File;
     Token.Token_String   = String;
-    Token.Data           = NULL;
+    Token.Data           = nullptr;
     Token.Token_Id       = Conversion_Util_Table[Token_Id];
     Token.Function_Id    = Token_Id;
     Token.table          = table;
@@ -1682,7 +1701,7 @@ const char *Parser::Get_Token_String (TOKEN Token_Id)
 {
     int i;
 
-    for (i = 0; Reserved_Words[i].Token_Name != NULL; i++)
+    for (i = 0; Reserved_Words[i].Token_Name != nullptr; i++)
         if (Reserved_Words[i].Token_Number == Token_Id)
             return (Reserved_Words[i].Token_Name);
     return ("");
@@ -1721,11 +1740,11 @@ char *Parser::Get_Reserved_Words (const char *additional_words)
 
     // Compute the length required for the buffer.
 
-    for (i = 0; Reserved_Words[i].Token_Name != NULL; i++)
+    for (i = 0; Reserved_Words[i].Token_Name != nullptr; i++)
     {
         if (!isalpha (Reserved_Words [i].Token_Name [0]))
             continue;
-        if (strchr (Reserved_Words [i].Token_Name, ' ') != NULL)
+        if (strchr (Reserved_Words [i].Token_Name, ' ') != nullptr)
             continue;
         length += (int)strlen (Reserved_Words[i].Token_Name) + 1;
     }
@@ -1742,11 +1761,11 @@ char *Parser::Get_Reserved_Words (const char *additional_words)
 
     // Copy our own keywords into the buffer.
 
-    for (i = 0; Reserved_Words[i].Token_Name != NULL; i++)
+    for (i = 0; Reserved_Words[i].Token_Name != nullptr; i++)
     {
         if (!isalpha (Reserved_Words [i].Token_Name [0]))
             continue;
-        if (strchr (Reserved_Words [i].Token_Name, ' ') != NULL)
+        if (strchr (Reserved_Words [i].Token_Name, ' ') != nullptr)
             continue;
         s += sprintf (s, "%s\n", Reserved_Words[i].Token_Name);
     }
@@ -1778,7 +1797,7 @@ int Parser::Echo_getc()
 {
     int c;
 
-    if((Input_File == NULL) || (Input_File->In_File == NULL) || (c = Input_File->In_File->getchar()) == EOF)
+    if ((Input_File == nullptr) || (Input_File->In_File == nullptr) || (c = Input_File->In_File->getchar()) == EOF)
     {
         if (Got_EOF)
             return EOF;
@@ -1845,14 +1864,14 @@ void Parser::Echo_ungetc(int c)
 void Parser::Where_Error(POVMSObjectPtr msg)
 {
     // return if no filename is specified
-    if(Token.FileHandle == NULL)
+    if (Token.FileHandle == nullptr)
         return;
 
     (void)POVMSUtil_SetUCS2String(msg, kPOVAttrib_FileName, Token.FileHandle->name());
     (void)POVMSUtil_SetString(msg, kPOVAttrib_TokenName, Token.Token_String);
     (void)POVMSUtil_SetLong(msg, kPOVAttrib_Line, Token.Token_File_Pos.lineno);
     (void)POVMSUtil_SetInt(msg, kPOVAttrib_Column, Token.Token_Col_No);
-    if(Token.FileHandle != NULL)
+    if (Token.FileHandle != nullptr)
         (void)POVMSUtil_SetLong(msg, kPOVAttrib_FilePosition, Token.FileHandle->tellg().offset);
 }
 
@@ -1878,14 +1897,14 @@ void Parser::Where_Error(POVMSObjectPtr msg)
 void Parser::Where_Warning(POVMSObjectPtr msg)
 {
     // return if no filename is specified
-    if(Token.FileHandle == NULL)
+    if (Token.FileHandle == nullptr)
         return;
 
     (void)POVMSUtil_SetUCS2String(msg, kPOVAttrib_FileName, Token.FileHandle->name());
     (void)POVMSUtil_SetString(msg, kPOVAttrib_TokenName, Token.Token_String);
     (void)POVMSUtil_SetLong(msg, kPOVAttrib_Line, Token.Token_File_Pos.lineno);
     (void)POVMSUtil_SetInt(msg, kPOVAttrib_Column, Token.Token_Col_No);
-    if(Token.FileHandle != NULL)
+    if (Token.FileHandle != nullptr)
         (void)POVMSUtil_SetLong(msg, kPOVAttrib_FilePosition, Token.FileHandle->tellg().offset);
 }
 
@@ -1914,13 +1933,13 @@ void Parser::Parse_Directive(int After_Hash)
     DBL Value, Value2;
     int Flag;
     char *ts;
-    Macro *PMac=NULL;
+    Macro *PMac = nullptr;
     COND_TYPE Curr_Type = Cond_Stack[CS_Index].Cond_Type;
     POV_OFF_T Hash_Loc = Input_File->In_File->tellg().offset;
 
     if (Curr_Type == INVOKING_MACRO_COND)
     {
-        POV_PARSER_ASSERT(Cond_Stack[CS_Index].PMac != NULL);
+        POV_PARSER_ASSERT(Cond_Stack[CS_Index].PMac != nullptr);
         if ((Cond_Stack[CS_Index].PMac->Macro_End==Hash_Loc) &&
             (UCS2_strcmp(Cond_Stack[CS_Index].PMac->Macro_Filename, Input_File->In_File->name()) == 0))
         {
@@ -2070,7 +2089,7 @@ void Parser::Parse_Directive(int After_Hash)
             }
             else
             {
-                char* Identifier = NULL;
+                char* Identifier = nullptr;
                 DBL End, Step;
                 if (Parse_For_Param (&Identifier, &End, &Step))
                 {
@@ -2304,7 +2323,7 @@ void Parser::Parse_Directive(int After_Hash)
                 case SKIP_TIL_END_COND:
                     if (Curr_Type==DECLARING_MACRO_COND)
                     {
-                        if ((PMac=Cond_Stack[CS_Index].PMac)!=NULL)
+                        if ((PMac=Cond_Stack[CS_Index].PMac) != nullptr)
                         {
                             PMac->Macro_End=Hash_Loc;
                             ITextStream::FilePos pos = Input_File->In_File->tellg();
@@ -2319,7 +2338,7 @@ void Parser::Parse_Directive(int After_Hash)
                                     if (!Input_File->In_File->ReadRaw(PMac->Cache, PMac->CacheSize))
                                     {
                                         delete[] PMac->Cache;
-                                        PMac->Cache = NULL;
+                                        PMac->Cache = nullptr;
                                     }
                                     Input_File->In_File->seekg(pos);
                                 }
@@ -2375,7 +2394,7 @@ void Parser::Parse_Directive(int After_Hash)
 
                     {
                         SYM_ENTRY* Entry = Find_Symbol(Table_Index, Cond_Stack[CS_Index].Loop_Identifier);
-                        if ((Entry == NULL) || (Entry->Token_Number != FLOAT_ID_TOKEN))
+                        if ((Entry == nullptr) || (Entry->Token_Number != FLOAT_ID_TOKEN))
                             Error ("#for loop variable must remain defined and numerical during loop.");
 
                         DBL* CurrentPtr = reinterpret_cast<DBL *>(Entry->Data);
@@ -2519,12 +2538,8 @@ void Parser::Parse_Directive(int After_Hash)
                                           "'#version version;'.");
                             }
 
-                            if (!sceneData->languageVersionLate && !sceneData->languageVersionSet)
-                            {
-                                // Got `#version` as the first statement of the file.
-                                // Initialize various defaults depending on language version specified.
-                                InitDefaults(sceneData->languageVersion);
-                            }
+                            // Initialize various defaults depending on language version specified.
+                            InitDefaults(sceneData->languageVersion);
 
                             // NB: This must be set _after_ parsing the value, in order for the `#version version`
                             // idiom to work properly, but _before_ any of the following code querying
@@ -2796,8 +2811,15 @@ void Parser::Parse_Directive(int After_Hash)
 
 #if POV_DEBUG
         CASE(BREAKPOINT_TOKEN)
-            // This statement does nothing, except allow you to set a debug breakpoint here
-            // so that you can effectively trigger the debugger via an SDL command.
+            Parsing_Directive = false;
+            if (Skipping)
+            {
+                UNGET
+            }
+            else
+            {
+                Parse_Breakpoint();
+            }
             EXIT
         END_CASE
 #endif
@@ -2823,6 +2845,24 @@ void Parser::Parse_Directive(int After_Hash)
         Token.is_dictionary_elem = false;
     }
 }
+
+#if POV_DEBUG
+void Parser::Parse_Breakpoint()
+{
+    // This function is invoked in debug builds whenever the `#breakpoint` directive is encountered
+    // in a scene or include file.
+    // Control flow is honored, e.g. `#if(0) #breakpoint #else #breakpoint #end` will trigger this
+    // function only on the second `#breakpoint` directive.
+
+    // To use the `#breakpoint` directive to immediately break program execution, place an
+    // unconditional breakpoint here.
+
+    // To use the `#breakpoint` directive to prime a breakpoint elsewhere, make that breakpoint
+    // conditional, testing for `gBreakpointCounter > 0`.
+
+    ++gBreakpointCounter;
+}
+#endif
 
 
 /*****************************************************************************
@@ -2868,15 +2908,15 @@ void Parser::Open_Include()
 
     Input_File = &Include_Files[Include_File_Index];
 
-    // must set this to NULL in case it's uninitialized - if Locate_File throws an
+    // must set this to `nullptr` in case it's uninitialized - if Locate_File throws an
     // exception (e.g. I/O restriction error), the parser shut-down code will attempt
-    // to free In_File if it's not NULL.
-    Input_File->In_File = NULL;
+    // to free In_File if it's not `nullptr`.
+    Input_File->In_File = nullptr;
 
     IStream *is = Locate_File(formalFileName, POV_File_Text_INC, actualFileName, true);
-    if(is == NULL)
+    if (is == nullptr)
     {
-        Input_File->In_File = NULL;  /* Keeps from closing failed file. */
+        Input_File->In_File = nullptr;  /* Keeps from closing failed file. */
         Error ("Cannot open include file %s.", UCS2toASCIIString(formalFileName).c_str());
     }
     else
@@ -3073,7 +3113,7 @@ void Parser::init_sym_tables()
 
     Add_Sym_Table();
 
-    for (i = 0; Reserved_Words[i].Token_Name != NULL; i++)
+    for (i = 0; Reserved_Words[i].Token_Name != nullptr; i++)
     {
         Add_Symbol(SYM_TABLE_RESERVED,Reserved_Words[i].Token_Name,Reserved_Words[i].Token_Number);
     }
@@ -3088,7 +3128,7 @@ Parser::SYM_TABLE *Parser::Create_Sym_Table (bool copyNames)
 
     for (int i = 0; i < SYM_TABLE_SIZE; i++)
     {
-        New->Table[i] = NULL;
+        New->Table[i] = nullptr;
     }
 
     return New;
@@ -3118,7 +3158,7 @@ void Parser::Destroy_Sym_Table (Parser::SYM_TABLE *Table)
             Entry = Destroy_Entry (Entry, Table->namesAreCopies);
         }
 
-        Table->Table[i] = NULL;
+        Table->Table[i] = nullptr;
     }
 
     POV_FREE(Table);
@@ -3158,11 +3198,11 @@ SYM_ENTRY *Parser::Create_Entry (const char *Name, TOKEN Number, bool copyName)
     New = reinterpret_cast<SYM_ENTRY *>(POV_MALLOC(sizeof(SYM_ENTRY), "symbol table entry"));
 
     New->Token_Number        = Number;
-    New->Data                = NULL;
+    New->Data                = nullptr;
     New->deprecated          = false;
     New->deprecatedOnce      = false;
     New->deprecatedShown     = false;
-    New->Deprecation_Message = NULL;
+    New->Deprecation_Message = nullptr;
     New->ref_count           = 1;
     if (copyName)
         New->Token_Name = POV_STRDUP(Name);
@@ -3183,7 +3223,7 @@ SYM_ENTRY *Parser::Copy_Entry (const SYM_ENTRY *oldEntry)
     newEntry->deprecated          = false;
     newEntry->deprecatedOnce      = false;
     newEntry->deprecatedShown     = false;
-    newEntry->Deprecation_Message = NULL;
+    newEntry->Deprecation_Message = nullptr;
     newEntry->ref_count           = 1;
     newEntry->Token_Name          = POV_STRDUP (oldEntry->Token_Name);
 
@@ -3192,7 +3232,7 @@ SYM_ENTRY *Parser::Copy_Entry (const SYM_ENTRY *oldEntry)
 
 void Parser::Acquire_Entry_Reference (SYM_ENTRY *Entry)
 {
-    if (Entry == NULL)
+    if (Entry == nullptr)
         return;
     if (Entry->ref_count >= std::numeric_limits<SymTableEntryRefCount>::max())
         Error("Too many unresolved references to symbol");
@@ -3201,7 +3241,7 @@ void Parser::Acquire_Entry_Reference (SYM_ENTRY *Entry)
 
 void Parser::Release_Entry_Reference (SYM_TABLE *table, SYM_ENTRY *Entry)
 {
-    if (Entry == NULL)
+    if (Entry == nullptr)
         return;
     if (Entry->ref_count <= 0)
         Error("Internal error: Symbol reference counter underflow");
@@ -3214,7 +3254,7 @@ void Parser::Release_Entry_Reference (SYM_TABLE *table, SYM_ENTRY *Entry)
             POV_FREE(Entry->Token_Name);
             Destroy_Ident_Data (Entry->Data, Entry->Token_Number); // TODO - shouldn't this be outside the if() block?
         }
-        if (Entry->Deprecation_Message != NULL)
+        if (Entry->Deprecation_Message != nullptr)
             POV_FREE(Entry->Deprecation_Message);
 
         POV_FREE(Entry);
@@ -3225,12 +3265,12 @@ SYM_ENTRY *Parser::Destroy_Entry (SYM_ENTRY *Entry, bool destroyName)
 {
     SYM_ENTRY *Next;
 
-    if(Entry == NULL)
-        return NULL;
+    if (Entry == nullptr)
+        return nullptr;
 
     // always unhook the entry from hash table (if it is still member of one)
     Next = Entry->next;
-    Entry->next = NULL;
+    Entry->next = nullptr;
 
     if (Entry->ref_count <= 0)
         Error("Internal error: Symbol reference counter underflow");
@@ -3243,7 +3283,7 @@ SYM_ENTRY *Parser::Destroy_Entry (SYM_ENTRY *Entry, bool destroyName)
             POV_FREE(Entry->Token_Name);
             Destroy_Ident_Data (Entry->Data, Entry->Token_Number); // TODO - shouldn't this be outside the if() block?
         }
-        if (Entry->Deprecation_Message != NULL)
+        if (Entry->Deprecation_Message != nullptr)
             POV_FREE(Entry->Deprecation_Message);
 
         POV_FREE(Entry);
@@ -3327,7 +3367,7 @@ SYM_ENTRY *Parser::Find_Symbol (const char *name)
         if (entry)
             return entry;
     }
-    return NULL;
+    return nullptr;
 }
 
 
@@ -3335,7 +3375,7 @@ void Parser::Remove_Symbol (SYM_TABLE *table, const char *Name, bool is_array_el
 {
     if(is_array_elem == true)
     {
-        if(DataPtr == NULL)
+        if (DataPtr == nullptr)
             Error("Invalid array element!");
 
         if(ttype == FLOAT_FUNCT_TOKEN)
@@ -3346,7 +3386,7 @@ void Parser::Remove_Symbol (SYM_TABLE *table, const char *Name, bool is_array_el
             ttype = COLOUR_ID_TOKEN;
 
         Destroy_Ident_Data (*DataPtr, ttype);
-        *DataPtr = NULL;
+        *DataPtr = nullptr;
     }
     else
     {
@@ -3392,7 +3432,7 @@ void Parser::Check_Macro_Vers(void)
 Parser::Macro *Parser::Parse_Macro()
 {
     Macro *New;
-    SYM_ENTRY *Table_Entry=NULL;
+    SYM_ENTRY *Table_Entry = nullptr;
     bool Old_Ok = Ok_To_Declare;
     MacroParameter newParameter;
 
@@ -3406,7 +3446,7 @@ Parser::Macro *Parser::Parse_Macro()
         END_CASE
 
         CASE (MACRO_ID_TOKEN)
-            Remove_Symbol(SYM_TABLE_GLOBAL,Token.Token_String,false,NULL,0);
+            Remove_Symbol(SYM_TABLE_GLOBAL, Token.Token_String, false, nullptr, 0);
             Table_Entry = Add_Symbol (SYM_TABLE_GLOBAL,Token.Token_String,TEMPORARY_MACRO_ID_TOKEN);
         END_CASE
 
@@ -3419,7 +3459,7 @@ Parser::Macro *Parser::Parse_Macro()
 
     Table_Entry->Data=reinterpret_cast<void *>(New);
 
-    New->Macro_Filename = NULL;
+    New->Macro_Filename = nullptr;
 
     EXPECT_ONE
         CASE (LEFT_PAREN_TOKEN)
@@ -3509,14 +3549,14 @@ Parser::Macro *Parser::Parse_Macro()
 void Parser::Invoke_Macro()
 {
     Macro *PMac=reinterpret_cast<Macro *>(Token.Data);
-    SYM_ENTRY **Table_Entries=NULL;
+    SYM_ENTRY **Table_Entries = nullptr;
     int i,Local_Index;
 
     Inc_CS_Index();
 
-    if(PMac == NULL)
+    if (PMac == nullptr)
     {
-        if(Token.DataPtr!=NULL)
+        if (Token.DataPtr != nullptr)
             PMac = reinterpret_cast<Macro*>(*(Token.DataPtr));
         else
             Error("Error in Invoke_Macro");
@@ -3543,7 +3583,7 @@ void Parser::Invoke_Macro()
         {
             bool finalParameter = (i == PMac->parameters.size()-1);
             Table_Entries[i] = Create_Entry (PMac->parameters[i].name, IDENTIFIER_TOKEN, true);
-            if (!Parse_RValue(IDENTIFIER_TOKEN, &(Table_Entries[i]->Token_Number), &(Table_Entries[i]->Data), NULL, true, false, true, true, true, Local_Index))
+            if (!Parse_RValue(IDENTIFIER_TOKEN, &(Table_Entries[i]->Token_Number), &(Table_Entries[i]->Data), nullptr, true, false, true, true, true, Local_Index))
             {
                 EXPECT_ONE
                     CASE (IDENTIFIER_TOKEN)
@@ -3575,7 +3615,7 @@ void Parser::Invoke_Macro()
                 END_EXPECT
 
                 Destroy_Entry (Table_Entries[i], true);
-                Table_Entries[i] = NULL;
+                Table_Entries[i] = nullptr;
             }
             properlyDelimited = Parse_Comma();
         }
@@ -3597,7 +3637,7 @@ void Parser::Invoke_Macro()
     {
         for (i=0; i<PMac->parameters.size(); i++)
         {
-            if (Table_Entries[i] != NULL)
+            if (Table_Entries[i] != nullptr)
                 Add_Entry(Table_Index,Table_Entries[i]);
         }
 
@@ -3621,9 +3661,9 @@ void Parser::Invoke_Macro()
         else
         {
             is = Locate_File (PMac->Macro_Filename, POV_File_Text_Macro, ign, true);
-            if(is == NULL)
+            if (is == nullptr)
             {
-                Input_File->In_File = NULL;  /* Keeps from closing failed file. */
+                Input_File->In_File = nullptr;  /* Keeps from closing failed file. */
                 Error ("Cannot open macro file '%s'.", UCS2toASCIIString(UCS2String(PMac->Macro_Filename)).c_str());
             }
             else
@@ -3658,11 +3698,11 @@ void Parser::Return_From_Macro()
     if (!Cond_Stack[CS_Index].Macro_Same_Flag)
     {
         if (Token.FileHandle == Input_File->In_File)
-            Token.FileHandle = NULL;
+            Token.FileHandle = nullptr;
         delete Input_File->In_File;
         Input_File->R_Flag=false;
         Input_File->In_File = Cond_Stack[CS_Index].Macro_File;
-        if (Token.FileHandle == NULL)
+        if (Token.FileHandle == nullptr)
             Token.FileHandle = Input_File->In_File;
     }
 
@@ -3681,8 +3721,8 @@ void Parser::Return_From_Macro()
 
 Parser::Macro::Macro(const char *s) :
     Macro_Name(POV_STRDUP(s)),
-    Macro_Filename(NULL),
-    Cache(NULL)
+    Macro_Filename(nullptr),
+    Cache(nullptr)
 {}
 
 Parser::Macro::~Macro()
@@ -3690,7 +3730,7 @@ Parser::Macro::~Macro()
     int i;
 
     POV_FREE(Macro_Name);
-    if (Macro_Filename!=NULL)
+    if (Macro_Filename != nullptr)
     {
         POV_FREE(Macro_Filename);
     }
@@ -3700,17 +3740,19 @@ Parser::Macro::~Macro()
         POV_FREE(parameters[i].name);
     }
 
-    if (Cache != NULL)
+    if (Cache != nullptr)
         delete[] Cache;
 }
 
 Parser::POV_ARRAY *Parser::Parse_Array_Declare (void)
 {
     POV_ARRAY *New;
-    int i,j;
+    int i;
+    size_t j;
 
     New = new POV_ARRAY;
     New->resizable = false;
+    New->mixedType = AllowToken(MIXED_TOKEN);
 
     i=0;
     j=1;
@@ -3719,7 +3761,7 @@ Parser::POV_ARRAY *Parser::Parse_Array_Declare (void)
 
     while (Parse_Square_Begin(false))
     {
-        if (i>4)
+        if (i >= POV_ARRAY::kMaxDimensions)
         {
             Error("Too many array dimensions");
         }
@@ -3736,18 +3778,24 @@ Parser::POV_ARRAY *Parser::Parse_Array_Declare (void)
         // new syntax: Dynamically sized one-dimensional array
         New->Sizes[0] = 0;
         New->resizable = true;
-        New->Dims     = 0;
+        New->maxDim     = 0;
     }
     else
     {
-        New->Dims     = i-1;
-        New->DataPtrs.resize (j);
+        New->maxDim     = i-1;
+        New->DataPtrs.reserve(j);
+        New->DataPtrs.assign(j, nullptr);
+        if (New->mixedType)
+        {
+            New->Types.reserve(j);
+            New->Types.assign(j, IDENTIFIER_TOKEN);
+        }
     }
-    New->Type = EMPTY_ARRAY_TOKEN;
+    New->Type_ = EMPTY_ARRAY_TOKEN;
 
     j = 1;
 
-    for(i = New->Dims; i>=0; i--)
+    for(i = New->maxDim; i>=0; i--)
     {
         New->Mags[i] = j;
         j *= New->Sizes[i];
@@ -3755,7 +3803,7 @@ Parser::POV_ARRAY *Parser::Parse_Array_Declare (void)
 
     for (i=0; i<New->DataPtrs.size(); i++)
     {
-        POV_PARSER_ASSERT (New->DataPtrs[i] == NULL);
+        POV_PARSER_ASSERT (New->DataPtrs[i] == nullptr);
     }
 
     EXPECT_ONE
@@ -3835,7 +3883,7 @@ Parser::SYM_TABLE *Parser::Parse_Dictionary_Declare()
 
 };
 
-void Parser::Parse_Initalizer (int Sub, int Base, POV_ARRAY *a)
+void Parser::Parse_Initalizer (int Sub, size_t Base, POV_ARRAY *a)
 {
     int i;
     bool optional = false;
@@ -3851,7 +3899,7 @@ void Parser::Parse_Initalizer (int Sub, int Base, POV_ARRAY *a)
     END_EXPECT
 
     Parse_Begin();
-    if (Sub < a->Dims)
+    if (Sub < a->maxDim)
     {
         for(i=0; i < a->Sizes[Sub]; i++)
         {
@@ -3865,14 +3913,12 @@ void Parser::Parse_Initalizer (int Sub, int Base, POV_ARRAY *a)
         for(i=0; !finalParameter; i++)
         {
             if (a->resizable)
-            {
-                a->DataPtrs.push_back (NULL);
-                a->Sizes[Sub] = a->DataPtrs.size();
-            }
+                a->Grow();
             else
                 finalParameter = (i == (a->Sizes[Sub]-1));
 
-            if (!Parse_RValue (a->Type, &(a->Type), &(a->DataPtrs[Base+i]), NULL, false, false, true, false, true, MAX_NUMBER_OF_TABLES))
+            if (!Parse_RValue (a->ElementType(Base+i), &(a->ElementType(Base+i)), &(a->DataPtrs[Base+i]),
+                               nullptr, false, false, true, false, true, MAX_NUMBER_OF_TABLES))
             {
                 EXPECT_ONE
                     CASE (IDENTIFIER_TOKEN)
@@ -3883,12 +3929,8 @@ void Parser::Parse_Initalizer (int Sub, int Base, POV_ARRAY *a)
 
                     CASE (RIGHT_CURLY_TOKEN)
                         if (a->resizable)
-                        {
-                            finalParameter = true;
-                            POV_PARSER_ASSERT (a->DataPtrs.back() == NULL);
-                            a->DataPtrs.pop_back();
-                            a->Sizes[Sub] = a->DataPtrs.size();
-                        }
+                            // We reserved one element too many.
+                            a->Shrink();
                         else
                         {
                             if (!(finalParameter && properlyDelimited))
@@ -3922,8 +3964,8 @@ void Parser::Parse_Initalizer (int Sub, int Base, POV_ARRAY *a)
 
 void Parser::Parse_Fopen(void)
 {
-    IStream *rfile = NULL;
-    OStream *wfile = NULL;
+    IStream *rfile = nullptr;
+    OStream *wfile = nullptr;
     DATA_FILE *New;
     char *asciiFileName;
     UCS2String fileName;
@@ -3931,8 +3973,8 @@ void Parser::Parse_Fopen(void)
     SYM_ENTRY *Entry;
 
     New=reinterpret_cast<DATA_FILE *>(POV_MALLOC(sizeof(DATA_FILE),"user file"));
-    New->In_File=NULL;
-    New->Out_File=NULL;
+    New->In_File = nullptr;
+    New->Out_File = nullptr;
 
     // Safeguard against accidental nesting of other file access directives inside the `#fopen`
     // directive (or the user forgetting portions of the directive).
@@ -3950,36 +3992,36 @@ void Parser::Parse_Fopen(void)
         CASE(READ_TOKEN)
             New->R_Flag = true;
             rfile = Locate_File(fileName.c_str(), POV_File_Text_User, ign, true);
-            if(rfile != NULL)
+            if (rfile != nullptr)
                 New->In_File = new IBufferedTextStream(fileName.c_str(), rfile);
             else
-                New->In_File = NULL;
+                New->In_File = nullptr;
 
-            if(New->In_File == NULL)
+            if (New->In_File == nullptr)
                 Error ("Cannot open user file %s (read).", UCS2toASCIIString(fileName).c_str());
         END_CASE
 
         CASE(WRITE_TOKEN)
             New->R_Flag = false;
             wfile = CreateFile(fileName.c_str(), POV_File_Text_User, false);
-            if(wfile != NULL)
+            if (wfile != nullptr)
                 New->Out_File= new OTextStream(fileName.c_str(), wfile);
             else
-                New->Out_File = NULL;
+                New->Out_File = nullptr;
 
-            if(New->Out_File == NULL)
+            if (New->Out_File == nullptr)
                 Error ("Cannot open user file %s (write).", UCS2toASCIIString(fileName).c_str());
         END_CASE
 
         CASE(APPEND_TOKEN)
             New->R_Flag = false;
             wfile = CreateFile(fileName.c_str(), POV_File_Text_User, true);
-            if(wfile != NULL)
+            if (wfile != nullptr)
                 New->Out_File= new OTextStream(fileName.c_str(), wfile);
             else
-                New->Out_File = NULL;
+                New->Out_File = nullptr;
 
-            if(New->Out_File == NULL)
+            if (New->Out_File == nullptr)
                 Error ("Cannot open user file %s (append).", UCS2toASCIIString(fileName).c_str());
         END_CASE
 
@@ -4002,14 +4044,14 @@ void Parser::Parse_Fclose(void)
                 Error ("Can't nest directives accessing the same file.");
             // NB no need to set Data->busyParsing, as we're not reading any tokens where the
             // tokenizer might stumble upon nested file access directives
-            if(Data->In_File != NULL)
+            if (Data->In_File != nullptr)
                 delete Data->In_File;
-            if(Data->Out_File != NULL)
+            if (Data->Out_File != nullptr)
                 delete Data->Out_File;
             Got_EOF=false;
-            Data->In_File = NULL;
-            Data->Out_File = NULL;
-            Remove_Symbol (SYM_TABLE_GLOBAL,Token.Token_String,false,NULL,0);
+            Data->In_File = nullptr;
+            Data->Out_File = nullptr;
+            Remove_Symbol(SYM_TABLE_GLOBAL, Token.Token_String, false, nullptr, 0);
         END_CASE
 
         OTHERWISE
@@ -4035,7 +4077,7 @@ void Parser::Parse_Read()
     if (User_File->busyParsing)
         Error ("Can't nest directives accessing the same file.");
     File_Id=POV_STRDUP(Token.Token_String);
-    if(User_File->In_File == NULL)
+    if (User_File->In_File == nullptr)
         Error("Cannot read from file %s because the file is open for writing only.", UCS2toASCIIString(UCS2String(User_File->Out_File->name())).c_str());
 
     // Safeguard against accidental nesting of other file access directives inside the `#fopen`
@@ -4114,8 +4156,8 @@ void Parser::Parse_Read()
     {
         delete User_File->In_File;
         Got_EOF=false;
-        User_File->In_File = NULL;
-        Remove_Symbol (SYM_TABLE_GLOBAL,File_Id,false,NULL,0);
+        User_File->In_File = nullptr;
+        Remove_Symbol(SYM_TABLE_GLOBAL, File_Id, false, nullptr, 0);
     }
     POV_FREE(File_Id);
 }
@@ -4133,9 +4175,9 @@ int Parser::Parse_Read_Value(DATA_FILE *User_File,int Previous,int *NumberPtr,vo
     Temp_R_Flag = Input_File->R_Flag;
     Input_File->In_File = User_File->In_File;
     Input_File->R_Flag = User_File->R_Flag;
-    if(User_File->In_File == NULL)
+    if (User_File->In_File == nullptr)
         Error("Cannot read from file '%s' because the file is open for writing only.", UCS2toASCIIString(UCS2String(User_File->Out_File->name())).c_str());
-    User_File->In_File = NULL; // take control over pointer
+    User_File->In_File = nullptr; // take control over pointer
 
     try
     {
@@ -4263,7 +4305,7 @@ void Parser::Parse_Write(void)
     User_File=reinterpret_cast<DATA_FILE *>(Token.Data);
     if (User_File->busyParsing)
         Error ("Can't nest directives accessing the same file.");
-    if(User_File->Out_File == NULL)
+    if (User_File->Out_File == nullptr)
         Error("Cannot write to file %s because the file is open for reading only.", UCS2toASCIIString(UCS2String(User_File->In_File->name())).c_str());
 
     // Safeguard against accidental nesting of other file access directives inside the `#fopen`
@@ -4431,11 +4473,11 @@ void Parser::Inc_CS_Index()
         Error("Too many nested conditionals or macros.");
     }
     Cond_Stack[CS_Index].Cond_Type = BUSY_COND;
-    Cond_Stack[CS_Index].Macro_File = NULL;
-    Cond_Stack[CS_Index].Macro_Return_Name = NULL;
-    Cond_Stack[CS_Index].PMac = NULL;
-    Cond_Stack[CS_Index].Loop_File = NULL;
-    Cond_Stack[CS_Index].Loop_Identifier = NULL;
+    Cond_Stack[CS_Index].Macro_File = nullptr;
+    Cond_Stack[CS_Index].Macro_Return_Name = nullptr;
+    Cond_Stack[CS_Index].PMac = nullptr;
+    Cond_Stack[CS_Index].Loop_File = nullptr;
+    Cond_Stack[CS_Index].Loop_Identifier = nullptr;
 }
 
 bool Parser::Parse_Ifdef_Param ()
@@ -4450,14 +4492,14 @@ bool Parser::Parse_Ifdef_Param ()
     Inside_Ifdef=false;
 
     if (Token.is_array_elem)
-        retval = (*Token.DataPtr != NULL);
+        retval = (*Token.DataPtr != nullptr);
     else
         retval = (Token.Token_Id != IDENTIFIER_TOKEN);
 
     Parse_Paren_End();
 
     POV_FREE(String2);
-    String2 = NULL;
+    String2 = nullptr;
 
     return retval;
 }
@@ -4465,7 +4507,7 @@ bool Parser::Parse_Ifdef_Param ()
 int Parser::Parse_For_Param (char** IdentifierPtr, DBL* EndPtr, DBL* StepPtr)
 {
     int Previous=-1;
-    SYM_ENTRY *Temp_Entry = NULL;
+    SYM_ENTRY *Temp_Entry = nullptr;
 
     Parse_Paren_Begin();
 
@@ -4618,11 +4660,11 @@ void Parser::IncludeHeader(const UCS2String& formalFileName)
     Echo_Indx = 0;
 
     Input_File = &Include_Files[Include_File_Index];
-    Input_File->In_File = NULL;
+    Input_File->In_File = nullptr;
     IStream *is = Locate_File (formalFileName.c_str(),POV_File_Text_INC,actualFileName,true);
-    if(is == NULL)
+    if (is == nullptr)
     {
-        Input_File->In_File = NULL;  /* Keeps from closing failed file. */
+        Input_File->In_File = nullptr;  /* Keeps from closing failed file. */
         Error ("Cannot open include header file %s.", UCS2toASCIIString(formalFileName).c_str());
     }
     else

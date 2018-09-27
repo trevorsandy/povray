@@ -10,8 +10,8 @@
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
-/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
+/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
+/// Copyright 1991-2018 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -75,9 +75,9 @@ namespace pov_frontend
         m_valid = false;
         m_display_scaled = false;
         m_display_scale = 1.;
-        m_screen = NULL;
-        m_display = NULL;
-		m_window = NULL;
+        m_screen = nullptr;
+        m_display = nullptr;
+		m_window = nullptr;
     }
 
     WinConSDLDisplay::~WinConSDLDisplay()
@@ -98,7 +98,7 @@ namespace pov_frontend
     bool WinConSDLDisplay::TakeOver(WinConDisplay *display)
     {
         WinConSDLDisplay *p = dynamic_cast<WinConSDLDisplay *>(display);
-        if (p == NULL)
+        if (p == nullptr)
             return false;
         if ((GetWidth() != p->GetWidth()) || (GetHeight() != p->GetHeight()))
             return false;
@@ -134,11 +134,11 @@ namespace pov_frontend
 
 		// Deallocate display surface
 		SDL_FreeSurface(m_display);
-		m_display = NULL;
+		m_display = nullptr;
 
 		// Destroy window
 		SDL_DestroyWindow(m_window);
-		m_window = NULL;
+		m_window = nullptr;
 
 		// Quit subsystems
 		SDL_Quit();
@@ -204,7 +204,7 @@ namespace pov_frontend
 
 			// create display window
 			m_window = SDL_CreateWindow(PACKAGE_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
-			if (m_window == NULL)
+			if (m_window == nullptr)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create W%d x H%d SDL window: %s", width, height, SDL_GetError());
 				return;
@@ -220,7 +220,7 @@ namespace pov_frontend
 
             // Initialize the display
 			m_screen = SDL_GetWindowSurface(m_window);
-			if (m_screen == NULL)
+			if (m_screen == nullptr)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't get SDL window surface: %s", SDL_GetError());
 				return;
@@ -241,7 +241,7 @@ namespace pov_frontend
 			Amask = 0xff000000;
 #endif
 			SDL_Surface *optimized_surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, depth, Rmask, Gmask, Bmask, Amask);
-			if (optimized_surface == NULL)
+			if (optimized_surface == nullptr)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create optimized RGB surface for repeated blitting:: %s", SDL_GetError());
 				return;
@@ -251,7 +251,7 @@ namespace pov_frontend
 			Uint32 pixelFormatEnum = pixelFormat->format;
 			m_display = SDL_ConvertSurfaceFormat(optimized_surface, pixelFormatEnum, unused);
 			SDL_FreeSurface(optimized_surface);
-			if (m_display == NULL)
+			if (m_display == nullptr)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't convert to optimized RGB display surface for repeated blitting:: %s", SDL_GetError());
 				return;

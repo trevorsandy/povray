@@ -341,6 +341,7 @@ const RESERVED_WORD Reserved_Words[] = {
     { MIN_TOKEN,                    "min" },
     { MIN_EXTENT_TOKEN,             "min_extent" },
     { MINIMUM_REUSE_TOKEN,          "minimum_reuse" },
+    { MIXED_TOKEN,                  "mixed" },
     { MM_PER_UNIT_TOKEN,            "mm_per_unit" },
     { MOD_TOKEN,                    "mod" },
     { MORTAR_TOKEN,                 "mortar" },
@@ -728,9 +729,9 @@ const RESERVED_WORD Reserved_Words[] = {
     { STRING_LITERAL_TOKEN,         "string literal" },
 
     //------------------------------------------------------------------------------
-    // End of list, marked by NULL token string.
+    // End of list, marked by `nullptr` token string.
 
-    { TOKEN_COUNT,                  NULL }
+    { TOKEN_COUNT,                  nullptr }
 };
 
 } // end of pov namespace

@@ -426,10 +426,10 @@ case "$1" in
 # Please report bugs to $pov_config_bugreport
 
 # Programs to build.
-bin_PROGRAMS = lpub3d_trace_cui
+bin_PROGRAMS = povray
 
 # Source files.
-lpub3d_trace_cui_SOURCES = \\
+povray_SOURCES = \\
   disp.h \\
   disp_sdl.cpp disp_sdl.h \\
   disp_text.cpp disp_text.h

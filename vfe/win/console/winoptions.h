@@ -30,7 +30,7 @@
 ///
 /// ----------------------------------------------------------------------------
 ///
-/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
 /// Copyright 1991-2018 Persistence of Vision Raytracer Pty. Ltd which is,
 /// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.

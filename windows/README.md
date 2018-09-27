@@ -1,7 +1,7 @@
 ------------------------------------------------------------------------
 
 Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
-Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
+Copyright 1991-2018 Persistence of Vision Raytracer Pty. Ltd.
 
 POV-Ray is free software: you can redistribute it and/or modify it under
 the terms of the GNU Affero General Public License as published by the
@@ -103,6 +103,12 @@ Build Steps
     make unofficial versions distinguishable from each other. Remove the
     `#error` directive afterwards to proceed with the build. Note that
     if you do not do this you will get compile errors.
+
+    Note: If you are building in a Git local workspace, we recommend you run
+    `git update-index --skip-workspace source/base/build.h`. This will keep
+    your changes to the file from being included in a commit, or overwritten
+    in a pull or reset, while still allowing you to pull non-conflicting
+    updates to the file).
 
     By default, the GUI project is built, and the Console project is
     excluded. If you wish to generate a simple console version of

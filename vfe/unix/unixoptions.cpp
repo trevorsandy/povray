@@ -12,7 +12,7 @@
 /// @copyright
 /// @parblock
 ///
-/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.7. is built
+/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 /// specially for LPub3D - An LDraw Building Instruction Editor.
 /// Copyright 2017-2018 by Trevor SANDY.
 ///
@@ -31,7 +31,7 @@
 ///
 /// ----------------------------------------------------------------------------
 ///
-/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.7.
+/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
 /// Copyright 1991-2018 Persistence of Vision Raytracer Pty. Ltd which is,
 /// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
@@ -335,7 +335,7 @@ namespace vfePlatform
                     strcpy(nargv[i], oargv[i]);
                 }
 
-                nargv[nargc] = NULL;
+                nargv[nargc] = nullptr;
 
                 vector<string> CmdVariations;
                 boost::split(CmdVariations, (*iter).CmdOption, boost::is_any_of("|"));
@@ -349,7 +349,7 @@ namespace vfePlatform
                             if ((*iter).has_param)
                             {
                                 int j = i + 1;
-                                if (j < nargc && nargv[j] != NULL)
+                                if (j < nargc && nargv[j] != nullptr)
                                 {
                                     (*iter).Value = nargv[j];
                                     remove_arg(&nargc, nargv, j);
@@ -361,7 +361,7 @@ namespace vfePlatform
                         }
                         else
                             i++;
-                        if (nargv[i] == NULL)
+                        if (nargv[i] == nullptr)
                             break;
                     }
                 }
@@ -382,7 +382,7 @@ namespace vfePlatform
         if (index >= *argc || index == 0)
             return;
 
-        if (argv[index] != NULL)
+        if (argv[index] != nullptr)
             free(argv[index]);
 
         for (; index < *argc; index++)
@@ -400,14 +400,14 @@ namespace vfePlatform
         len = 256;  // default buffer size
         char *tmp = new char[len];
 
-        while(getcwd(tmp, len) == NULL)  // buffer is too small
+        while (getcwd(tmp, len) == nullptr)  // buffer is too small
         {
             delete[] tmp;
             len *= 2;  // double buffer size and try again
             tmp = new char[len];
         }
 #else
-        string tmp = std::getenv("PWD");  // must not be NULL; checked by configure
+        string tmp = std::getenv("PWD");  // must not be `nullptr`; checked by configure
         if(tmp.length() == 0)        // run-time checks are safer anyway
         {
             // TODO: correct error handling
@@ -524,7 +524,7 @@ namespace vfePlatform
             { "%HOME%", m_home.c_str() },
             { "//", "/" },
             { "/./", "/" },
-            { NULL, NULL }  // sentinel
+            { nullptr, nullptr }  // sentinel
         };
 
         // nothing to canonicalize; return an empty string
@@ -732,7 +732,7 @@ namespace vfePlatform
             { "[File I/O Security]", FILE_IO         },
             { "[Shellout Security]", SHELLOUT        },
             { "[Permitted Paths]"  , PERMITTED_PATHS },
-            { NULL                 , UNKNOWN         }   // sentinel
+            { nullptr              , UNKNOWN         }   // sentinel
         };
 
         typedef struct IOSettings { const char *label; const FileIO value; } IOSettings;
@@ -742,7 +742,7 @@ namespace vfePlatform
             { "none"      , IO_NONE       },
             { "read-only" , IO_READONLY   },
             { "restricted", IO_RESTRICTED },
-            { NULL        , IO_UNKNOWN    }
+            { nullptr     , IO_UNKNOWN    }
         };
 
         typedef struct SHLSettings { const char *label; const ShellOut value; } SHLSettings;
@@ -751,7 +751,7 @@ namespace vfePlatform
             { ""         , SHL_UNSET     },
             { "allowed"  , SHL_ALLOWED   },
             { "forbidden", SHL_FORBIDDEN },
-            { NULL       , SHL_UNKNOWN   }
+            { nullptr    , SHL_UNKNOWN   }
         };
 
         // inits
@@ -1024,7 +1024,7 @@ namespace vfePlatform
             {
                 // fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE);
                 // perror(m_sysconf.c_str());
-                if (std::getenv("POV_IGNORE_SYSCONF_MSG") != NULL)
+                if (std::getenv("POV_IGNORE_SYSCONF_MSG") != nullptr)
                     fprintf(stderr, "%s: ignoring system configuration file\n", PACKAGE_NAME);
                 else {
                     fprintf(stderr, "%s: cannot open the system configuration file ", PACKAGE_NAME);
@@ -1080,7 +1080,7 @@ namespace vfePlatform
     {
         FILE *file = fopen(name.c_str(), "r");
 
-        if(file != NULL)
+        if (file != nullptr)
             fclose(file);
         else
             return false;

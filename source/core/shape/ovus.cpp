@@ -10,7 +10,7 @@
 /// @parblock
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
-/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2018 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -650,7 +650,7 @@ void Ovus::Scale(const Vector3d&, const TRANSFORM *tr)
 
 void Ovus::Transform(const TRANSFORM *tr)
 {
-    if(Trans == NULL)
+    if (Trans == nullptr)
         Trans = Create_Transform();
 
     Compose_Transforms(Trans, tr);
@@ -921,11 +921,11 @@ void Ovus::CalcUV(const Vector3d& IPoint, Vector2d& Result) const
 
     if ( (P[Y] > EPSILON) && (P[Y] < (VerticalSpherePosition - EPSILON) ) )
     {
-    // when on the spindle, the range 0.25 to 0.75 is used 
+    // when on the spindle, the range 0.25 to 0.75 is used
     // Verbatim from C-Lipka:
     // Dividing at 1/4 and 3/4 has the advantage of the division being exactly at a pixel boundary
     // if the texture is an image 2^N by 2^M pixels in size, which is common for image textures
-    // originally designed for mesh-based renderers. It also happens to work for 20N by 20M pixels, 
+    // originally designed for mesh-based renderers. It also happens to work for 20N by 20M pixels,
     // which is common for image textures with "arbitrary" sizes.
         phi = 0.75-0.5*(P[Y])/(VerticalSpherePosition);
     }
