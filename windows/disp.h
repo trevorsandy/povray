@@ -53,8 +53,8 @@ namespace pov_frontend
     class WinConDisplay : public vfeDisplay
     {
         public:
-            WinConDisplay(unsigned int w, unsigned int h, GammaCurvePtr gamma, vfeSession *session, bool visible) :
-            vfeDisplay(w, h, gamma, session, visible) {};
+            WinConDisplay(unsigned int w, unsigned int h, vfeSession *session, bool visible) :
+            vfeDisplay(w, h, session, visible) {};
             virtual ~WinConDisplay() {} ;
             virtual void Initialise() = 0;
             virtual void Close() = 0;

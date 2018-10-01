@@ -252,6 +252,13 @@ $RECYCLE.BIN/
 
 /build_32bit/*
 
+# ===========================
+# POV-Ray meta-build detritus
+# ===========================
+
+# Byte-compiled python modules
+*.pyc
+
 # =====================
 # POV-Ray Miscellaneous
 # =====================

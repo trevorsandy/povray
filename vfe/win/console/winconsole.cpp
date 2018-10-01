@@ -142,7 +142,7 @@ BOOL WINAPI ConsoleHandler(DWORD CEvent)
   return TRUE;
 }
 
-static vfeDisplay *WinConDisplayCreator(unsigned int width, unsigned int height, GammaCurvePtr gamma, vfeSession *session, bool visible)
+static vfeDisplay *WinConDisplayCreator(unsigned int width, unsigned int height, vfeSession *session, bool visible)
 {
   WinConDisplay *display = GetRenderWindow();
   switch (gDisplayMode)
@@ -151,16 +151,16 @@ static vfeDisplay *WinConDisplayCreator(unsigned int width, unsigned int height,
   case DISP_MODE_SDL:
     if (display != nullptr && display->GetWidth() == width && display->GetHeight() == height)
     {
-      WinConDisplay *p = new WinConSDLDisplay(width, height, gamma, session, false);
+      WinConDisplay *p = new WinConSDLDisplay(width, height, session, false);
       if (p->TakeOver(display))
         return p;
       delete p;
     }
-    return new WinConSDLDisplay(width, height, gamma, session, visible);
+    return new WinConSDLDisplay(width, height, session, visible);
     break;
 #endif
   case DISP_MODE_TEXT:
-    return new WinConTextDisplay(width, height, gamma, session, visible);
+    return new WinConTextDisplay(width, height, session, visible);
     break;
   default:
     return nullptr;

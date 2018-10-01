@@ -69,8 +69,8 @@ namespace pov_frontend
         return true;
     }
 
-    WinConSDLDisplay::WinConSDLDisplay(unsigned int w, unsigned int h, GammaCurvePtr gamma, vfeSession *session, bool visible) :
-        WinConDisplay(w, h, gamma, session, visible)
+    WinConSDLDisplay::WinConSDLDisplay(unsigned int w, unsigned int h, vfeSession *session, bool visible) :
+        WinConDisplay(w, h, session, visible)
     {
         m_valid = false;
         m_display_scaled = false;

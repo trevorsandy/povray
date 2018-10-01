@@ -72,7 +72,7 @@ namespace pov_frontend
         static const WinConOptionsProcessor::Option_Info Options[];
         static bool Register(vfeWinSession *session);
 
-        WinConSDLDisplay(unsigned int w, unsigned int h, GammaCurvePtr gamma, vfeSession *session, bool visible);
+        WinConSDLDisplay(unsigned int w, unsigned int h, vfeSession *session, bool visible);
         virtual ~WinConSDLDisplay();
         void Initialise();
         void Close();
