@@ -10,7 +10,7 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: July 20, 2018
+rem  Last Update: October 27, 2018
 rem  Copyright (c) 2018 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -655,15 +655,15 @@ SET genConfigFile="%CONFIG_DIR%\povray.ini" ECHO
 EXIT /b
 
 :PROJECT_MESSAGE
-SET OPTION=%BUILD_LBL% Graphic User Interface (GUI) solution...
+SET OPTION=%BUILD_LBL% Graphic User Interface ^(GUI^) solution...
 IF %1==1 SET OPTION=%BUILD_LBL% Console User Interface (CUI) project - Default...
 ECHO.
 ECHO -%OPTION%
 EXIT /b
 
 :VERBOSE_MESSAGE
-SET STATE=Verbose (Win Debug) tracing is OFF - Default
-IF %1==1 SET STATE=Verbose (Win Debug) tracing is ON
+SET STATE=Verbose tracing is OFF - Default
+IF %1==1 SET STATE=Verbose tracing is ON
 ECHO.
 ECHO -%STATE%
 EXIT /b
