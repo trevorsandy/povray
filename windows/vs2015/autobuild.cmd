@@ -582,9 +582,9 @@ SET genConfigFile="%DIST_INSTALL_PATH%\povray.conf" ECHO
 >>%genConfigFile% ; This example shows how to qualify path names containing space(s):
 >>%genConfigFile% ; read = "%%HOME%%\this\directory\contains space characters"
 >>%genConfigFile%.
->>%genConfigFile% ; You can use %%HOME%%, %%INSTALLDIR%% and working directory (%CD%) as the origin to define permitted paths:
+>>%genConfigFile% ; __USEFUL_LOCATIONS_COMMENT__
 >>%genConfigFile%.
->>%genConfigFile% ; %%HOME%% is hard-coded to the %%USERPROFILE%% environment variable (%USERPROFILE%).
+>>%genConfigFile% ; __HOMEDIR_COMMENT__
 >>%genConfigFile% read* = "%%HOME%%\%__POVUSERDIR__%\config"
 >>%genConfigFile%.
 >>%genConfigFile% ; read* = "__LGEOARDIR__\ar"
@@ -595,7 +595,7 @@ SET genConfigFile="%DIST_INSTALL_PATH%\povray.conf" ECHO
 >>%genConfigFile% read* = "__POVSYSDIR__\resources\include"
 >>%genConfigFile% read* = "__POVSYSDIR__\resources\ini"
 >>%genConfigFile%.
->>%genConfigFile% ; The working directory (%CD%) is where LPub3D-Trace is called from.
+>>%genConfigFile% ; __WORKINGDIR_COMMENT__
 >>%genConfigFile% read+write* = .
 ECHO   Create povray.ini...
 COPY /V /Y "..\..\distribution\ini\povray.ini" "%DIST_INSTALL_PATH%\povray.ini" /A

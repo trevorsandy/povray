@@ -617,9 +617,9 @@ case "$1" in
 ; This example shows how to qualify path names containing space(s):
 ; read = "%HOME%/this/directory/contains space characters"
 
-; You can use %HOME%, %INSTALLDIR% and working directory ($PWD) as the origin to define permitted paths:
+; __USEFUL_LOCATIONS_COMMENT__
 
-; %HOME% is hard-coded to the \$USER environment variable ($USER).
+; __HOMEDIR_COMMENT__
 read* = "%HOME%/__POVUSERDIR__/config"
 
 ; read* = "__LGEOARDIR__/ar"
@@ -630,7 +630,7 @@ read* = "%HOME%/__POVUSERDIR__/config"
 read* = "__POVSYSDIR__/resources/include"
 read* = "__POVSYSDIR__/resources/ini"
 
-; The working directory ($PWD) is where LPub3D-Trace is called from.
+; __WORKINGDIR_COMMENT__
 read+write* = .
 pbEOF
 
