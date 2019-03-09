@@ -13,7 +13,7 @@
 ///
 /// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 /// specially for LPub3D - An LDraw Building Instruction Editor.
-/// Copyright 2017-2018 by Trevor SANDY.
+/// Copyright 2017-2019 by Trevor SANDY.
 ///
 /// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -31,7 +31,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
-/// Copyright 1991-2018 Persistence of Vision Raytracer Pty. Ltd which is,
+/// Copyright 1991-2019 Persistence of Vision Raytracer Pty. Ltd which is,
 /// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
@@ -51,10 +51,8 @@
 // C++ variants of C standard header files
 #include <cstdlib>
 
-// boost header files
-#include <boost/shared_ptr.hpp>
+// Boost header files
 #include <boost/algorithm/string.hpp>
-#include <boost/thread.hpp>
 
 // version details
 #include "base/version_info.h"
@@ -72,15 +70,13 @@
 #include "disp_text.h"
 #include "disp_sdl.h"
 
+// from directory "source"
 #include "backend/povray.h"
 #include "backend/control/benchmark.h"
 
-using namespace vfe;
-using namespace vfePlatform;
-
 namespace pov_frontend
 {
-  shared_ptr<Display> gDisplay;
+  std::shared_ptr<Display> gDisplay;
 
   ////////////////////////////////
   // Called from the shellout code
@@ -88,6 +84,10 @@ namespace pov_frontend
   bool MinimizeShellouts(void) { return false; } // TODO
   bool ShelloutsPermitted(void) { return false; } // TODO
 }
+// end of namespace pov_frontend
+
+using namespace vfe;
+using namespace vfePlatform;
 
 enum DispMode
 {
@@ -177,7 +177,7 @@ void PrintStatus(vfeSession *session)
 {
   // TODO -- when invoked while processing "--help" command-line switch,
   //         GNU/Linux customs would be to print to stdout (among other differences).
-  string str;
+  std::string str;
   vfeSession::MessageType type;
   static vfeSession::MessageType lastType = vfeSession::mUnclassified;
 
@@ -313,13 +313,13 @@ static void PauseWhenDone(vfeSession *session)
   GetRenderWindow()->PauseWhenDoneNotifyEnd();
 }
 
-static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts, string& ini, string& pov, int argc, char **argv)
+static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts, std::string& ini, std::string& pov, int argc, char **argv)
 {
 
   // parse command-line options
   while (*++argv)
   {
-    string s = string(*argv);
+    std::string s = std::string(*argv);
     boost::algorithm::to_lower(s);
     // set number of threads to run the benchmark
     if (boost::starts_with(s, "+wt") || boost::starts_with(s, "-wt"))
@@ -405,7 +405,7 @@ static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts,
     Delay(20);
   }
 
-  string basename = UCS2toASCIIString(session->CreateTemporaryFile());
+  std::string basename = UCS2toSysString(session->CreateTemporaryFile());
   ini = basename + ".ini";
   pov = basename + ".pov";
   if (pov::Write_Benchmark_File(pov.c_str(), ini.c_str()))
@@ -426,7 +426,7 @@ static ReturnValue PrepareBenchmark(vfeSession *session, vfeRenderOptions& opts,
   return RETURN_OK;
 }
 
-static void CleanupBenchmark(vfeWinSession *session, string& ini, string& pov)
+static void CleanupBenchmark(vfeWinSession *session, std::string& ini, std::string& pov)
 {
   fprintf(stderr, "%s: removing %s\n", PACKAGE_NAME, ini.c_str());
   session->DeleteTemporaryFile(ASCIItoUCS2String(ini.c_str()));
@@ -509,8 +509,8 @@ extern "C" int main(int argc, char **argv)
   vfeRenderOptions  opts;
   ReturnValue       retval = RETURN_OK;
   bool              running_benchmark = false;
-  string            bench_ini_name;
-  string            bench_pov_name;
+  std::string       bench_ini_name;
+  std::string       bench_pov_name;
   char **           argv_copy=argv; /* because argv is updated later */
   int               argc_copy=argc; /* because it might also be updated */
 
@@ -524,7 +524,7 @@ extern "C" int main(int argc, char **argv)
     DESCRIPTION_MESSAGE_LPUB3D_TRACE_1 "\n"
     DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 "\n"
     DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 "\n\n"
-    LPUB3D_TRACE_COPYRIGHT "\n"
+    LPUB3D_TRACE_COPYRIGHT "\n\n"
     DISCLAIMER_MESSAGE_1 "\n"
     DISCLAIMER_MESSAGE_2 "\n\n");
 
@@ -601,7 +601,7 @@ extern "C" int main(int argc, char **argv)
   }
 
   // default number of work threads: number of CPUs or 4
-  int nthreads = boost::thread::hardware_concurrency();
+  int nthreads = std::thread::hardware_concurrency();
   if (nthreads < 2)
       nthreads = 4;
   opts.SetThreadCount(nthreads);
@@ -648,7 +648,7 @@ extern "C" int main(int argc, char **argv)
   if (running_benchmark)
   {
     // read only the provided INI file and set minimal lib paths
-    opts.AddLibraryPath(string(POVLIBDIR "\\include"));
+    opts.AddLibraryPath(std::string(POVLIBDIR "\\include"));
     opts.AddINI(bench_ini_name.c_str());
     opts.SetSourceFile(bench_pov_name.c_str());
   }

@@ -7,7 +7,7 @@
 # ---------------------------------------------------------------------------
 # LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 # specially for LPub3D - An LDraw Building Instruction Editor.
-# Copyright 2017 by Trevor SANDY.
+# Copyright 2017-2019 by Trevor SANDY.
 #
 # LPub3D-Trace is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -61,7 +61,6 @@ m4_include([unix/config/ax_pthread.m4])
 m4_include([unix/config/ax_arg_enable.m4])
 m4_include([unix/config/ax_arg_with.m4])
 m4_include([unix/config/ax_boost_base.m4])
-m4_include([unix/config/ax_boost_thread.m4])
 m4_include([unix/config/ax_test_compiler_flags.m4])
 m4_include([unix/config/ax_check_compile_flag.m4])
 m4_include([unix/config/ax_check_lib.m4])
@@ -91,7 +90,7 @@ required_openexr_version="1.2"
 libsdl2_source_version="2.0.5"
 
 # Supported options.
-# AX_ARG_ENABLE([--enable-avx2],             [enable AVX2 features and compiler optmization])
+# AX_ARG_ENABLE([--enable-avx2],           [enable AVX2 features and compiler optmization])
 AX_ARG_ENABLE([--enable-watch-cursor],     [enable a watch cursor over the display when rendering (X Window only)])
 AX_ARG_ENABLE([--enable-debug],            [enable compiler debugging mode])
 AX_ARG_ENABLE([--enable-profile],          [enable program execution profiling])
@@ -127,29 +126,7 @@ rm -f ./povray.ini
 
 # Instruction message.
 if test x"$COMPILED_BY" = x""; then
-  echo "
-Welcome to the $PACKAGE_NAME $PACKAGE_VERSION configure script.
-
-This script will prepare the source distribution of $PACKAGE_NAME $PACKAGE_VERSION for Unix
-for compilation on this machine.  Compiling the program yourself means
-that the LPub3D-Trace Team(tm) is not responsible for supporting this
-version, no matter if it is the unmodified official LPub3D-Trace source code
-or a customized version.  Refer to the LPub3D-Trace source license conditions
-that come with this package.
-
-In order to start configuration, you have to provide a valid contact
-information that will be included in the executable and displayed
-whenever LPub3D-Trace (or a modified version of it) is started.  In case
-you intend to distribute this binary, this information will help users
-to contact the appropriate maintainers.  To start configuring $PACKAGE_NAME
-type in the following command with your own contact information:
-
-./configure COMPILED_BY=\"your name <email@address>\"
-
-Please consult the INSTALL file for additional configuration and
-installation instructions.
-"
-  exit 1
+  COMPILED_BY="$USER <no contact address>"
 fi
 
 pov_no_distrib="${NON_REDISTRIBUTABLE_BUILD:-no}"
@@ -273,6 +250,7 @@ AC_DEFINE_UNQUOTED([COMPILER_VENDOR], ["$pov_compiler_vendor"], [Compiler vendor
 AC_DEFINE_UNQUOTED([COMPILER_VERSION], ["$pov_compiler_version"], [Compiler version.])
 AC_DEFINE_UNQUOTED([POV_COMPILER_INFO], ["$pov_compiler_version @ $build"], [Compiler version (processed).])
 
+
 # Not necessary when AM_MAINTAINER_MODE is called above.
 ###AC_PROG_MAKE_SET
 
@@ -363,64 +341,9 @@ AX_PTHREAD
 CXXFLAGS="$CXXFLAGS $PTHREAD_CFLAGS"  # append
 LIBS="$LIBS $PTHREAD_CFLAGS $PTHREAD_LIBS"  # append
 
-# Boost; required libraries
-# the following macro stops with error when boost is not found.
-# also force boost_system lib when cross-compiling b/c test passes without it
+# Boost; required library
+# the following macro stops with error when boost is not found
 AX_BOOST_BASE([$required_libboost_version])
-AX_BOOST_THREAD
-if test x"$ax_cv_boost_thread" != x"yes"; then
-  AC_MSG_ERROR([cannot find a suitable boost thread library])
-else
-  CPPFLAGS="$CPPFLAGS $BOOST_CPPFLAGS"  # append
-  LDFLAGS="$LDFLAGS $BOOST_LDFLAGS"     # append
-  LIBS="$BOOST_THREAD_LIB $LIBS"
-fi
-AC_MSG_CHECKING([whether the boost thread library is usable])
-SAVED_LIBS=$LIBS
-boost_thread_links=0
-for extralib in '' '-lboost_system'
-do
-  LIBS=$SAVED_LIBS
-  LIBS="$LIBS $extralib"
-  AC_RUN_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <boost/thread/thread.hpp>
-    ]],[[
-      boost::mutex m;
-      boost::defer_lock_t();
-      return 0;
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    BOOST_THREAD_LIB="$BOOST_THREAD_LIB $extralib"
-    boost_thread_links=1
-  ],,
-  [
-  	LIBS="$LIBS -lboost_system"
-    AC_COMPILE_IFELSE(
-      [AC_LANG_PROGRAM([[
-        #include <boost/thread/thread.hpp>
-      ]],[[
-        boost::mutex m;
-        boost::defer_lock_t();
-        return 0;
-      ]])
-    ],[
-        AC_MSG_RESULT([cross-compiling... yes])
-        BOOST_THREAD_LIB="$BOOST_THREAD_LIB -lboost_system"
-        boost_thread_links=1
-    ],[
-        AC_MSG_RESULT([cross-compiling... no])
-    ])
-  ])
-  if test $boost_thread_links = '1'; then
-    break
-  fi
-done
-if test $boost_thread_links != '1'; then
-  AC_MSG_RESULT([no])
-  AC_MSG_FAILURE([cannot link with the boost thread library])
-fi
 
 AC_DEFINE([USE_OFFICIAL_BOOST], [], [Use the official Boost libraries.])
 
@@ -821,8 +744,8 @@ AC_TYPE_SIZE_T
 AC_STRUCT_TM
 
 AC_CHECK_SIZEOF([int])
-AC_CHECK_SIZEOF([long int]) # check for 64 bit support
-AC_CHECK_SIZEOF([size_t]) # check for 64 bit support
+AC_CHECK_SIZEOF([long int])	# check for 64 bit support
+AC_CHECK_SIZEOF([size_t])	# check for 64 bit support
 AC_CHECK_SIZEOF([float])
 
 
@@ -899,47 +822,25 @@ AC_CHECK_DECLS([RUSAGE_SELF, RUSAGE_THREAD, RUSAGE_LWP],
 # gettimeofday <sys/time.h>
 AC_CHECK_FUNCS([gettimeofday])
 
-# asinh and friends (requires libm)
-AC_CHECK_FUNCS([asinh],
-  [],
-  [AC_DEFINE([NEED_INVHYP], [], [Inverse hyperbolic functions.])]
-)
+# (Not checking for `asinh` and friends anymore, as they are mandatory as of C++11. [CLi])
 
-# support for non-IEEE compilers (requires libm)
+# support for non-IEEE compilers
+# TODO FIXME - We should actually check for existence of `int32_t` rather than size of `int` now.
 if test x"$C99_COMPATIBLE_RADIOSITY" != x"" || test x"$ac_cv_sizeof_int" != x"4" || test x"$ac_cv_sizeof_float" != x"4"; then
-  AC_CHECK_FUNCS([copysign],
-    [],
-    [AC_MSG_ERROR([
-*** Cannot find the 'copysign' function required for non-ieee platform
-])]
-  )
+  # (Not checking for `copysign` anymore as we're no longer using it. [CLi])
   if test x"$C99_COMPATIBLE_RADIOSITY" = x""; then  # auto-detection
-    AC_CHECK_FUNCS([ilogbf],
-      [AC_DEFINE([C99_COMPATIBLE_RADIOSITY], [2], [See source/backend/support/octree.cpp for details.])],
-      [AC_CHECK_FUNCS([ilogb],
-         [AC_DEFINE([C99_COMPATIBLE_RADIOSITY], [4], [See source/backend/support/octree.cpp for details.])],
-         [AC_CHECK_FUNCS([logbf],
-            [AC_DEFINE([C99_COMPATIBLE_RADIOSITY], [1], [See source/backend/support/octree.cpp for details.])],
-            [AC_CHECK_FUNCS([logb],
-               [AC_DEFINE([C99_COMPATIBLE_RADIOSITY], [3], [See source/backend/support/octree.cpp for details.])],
-               [AC_MSG_ERROR([
-*** Cannot find a 'logb' or equivalent function required for non-ieee platform
-])]
-             )]
-          )]
-       )]
-    )
-  else  # check value of C99_COMPATIBLE_RADIOSITY and function presence
+    # Simply choose `frexpf`/`ldexpf` variant; C++11 requires their existence,
+    # and they provide maximum portability at good performance.
+    AC_DEFINE([C99_COMPATIBLE_RADIOSITY], [6], [See source/core/configcore.h for details.])
+  else  # check value of C99_COMPATIBLE_RADIOSITY
+    # (Not checking function presence anymore, as they are all mandatory as of C++11. [CLi])
     case "$C99_COMPATIBLE_RADIOSITY" in
-      1) AC_CHECK_FUNCS([logbf],  [], [AC_MSG_ERROR([logbf not found])]) ;;
-      2) AC_CHECK_FUNCS([ilogbf], [], [AC_MSG_ERROR([ilogbf not found])]) ;;
-      3) AC_CHECK_FUNCS([logb],   [], [AC_MSG_ERROR([logb not found])]) ;;
-      4) AC_CHECK_FUNCS([ilogb],  [], [AC_MSG_ERROR([ilogb not found])]) ;;
+      1|2|3|4|5|6|7|8|9) ;;
       *) AC_MSG_ERROR([Unsupported C99_COMPATIBLE_RADIOSITY value]) ;;
     esac
     AC_DEFINE_UNQUOTED([C99_COMPATIBLE_RADIOSITY],
       [$C99_COMPATIBLE_RADIOSITY],
-      [See source/backend/support/octree.cpp for details.]
+      [See source/core/configcore.h for details.]
     )
   fi
 fi
@@ -981,6 +882,7 @@ if test x"$pov_compiler_vendor" = x"gnu"; then
   AX_TEST_COMPILER_FLAGS([-fno-enforce-eh-specs])
   AX_TEST_COMPILER_FLAGS([-Wno-non-template-friend])
 fi
+AX_TEST_COMPILER_FLAGS([-Wsuggest-override])
 
 
 # I/O restrictions.
@@ -1449,7 +1351,7 @@ AC_RUN_IFELSE([
       ],[
         AC_MSG_RESULT([yes])
         AC_DEFINE([HAVE_INF],           [],[infinite floating point values are supported])
-        AC_DEFINE([HAVE_EMULATED_ISINF],[],[infinities can be identified by them comparing non-equal to themselves])
+        AC_DEFINE([HAVE_EMULATED_ISINF],[],[infinities can be identified by comparison to the maximum value])
       ],[
         # although double and float support infinite values, they are no use to us as we can't properly test for them,
         # so we're not setting HAVE_INF.

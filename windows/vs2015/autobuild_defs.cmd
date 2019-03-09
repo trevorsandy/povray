@@ -7,8 +7,8 @@ rem needed to build the solution/project.
 rem This script is intended to be called from autobuild.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: October 27, 2018
-rem  Copyright (c) 2017 by Trevor SANDY
+rem  Last Update: March 08, 2019
+rem  Copyright (c) 2019 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
 rem but WITHOUT ANY WARRANTY; without even the implied warranty of

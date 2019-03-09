@@ -15,7 +15,7 @@
 ///
 /// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 /// specially for LPub3D - An LDraw Building Instruction Editor.
-/// Copyright 2017 by Trevor SANDY.
+/// Copyright 2017-2019 by Trevor SANDY.
 ///
 /// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -33,7 +33,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
-/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+/// Copyright 1991-2019 Persistence of Vision Raytracer Pty. Ltd which is,
 /// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
@@ -59,62 +59,13 @@
 // failure to do so will lead to link errors.
 // #define _CONSOLE
 
-// C++ variants of C standard headers
-#include <cmath>
-#include <cstdarg>
-#include <cstdlib>
+// C++ variants of C standard header files
+#include <cmath>        // TODO - Required for `_isnan()`, `_finite()`.
+#include <cstdlib>      // TODO - required for `_MAX_PATH`, `std::memcpy()`[1], `std::malloc()`, `std::realloc()`, `std::free()`.
+#include <cstring>      // TODO - Required for `std::memmove() `std::memcpy()`[1], `std::strdup()`.
 
-
-// C++ standard headers
-#ifdef _CONSOLE
-#include <algorithm>
-#include <limits>
-#endif
-#include <exception>
-#include <list>
-#include <memory>
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-// boost headers
-#include <boost/intrusive_ptr.hpp>
-
-#include <io.h>
-#include <fcntl.h>
-
-// use this to verbose debug tracing
-//#define WIN_DEBUG
-
-#ifndef STD_TYPES_DECLARED
-#define STD_TYPES_DECLARED
-
-// the following types are used extensively throughout the POV source and hence are
-// included and named here for reasons of clarity and convenience.
-
-// when we say 'string' we mean std::string
-using std::string;
-
-// and vector is a std::vector
-using std::vector;
-
-// yup, list too
-using std::list;
-
-// runtime_error is the base of our Exception class, plus is referred
-// to in a few other places.
-using std::runtime_error;
-
-// we use the C++11 standard shared pointers
-using std::shared_ptr;
-using std::weak_ptr;
-using std::dynamic_pointer_cast;
-using std::static_pointer_cast;
-using std::const_pointer_cast;
-
-using boost::intrusive_ptr;
-
-#endif // STD_POV_TYPES_DECLARED
+// C++ standard header files
+//  (none at the moment)
 
 // the build command-line is expected to declare WIN32_LEAN_AND_MEAN, which will
 // prevent Window's objidl.h from being pulled in (which dupes IStream)
@@ -176,16 +127,6 @@ using boost::intrusive_ptr;
 
 /////////////////////////////////////////////////////////////
 
-#ifndef __GENDEFS
-  #define __GENDEFS
-  typedef unsigned char     uchar;
-  typedef unsigned short    ushort;
-  typedef unsigned int      uint;
-  typedef unsigned long     ulong;
-  typedef unsigned __int64  uint64;
-  typedef __int64           int64;
-#endif
-
 #ifdef __INTEL_COMPILER
 // Intel C++ whines about the lack of a return on RDTSC() for each and every file
 // it is included in. VC++ is smarter (or dumber, depending on your point of view).
@@ -208,11 +149,13 @@ namespace povwin
   void win_free(void *p, const void *ptr, int line);
   char *win_strdup(const char *s);
   char *win_strdup(const char *s, const void *ptr, int line);
-  bool WinMemReport(bool global, uint64& allocs, uint64& frees, int64& current, uint64& peak, uint64& smallest, uint64& largest);
+  bool WinMemReport(bool global, unsigned __int64& allocs, unsigned __int64& frees, __int64& current,
+                    unsigned __int64& peak, unsigned __int64& smallest, unsigned __int64& largest);
   void WinMemStage(bool BeginRender, void *cookie = NULL);
 #endif
 
 #ifndef _WIN64
+  // TODO FIXME - The following will obviously only work on x86 machines.
   inline void DebugBreak() { _asm _emit 0cch } // rather than use the windows one
   inline POV_LONG RDTSC(){ _asm _emit 0Fh _asm _emit 31h }
   #define READ_PROFILE_TIMER RDTSC()
@@ -221,6 +164,7 @@ namespace povwin
   #define READ_PROFILE_TIMER 0
 #endif
 }
+// end of namespace povwin
 #ifdef __INTEL_COMPILER
 #pragma warning(pop)
 #endif
@@ -229,15 +173,6 @@ namespace povwin
 // with file offsets having type `__int64`.
 #define POV_LSEEK(handle,offset,whence) _lseeki64(handle,offset,whence)
 #define POV_OFF_T __int64
-
-namespace pov_base
-{
-  // declare these to avoid warnings in image.cpp, rather than turn off the deprecation warnings.
-  static inline int open(const char *name, int flags, int mode) { return _open(name, flags|_O_BINARY, mode); }
-  static inline int close(int handle) { return _close(handle); }
-  static inline int write(int handle, const void *data, int count) { return _write(handle, data, count); }
-  static inline int read(int handle, void *data, int count) { return _read(handle, data, count); }
-}
 
 #define S_IRUSR                             _S_IREAD
 #define S_IWUSR                             _S_IWRITE
@@ -296,17 +231,19 @@ namespace pov_base
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_2 " mirroring the POV-Ray Unix console functionality."
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE_NAME " is developed and maintained by Trevor SANDY."
 /* Copyright string. */
-#define LPUB3D_TRACE_COPYRIGHT "Copyright 2018 Trevor SANDY"
+#define LPUB3D_TRACE_COPYRIGHT "Copyright 2017-2019 Trevor SANDY"
 
-#define POV_MALLOC(size,msg)                malloc (size)
-#define POV_REALLOC(ptr,size,msg)           realloc ((ptr), (size))
-#define POV_FREE(ptr)                       do { free (static_cast<void *>(ptr)); (ptr) = NULL; } while(false)
+#define POV_MALLOC(size,msg)                std::malloc (size)
+#define POV_REALLOC(ptr,size,msg)           std::realloc ((ptr), (size))
+#define POV_FREE(ptr)                       do { std::free (static_cast<void *>(ptr)); (ptr) = NULL; } while(false)
 #define POV_STRDUP(str)                     _strdup(str)
 
 #define NO_RTR                              1
+#define MEM_STATS                           0
 
 #else // not _CONSOLE
 
+#define MEM_STATS                           0
 #define POV_MEM_STATS                       0
 #define WIN_MEM_TRACKING                    0
 
@@ -334,6 +271,7 @@ namespace pov
 {
   class VideoCaptureImpl;
 }
+// end of namespace pov
 #endif // end of not _CONSOLE
 
 // see RLP comment in v3.6 windows config.h
@@ -345,11 +283,6 @@ namespace pov
 // this adds some useful debugging information to each LPub3D-Trace SDL object
 #if defined _DEBUG
   #define OBJECT_DEBUG_HELPER
-#endif
-
-// TODO REVIEW - Is this actually required for any Windows platform?
-#ifndef MAX_PATH
-  #define MAX_PATH _MAX_PATH
 #endif
 
 #ifndef NO_RTR

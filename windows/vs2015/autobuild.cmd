@@ -10,8 +10,8 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: October 27, 2018
-rem  Copyright (c) 2018 by Trevor SANDY
+rem  Last Update: March 08, 2019
+rem  Copyright (c) 2019 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
 rem but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -448,7 +448,8 @@ IF "%PATH_PREPENDED%" NEQ "True" (
     CALL "%LP3D_VCVARSALL%\vcvars64.bat" -vcvars_ver=14.0
   )
   rem Display MSVC Compiler settings
-  cl -Bv
+  echo _MSC_VER > %TEMP%\settings.c
+  cl -Bv -EP %TEMP%/settings.c > NUL
   ECHO.
 ) ELSE (
   ECHO.
@@ -785,38 +786,35 @@ ECHO ----------------------------------------------------------------
 ECHO Usage:
 ECHO.
 ECHO Help...
-ECHO autobuild [ -help ]
+ECHO autobuild.cmd [ -help ]
 ECHO.
 ECHO First position flags...
-ECHO autobuild [ x86 ^| x86_64 ^| -allcui ^| -run ^| -rbld ^| -verbose ^| -help]
+ECHO autobuild.cmd [ x86 ^| x86_64 ^| -allcui ^| -run ^| -rbld ^| -verbose ^| -help]
 ECHO.
 ECHO All flags, 1st, 2nd, 3rd and 4th...
-ECHO autobuild [ x86 ^| x86_64 ^| -allcui ^| -run ^| -rbld ^| -verbose ^| -help]
-ECHO           [ -rel ^| -dgb ^|-ins ^| -allins ^| -chk ^| -run ^| -rbld ^| -avx ^| sse2]
-ECHO           [-cui ^| -gui]
-ECHO           [ -verbose ]
+ECHO autobuild.cmd [ x86 ^| x86_64 ^| -allcui ^| -run ^| -rbld ^| -verbose ^| -help]
+ECHO               [ -rel ^| -dgb ^|-ins ^| -allins ^| -chk ^| -run ^| -rbld ^| -avx ^| sse2]
+ECHO               [ -cui ^| -gui ^| -chk ]
+ECHO               [ -minlog ^| -verbose ]
 ECHO.
 ECHO ----------------------------------------------------------------
 ECHO Build all CUI projects and deploy all artefacts as a 3rd party installation bundle
-ECHO autobuild -allcui -allins
+ECHO autobuild.cmd -allcui -allins
 ECHO.
 ECHO Build 64bit, Release and perform build check
-ECHO autobuild x86_64 -chk
+ECHO autobuild.cmd x86_64 -chk
 ECHO.
 ECHO Build 64bit, AVX-Release CUI project example:
-ECHO autobuild x86_64 -avx
+ECHO autobuild.cmd x86_64 -avx
 ECHO.
 ECHO Build 64bit, Release, CUI project with verbose output example:
-ECHO autobuild x86_64 -rel -cui -verbose
+ECHO autobuild.cmd x86_64 -rel -cui -verbose
 ECHO.
 ECHO Build 32bit, Release GUI project example:
-ECHO autobuild x86 -rel -gui
+ECHO autobuild.cmd x86 -rel -gui
 ECHO.
 ECHO Build 32bit, SSE2-Release GUI project example:
-ECHO autobuild x86 -sse2 -gui
-ECHO.
-ECHO Build 32bit, Release CUI project example:
-ECHO autobuild
+ECHO autobuild.cmd x86 -sse2 -gui
 ECHO.
 ECHO.
 ECHO Flags are not case sensitive, use lowere case.
@@ -839,7 +837,7 @@ EChO  -rel.......2.....Configuration flag [Default=On ] Specify a release build.
 EChO  -dgb.......2.....Configuration flag [Default=Off] Specify a debug build.
 ECHO  -avx.......2.....Configuraiton flag [Default=Off] AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
 ECHO  -sse2......2.....Configuration flag [Default=Off] SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
-ECHO  -chk.......2.....Project flag       [Default=On ] Build and run an image redering check.
+ECHO  -chk.......2,3...Project flag       [Default=On ] Build and run an image redering check.
 ECHO  -cui.......3.....Project flag       [Default=On ] Build Console User Interface (CUI) project (must be preceded by a configuration flag).
 ECHO  -gui.......3.....Project flag       [Default=Off] Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
 ECHO  -verbose...4,1...Project flag       [Default=Off] Display verbose output. Useful for debugging (must be preceded by -cui flag).

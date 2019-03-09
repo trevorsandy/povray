@@ -1,7 +1,7 @@
     ///
     /// LPub3D-Trace Windows Console User Interface (CUI) build
 	/// @author Trevor SANDY <trevor.sandy@gmail.com>
-	/// November 05, 2017
+	/// March 07, 2019
 	///
 	/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 	/// specially for LPub3D - An LDraw Building Instruction Editor.
@@ -22,7 +22,7 @@
 	/// ----------------------------------------------------------------------------
 	///
 	/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
-	/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+	/// Copyright 1991-2019 Persistence of Vision Raytracer Pty. Ltd which is,
 	/// in turn, based on the popular DKB raytracer version 2.12.
 	/// DKBTrace was originally written by David K. Buck.
 	/// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
@@ -173,8 +173,8 @@
 
 	/// Updated source files
     /////////////////////////////////////////////////////
-	0.  .gitignore.............../
-	1.  povray.cpp.............../source/backend
+    0.  .gitignore.............../
+    1.  povray.cpp.............../source/backend
 	2.  povray.conf............../distribution......(New)
 	3.  povray.ini.............../distribution/ini..(New)
 	Windows
@@ -186,40 +186,46 @@
 	9.  openexr_eLut.vcxproj...../windows/vs2015
 	10. openexr_toFloat.vcxproj../windows/vs2015
 	11. povray.sln.............../windows/vs2015
-	12. syspovconfig.h.........../windows/povconfig
-	13. vfeplatform.cpp........../vfe/win
-	14. vfeplatform.h............/vfe/win
-	15. disp.h.................../windows...........(New)
-	16. disp_sdl.cpp............./windows...........(New)
-	17. disp_sdl.h.............../windows...........(New)
-	18. disp_text.h............../windows...........(New)
-	19. disp_text.cpp............/windows...........(New)
-	20. winconsole.cpp.........../vfe/win/console
-	21. winoptions.cpp.........../vfe/win/console...(New)
-	22. winoptions.h............./vfe/win/console...(New)
-	23. CUI_README.txt.........../windows...........(New)
-	24. autobuild.cmd............/windows/vs2015....(New)
-	25. autobuild_defs.cmd......./windows/vs2015....(New)
-	26. SDL2.vcxproj............./windows/vs2015....(New)
-	27. SDL2_vcxproj.filters...../windows/vs2015....(New)
-	28. SDL2Main.vcxproj........./windows/vs2015....(New)
-	29. povbackend.vcxproj......./windows/vs2015
+	12. povbackend.vcxproj......./windows/vs2015	
+	13. autobuild.cmd............/windows/vs2015.........(New)
+	14. autobuild_defs.cmd......./windows/vs2015.........(New)
+	15. SDL2.vcxproj............./windows/vs2015.........(New)
+	16. SDL2_vcxproj.filters...../windows/vs2015.........(New)
+	17. SDL2Main.vcxproj........./windows/vs2015.........(New)	
+	18. console.ico............../windows/vs2015.........(New)
+	19. console_resource.rc....../windows/vs2015.........(New)
+	20. csi.ldr.pov............../windows/vs2015/tests/..(New)
+	21. test.cmd................./windows/vs2015/tests/..(New)
+	22. biscuit.pov............../windows/vs2015/tests/space in dir name test/..(New)
+	23. syspovconfig.h.........../windows/povconfig
+	24. vfeplatform.cpp........../vfe/win
+	25. vfeplatform.h............/vfe/win
+	26. disp.h.................../windows...........(New)
+	27. disp_sdl.cpp............./windows...........(New)
+	28. disp_sdl.h.............../windows...........(New)
+	29. disp_text.h............../windows...........(New)
+	30. disp_text.cpp............/windows...........(New)
+	31. winconsole.cpp.........../vfe/win/console
+	32. winoptions.cpp.........../vfe/win/console...(New)
+	33. winoptions.h............./vfe/win/console...(New)
+	34. CUI_README.txt.........../windows...........(New)
+	
 	Unix
-	30. travis.yml.............../
-	31. prebuild3rdparty.sh....../unix..............(New) replaces prebuild.sh
-	32. configure.ac............./unix
-	33. install................../unix
-	34. syspovconfig.h.........../unix
-	35. disp_sdl.cpp............./unix
-	36. disp_sdl.h.............../unix
-	37. acx_pthread.m4.........../unix/config
-	38. ax_check_lib.m4........../unix/config
-	39. ax_check_libjpeg.m4....../unix/config
-	40. ax_check_libtiff.m4....../unix/config
-	41. ax_check_libsdl2.m4....../unix/config.......(New) replaces ax_check_libsdl.m4
-	42. unixconsole.cpp........../vfe/unix
-	43. unixoptions.cpp........../vfe/unix
-	44. unixoptions.h............/vfe/unix
+	35. travis.yml.............../
+	36. prebuild3rdparty.sh....../unix..............(New) replaces prebuild.sh
+	37. configure.ac............./unix
+	38. install................../unix
+	39. syspovconfig.h.........../unix
+	40. disp_sdl.cpp............./unix
+	41. disp_sdl.h.............../unix
+	42. acx_pthread.m4.........../unix/config
+	43. ax_check_lib.m4........../unix/config
+	44. ax_check_libjpeg.m4....../unix/config
+	45. ax_check_libtiff.m4....../unix/config
+	46. ax_check_libsdl2.m4....../unix/config.......(New) replaces ax_check_libsdl.m4
+	47. unixconsole.cpp........../vfe/unix
+	48. unixoptions.cpp........../vfe/unix
+	49. unixoptions.h............/vfe/unix
 
 	Note: Although I used VS2017 to develop the Windows Console User Interface build
 	components described here. I do not believe there is any material difference

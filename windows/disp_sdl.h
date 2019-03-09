@@ -11,7 +11,7 @@
 /// @parblock
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
-/// Copyright 1991-2018 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2019 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -73,22 +73,22 @@ namespace pov_frontend
         static bool Register(vfeWinSession *session);
 
         WinConSDLDisplay(unsigned int w, unsigned int h, vfeSession *session, bool visible);
-        virtual ~WinConSDLDisplay();
-        void Initialise();
-        void Close();
-        void Show();
-        void Hide();
-        bool TakeOver(WinConDisplay *display);
-        void DrawPixel(unsigned int x, unsigned int y, const RGBA8& colour);
-        void DrawRectangleFrame(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour);
-        void DrawFilledRectangle(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour);
-        void DrawPixelBlock(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8 *colour);
-        void Clear();
-        bool HandleEvents();
-        void UpdateScreen(bool Force);
-        void PauseWhenDoneNotifyStart();
-        bool PauseWhenDoneResumeIsRequested();
-        void PauseWhenDoneNotifyEnd();
+        virtual ~WinConSDLDisplay() override;
+        virtual void Initialise() override;
+        virtual void Close() override;
+        virtual void Show() override;
+        virtual void Hide() override;
+        virtual bool TakeOver(WinConDisplay *display) override;
+        virtual void DrawPixel(unsigned int x, unsigned int y, const RGBA8& colour) override;
+        virtual void DrawRectangleFrame(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour) override;
+        virtual void DrawFilledRectangle(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8& colour) override;
+        virtual void DrawPixelBlock(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8 *colour) override;
+        virtual void Clear() override;
+        virtual bool HandleEvents() override;
+        virtual void UpdateScreen(bool Force = false) override;
+        virtual void PauseWhenDoneNotifyStart() override;
+        virtual bool PauseWhenDoneResumeIsRequested() override;
+        virtual void PauseWhenDoneNotifyEnd() override;
         protected:
             /// Number of Pixels before the display is updated
             static const unsigned int UpdateInterval = 100;
@@ -124,7 +124,7 @@ namespace pov_frontend
             SDL_Rect m_screen_rect;
             SDL_Rect m_update_rect;
             /// for mixing colors in scaled down display
-            vector<unsigned char> m_PxCount;
+			std::vector<unsigned char> m_PxCount;
     };
 }
 

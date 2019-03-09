@@ -12,7 +12,7 @@
 /// @parblock
 ///
 /// Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
-/// Copyright 1991-2018 Persistence of Vision Raytracer Pty. Ltd.
+/// Copyright 1991-2019 Persistence of Vision Raytracer Pty. Ltd.
 ///
 /// POV-Ray is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -48,18 +48,18 @@ namespace pov_frontend
 {
     using namespace vfe;
 
-    extern shared_ptr<Display> gDisplay;
+    extern std::shared_ptr<Display> gDisplay;
 
     class WinConDisplay : public vfeDisplay
     {
         public:
             WinConDisplay(unsigned int w, unsigned int h, vfeSession *session, bool visible) :
             vfeDisplay(w, h, session, visible) {};
-            virtual ~WinConDisplay() {} ;
-            virtual void Initialise() = 0;
-            virtual void Close() = 0;
-            virtual void Show() = 0;
-            virtual void Hide() = 0;
+            virtual ~WinConDisplay() override {} ;
+            virtual void Initialise() override = 0;
+            virtual void Close()override = 0;
+            virtual void Show() override = 0;
+            virtual void Hide() override = 0;
             virtual bool TakeOver(WinConDisplay *display) = 0;
 
             /**
