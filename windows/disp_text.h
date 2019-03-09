@@ -57,7 +57,7 @@ namespace pov_frontend
             WinConTextDisplay(unsigned int w, unsigned int h, vfeSession *session, bool visible) :
                 WinConDisplay(w, h, session, visible) {};
             virtual ~WinConTextDisplay() override {} ;
-            virtual void Initialise() override {};
+            virtual void Initialise() override;
             virtual void Close() override {};
             virtual void Show() override {};
             virtual void Hide() override {};

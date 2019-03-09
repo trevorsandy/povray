@@ -61,8 +61,14 @@ namespace pov_frontend
         return true;
     }
 
+	void WinConTextDisplay::Initialise()
+	{
+		vfeDisplay::Initialise();
+	}
+
     void WinConTextDisplay::DrawPixel(unsigned int x, unsigned int y, const RGBA8& colour)
     {
+        vfeDisplay::DrawPixel(x, y, colour);
         //fprintf(stderr, "DrawPixel(%d,%d)\n", x, y);
     }
 }
