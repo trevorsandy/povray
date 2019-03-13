@@ -750,6 +750,11 @@ check: all
 	\$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +O\$(top_srcdir)/biscuit.pov.cui.png +w320 +h240 +UA +A \\
 	+L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes
 	@if ! test "\$(CI)" = "true" && ! test "\$(OBS)" = "true"; then \\
+	  echo "Executing render shared map file output check..."; \\
+	  \$(top_builddir)/unix/\$(PACKAGE) +i\$(top_srcdir)/scenes/advanced/biscuit.pov +SM/tmp/build_check_povray_map.out \\
+	  +d -O- +w320 +h240 +UA +A +L\$(top_srcdir)/ini +L\$(top_srcdir)/include +L\$(top_srcdir)/scenes \\
+	  echo "" \\
+	  echo "" \\
 		echo "Executing the render display window check..."; \\
 		case "\$(pov_xwin_msg)" in \\
 			*enabled*) \\

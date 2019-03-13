@@ -29,11 +29,13 @@ IF "%APPVEYOR%" EQU "True" (
       ECHO  -%~nx0 terminated!
       GOTO :END
     )
+    SET MAP_FILE_CHECK=0
     rem If Appveyor, do not show the image display window
     SET DISP_WIN=-d
     rem deposit archive folder top build-folder
     SET DIST_DIR=%LP3D_DIST_DIR_PATH%
 ) ELSE (
+    SET MAP_FILE_CHECK=0
     SET DISP_WIN=+d
     SET DIST_DIR=..\..\..\lpub3d_windows_3rdparty
 )
@@ -60,8 +62,20 @@ rem SET BUILD_CHK_MY_INCLUDES=+L%USERPROFILE%\LDraw\lgeo\ar +L%USERPROFILE%\LDra
 
 rem Check 03
 rem ------------------------------------------
+REM SET BUILD_CHK_MY_POV_FILE=tests\space in dir name test\biscuit.pov
+REM SET BUILD_CHK_MY_OUTPUT=tests\space in dir name test\biscuit space in file name test
+REM SET BUILD_CHK_MY_PARMS=%DISP_WIN% -p +a0.3 +UA +A +w320 +h240
+REM SET BUILD_CHK_MY_INCLUDES=
+
+rem Check 04
+rem ------------------------------------------
+SET BUILD_CHECK_MAP_FILE=+SM"%USERPROFILE%\Temp\build_check_povray_map.out"
 SET BUILD_CHK_MY_POV_FILE=tests\space in dir name test\biscuit.pov
-SET BUILD_CHK_MY_OUTPUT=tests\space in dir name test\biscuit space in file name test
+IF MAP_FILE_CHECK EQU 1 (
+    SET BUILD_CHK_MY_OUTPUT=-O-
+) ELSE (
+    SET BUILD_CHK_MY_OUTPUT=tests\space in dir name test\biscuit space in file name test
+)
 SET BUILD_CHK_MY_PARMS=%DISP_WIN% -p +a0.3 +UA +A +w320 +h240
 SET BUILD_CHK_MY_INCLUDES=
 
@@ -69,7 +83,11 @@ rem Build check static settings - do not modify these.
 SET BUILD_CHK_OUTPUT=%BUILD_CHK_MY_OUTPUT%
 SET BUILD_CHK_POV_FILE=%BUILD_CHK_MY_POV_FILE%
 SET BUILD_CHK_PARAMS=%BUILD_CHK_MY_PARMS%
-SET BUILD_CHK_INCLUDE=+L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
+IF MAP_FILE_CHECK EQU 1 (
+    SET BUILD_CHK_INCLUDE=%BUILD_CHECK_MAP_FILE% +L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
+) ELSE (
+    SET BUILD_CHK_INCLUDE=+L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
+)
 SET BUILD_CHK_INCLUDE=%BUILD_CHK_INCLUDE% %BUILD_CHK_MY_INCLUDES%
 
 rem Visual Studio 'debug' comand line: +I"tests\space in dir name test\biscuit.pov" +O"tests\space in dir name test\biscuit space in file name test.png" +w320 +h240 +d -p +a0.3 +UA +A +L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"
@@ -462,8 +480,11 @@ ECHO   BUILD_DEFINES.....[%PovBuildDefs%]
 EXIT /b
 
 :BUILD_CHECK
-IF %1 == Win32 SET PL=32
 IF %1 == x64 SET PL=64
+IF %1 == Win32 SET PL=32
+REM IF "%APPVEYOR%" NEQ "True" (
+    REM IF %1 == x86 SET PL=32
+REM )
 ECHO.
 ECHO --Build check - %CONFIGURATION% Configuration, %PL%bit Platform...
 rem Version major and minor pulled in from autobuild_defs
@@ -476,7 +497,13 @@ SET CONFIG_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACK
 CALL :MAKE_BUILD_CHECK_CONF_AND_INI_FILES
 
 IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
-SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png" %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
+
+IF MAP_FILE_CHECK EQU 1 (
+    SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" %BUILD_CHK_OUTPUT% %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
+) ELSE (
+    SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png" %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
+)
+
 ECHO.
 ECHO   BUILD_CHECK_COMMAND.......[%PACKAGE%%PL%%d%.exe %BUILD_CHK_COMMAND%]
 
@@ -505,9 +532,9 @@ rem Version major and minor pulled in from autobuild_defs
 SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
 ECHO.
 IF %INSTALL_ALL% == 1 (
-	ECHO -Installing all distribution files...
+    ECHO -Installing all distribution files...
 ) ELSE (
-	ECHO -Installing configuration files...
+    ECHO -Installing configuration files...
 )
 IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Installing Documentaton to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs]...
@@ -542,9 +569,9 @@ IF %INSTALL_32BIT% == 1 (
         MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
     )
     COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
-	SET ARCH_LABEL=[32bit]
-	SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\i386
-	ECHO.
+    SET ARCH_LABEL=[32bit]
+    SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\i386
+    ECHO.
 )
 IF %INSTALL_32BIT% == 1 CALL :MAKE_CONF_AND_INI_FILES
 IF %INSTALL_64BIT% == 1 (
@@ -554,9 +581,9 @@ IF %INSTALL_64BIT% == 1 (
         MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
     )
     COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
-	SET ARCH_LABEL=[64bit]
-	SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\x86_64
-	ECHO.
+    SET ARCH_LABEL=[64bit]
+    SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\x86_64
+    ECHO.
 )
 IF %INSTALL_64BIT% == 1 CALL :MAKE_CONF_AND_INI_FILES
 EXIT /b
