@@ -1,10 +1,10 @@
 language: cpp
 cache: ccache
 sudo: false
-dist: trusty
+dist: xenial
 
 git:
-  depth: 200
+  depth: 2000
 
 branches:
   only:
@@ -19,7 +19,7 @@ addons:
     - libjpeg8-dev
     - libopenexr-dev
     - libpng12-dev
-    - libtiff4-dev
+    - libtiff5-dev
     - libsdl2-dev
     - zlib1g-dev
 
