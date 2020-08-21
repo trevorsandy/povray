@@ -1,10 +1,10 @@
 language: cpp
 cache: ccache
 sudo: false
-dist: trusty
+dist: xenial
 
 git:
-  depth: 200
+  depth: 2000
 
 branches:
   only:
