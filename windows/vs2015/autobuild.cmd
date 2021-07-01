@@ -10,7 +10,7 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: June 10, 2021
+rem  Last Update: July 02, 2021
 rem  Copyright (c) 2019 - 2021 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -19,34 +19,59 @@ rem MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 rem It is expected that this script will reside in .\windows\vs2015
 
-SET start=%time%
+CALL :ELAPSED_BUILD_TIME Start
 
 rem Static defaults
-IF "%APPVEYOR%" EQU "True" (
+IF "%CI%" EQU "True" (
     IF [%LP3D_DIST_DIR_PATH%] == [] (
       ECHO.
       ECHO  -ERROR: Distribution directory path not defined.
       ECHO  -%~nx0 terminated!
-      GOTO :END
+      GOTO :ERROR_END
+    )
+    IF "%GITHUB_RUNNER_IMAGE%" == "Visual Studio 2019" (
+      SET LP3D_VSVERSION=2019
+    )
+    IF "%APPVEYOR_BUILD_WORKER_IMAGE%" == "Visual Studio 2019" (
+      SET LP3D_VSVERSION=2019
     )
     SET MAP_FILE_CHECK=0
-    rem If Appveyor, do not show the image display window
+    rem if GitHub/Appveyor, do not show the image display window
     SET DISP_WIN=-d
-    rem deposit archive folder top build-folder
+    rem set distribution folder - accepts absolute path
     SET DIST_DIR=%LP3D_DIST_DIR_PATH%
 ) ELSE (
+    SET LP3D_VSVERSION=2019
     SET MAP_FILE_CHECK=0
     SET DISP_WIN=+d
-    SET DIST_DIR=..\..\..\lpub3d_windows_3rdparty
+    CALL :DIST_DIR_ABS_PATH ..\..\..\lpub3d_windows_3rdparty
 )
+
+IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build" (
+  SET LP3D_VCVARSALL=C:\Program Files ^(x86^)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build
+)
+IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build" (
+  SET LP3D_VCVARSALL=C:\Program Files ^(x86^)\Microsoft Visual Studio\2019\BuildTools\VC\Auxiliary\Build
+)
+IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build" (
+  SET LP3D_VCVARSALL=C:\Program Files ^(x86^)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build
+)
+IF "%LP3D_VCVARSALL%" == "" (
+  ECHO.
+  ECHO  -ERROR: Microsoft Visual Studio C++ environment not defined.
+  ECHO  -%~nx0 terminated!
+  GOTO :ERROR_END
+)
+
 rem Visual C++ 2012 -vcvars_ver=11.0
 rem Visual C++ 2013 -vcvars_ver=12.0
 rem Visual C++ 2015 -vcvars_ver=14.0
 rem Visual C++ 2017 -vcvars_ver=14.1
 rem Visual C++ 2019 -vcvars_ver=14.2
-SET LP3D_VCVARSALL=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build
-SET LP3D_VCVARSALL_VER=-vcvars_ver=14.2
-SET LP3D_VCTOOLSET=/p:PlatformToolset=v142 /p:WindowsTargetPlatformVersion=10.0.17763.0
+SET LP3D_VCVARSALL_VER=-vcvars_ver=14.0
+SET LP3D_VCVERSION=8.1
+SET LP3D_VCTOOLSET=v140
+
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
 SET VERSION_BASE=3.8
@@ -105,7 +130,7 @@ SET INSTALL_32BIT=unknown
 SET INSTALL_64BIT=unknown
 SET FLAG_CONFLICT=unknown
 SET CONFIGURATION=unknown
-SET PLATFORM=unknown
+SET PLATFORM_ARCH=unknown
 SET PROJECT=unknown
 SET CONSOLE=unknown
 SET VERBOSE=unknown
@@ -142,26 +167,26 @@ IF NOT [%1]==[] (
 )
 rem Parse platform input flag
 IF [%1]==[] (
-    SET PLATFORM=-allcui
+    SET PLATFORM_ARCH=-allcui
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="x86" (
-    SET PLATFORM=Win32
+    SET PLATFORM_ARCH=Win32
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="x86_64" (
-    SET PLATFORM=x64
+    SET PLATFORM_ARCH=x64
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-allcui" (
-    SET PLATFORM=-allcui
+    SET PLATFORM_ARCH=-allcui
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-run" (
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-rbld" (
-    SET PLATFORM=-allcui
+    SET PLATFORM_ARCH=-allcui
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-verbose" (
@@ -195,15 +220,15 @@ IF NOT [%2]==[] (
     )
 )
 rem  Set the default platform
-IF "%PLATFORM%"=="unknown" (
-    SET PLATFORM=%DEFAULT_PLATFORM%
+IF "%PLATFORM_ARCH%"=="unknown" (
+    SET PLATFORM_ARCH=%DEFAULT_PLATFORM%
 )
 rem Run a render check without building
 IF /I "%1"=="-run" SET RUN_CHK=true
 IF /I "%2"=="-run" SET RUN_CHK=true
 IF /I "%RUN_CHK%"=="true" (
     SET CONFIGURATION=run render only
-    CALL :BUILD_CHECK %PLATFORM%
+    CALL :BUILD_CHECK %PLATFORM_ARCH%
     rem Finish
     GOTO :END
 )
@@ -267,19 +292,19 @@ IF [%2]==[] (
     GOTO :BUILD
 )
 rem Check if %1=x86_64 and %2=AVX
-IF "%PLATFORM%"=="x64" (
+IF "%PLATFORM_ARCH%"=="x64" (
     IF /I "%2"=="-avx" GOTO :SET_AVX
 )
 rem Check if  %1=x86 and %2=SSE2
-IF "%PLATFORM%"=="Win32" (
+IF "%PLATFORM_ARCH%"=="Win32" (
     IF /I "%2"=="-sse2" GOTO :SET_SSE2
 )
 rem Check if bad platform and configuration flag combination -  %1=Win32 and %2=-avx
-IF "%PLATFORM%"=="Win32" (
+IF "%PLATFORM_ARCH%"=="Win32" (
     IF /I "%2"=="-avx" GOTO :AVX_ERROR
 )
 rem Check if bad platform and configuration flag combination -  %1=x64 and %2=-sse2
-IF "%PLATFORM%"=="x64" (
+IF "%PLATFORM_ARCH%"=="x64" (
     IF /I "%2"=="-sse2" GOTO :SSE2_ERROR
 )
 rem If we get here display invalid command message
@@ -343,7 +368,7 @@ IF /I "%3"=="-cui" (
         SET PROJECT=console.vcxproj
     )
 )
-IF "%FLAG_CONFLICT%" == "fatal" GOTO :END
+IF "%FLAG_CONFLICT%" == "fatal" GOTO :ERROR_END
 rem Run an image render check
 IF /I "%3"=="-chk" (
     SET CHECK=1
@@ -364,12 +389,38 @@ IF "%CONFIGURATION%"=="Debug" SET VERBOSE_CHK=true
 IF /I "%VERBOSE_CHK%"=="true" (
     rem Check if CUI or allCUI project build
     IF NOT %CONSOLE%==1 (
-        IF NOT "%PLATFORM%"=="-allcui" (
+        IF NOT "%PLATFORM_ARCH%"=="-allcui" (
             GOTO :VERBOSE_CUI_ERROR
         )
     )
     SET VERBOSE=1
 )
+
+rem Display the attributges and arguments to visually confirm all is well.
+ECHO.
+ECHO -Build Parameters:
+ECHO.
+IF "%GITHUB%" EQU "True" (
+    ECHO   BUILD_HOST..........[GITHUB CONTINUOUS INTEGRATION SERVICE]
+    ECHO   BUILD_WORKER_IMAGE..[%GITHUB_RUNNER_IMAGE%]
+    ECHO   BUILD_JOB...........[%GITHUB_JOB%]
+    ECHO   GITHUB_REF..........[%GITHUB_REF%]
+    ECHO   GITHUB_RUNNER_OS....[%RUNNER_OS%]
+    ECHO   PROJECT REPOSITORY..[%GITHUB_REPOSITORY%]
+)
+IF "%APPVEYOR%" EQU "True" (
+    ECHO   BUILD_HOST..........[APPVEYOR CONTINUOUS INTEGRATION SERVICE]
+    ECHO   BUILD_ID............[%APPVEYOR_BUILD_ID%]
+    ECHO   BUILD_BRANCH........[%APPVEYOR_REPO_BRANCH%]
+    ECHO   PROJECT_NAME........[%APPVEYOR_PROJECT_NAME%]
+    ECHO   REPOSITORY_NAME.....[%APPVEYOR_REPO_NAME%]
+    ECHO   REPO_PROVIDER.......[%APPVEYOR_REPO_PROVIDER%]
+)
+ECHO   PACKAGE.............[%PACKAGE%]
+ECHO   VERSION.............[%VERSION_BASE%]
+ECHO   WORKING_DIR.........[%CD%]
+ECHO   DIST_DIRECTORY......[%DIST_DIR%]
+
 rem Console output - see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference
 rem Set console output logging level - (normal:all output or minlog=only error output)
 SET LOGGING_FLAGS=
@@ -383,20 +434,6 @@ IF /I %MINIMUM_LOGGING% == 1 (
     SET LOGGING_FLAGS=/clp:ErrorsOnly /nologo
 )
 
-rem Display the attributges and arguments to visually confirm all is well.
-ECHO.
-ECHO -Build Parameters:
-ECHO.
-IF "%APPVEYOR%" EQU "True" (
-    ECHO   BUILD_HOST..........[APPVEYOR CONTINUOUS INTEGRATION SERVICE]
-    ECHO   BUILD_ID............[%APPVEYOR_BUILD_ID%]
-    ECHO   BUILD_BRANCH........[%APPVEYOR_REPO_BRANCH%]
-    ECHO   PROJECT_NAME........[%APPVEYOR_PROJECT_NAME%]
-    ECHO   REPOSITORY_NAME.....[%APPVEYOR_REPO_NAME%]
-    ECHO   REPO_PROVIDER.......[%APPVEYOR_REPO_PROVIDER%]
-    ECHO   DIST_DIRECTORY......[%DIST_DIR%]
-)
-
 rem Display build project message
 CALL :PROJECT_MESSAGE %CONSOLE%
 
@@ -407,88 +444,115 @@ rem Console output logging level message
 CALL :OUTPUT_LOGGING_MESSAGE %MINIMUM_LOGGING%
 
 rem Check if build all platforms
-IF /I "%PLATFORM%"=="-allcui" (
+IF /I "%PLATFORM_ARCH%"=="-allcui" (
     GOTO :BUILD_ALL_CUI
 )
 
-rem Configure buid arguments and set environment variables
-CALL :CONFIGURE_BUILD_ENV
-
-rem Assemble command line
-SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %LP3D_VCTOOLSET% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
-ECHO.
-ECHO   BUILD_COMMAND.....[%COMMAND_LINE%]
 rem Display the build configuration and platform settings
 ECHO.
-ECHO -%BUILD_LBL% %CONFIGURATION% Configuration for %PLATFORM% Platform...
-ECHO.
+ECHO -%BUILD_LBL% %PLATFORM_ARCH% Platform, %CONFIGURATION% Configuration...
+rem Check if build Win32 and vs2019, set to vs2017 for WinXP compat
+CALL :CONFIGURE_VCTOOLS %PLATFORM_ARCH%
+rem Configure buid arguments and set environment variables
+CALL :CONFIGURE_BUILD_ENV
+rem Assemble command line
+SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM_ARCH% /p:WindowsTargetPlatformVersion=%LP3D_VCVERSION% /p:PlatformToolset=%LP3D_VCTOOLSET% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
+ECHO   BUILD_COMMAND.....[%COMMAND_LINE%]
+IF NOT %MINIMUM_LOGGING%==1 ECHO.
 rem Launch msbuild
 %COMMAND_LINE%
-rem Perform build check if specified
-IF %CHECK% == 1 CALL :BUILD_CHECK %PLATFORM%
-rem Perform 3rd party install if specified
-IF %THIRD_INSTALL% == 1 (
-    CALL :3RD_PARTY_INSTALL %PLATFORM%
+rem Check build status
+IF %PLATFORM_ARCH%==Win32 (SET EXE=bin32\%PACKAGE%32%d%.exe)
+IF %PLATFORM_ARCH%==x64 (SET EXE=bin64\%PACKAGE%64%d%.exe)
+IF NOT EXIST "%EXE%" (
+   ECHO.
+   ECHO "-ERROR - %EXE% was not successfully built - %~nx0 will trminate."
+   GOTO :ERROR_END
 )
+rem Perform build check if specified
+IF %CHECK%==1 (CALL :BUILD_CHECK %PLATFORM_ARCH%)
+rem Perform 3rd party install if specified
+IF %THIRD_INSTALL%==1 (CALL :3RD_PARTY_INSTALL %PLATFORM_ARCH%)
 GOTO :END
 
 :BUILD_ALL_CUI
 rem Display the build configuration and platform settings
 ECHO.
-ECHO -%BUILD_LBL% x86 and x86_64 CUI Platforms for %CONFIGURATION% Configuration...
+ECHO -%BUILD_LBL% x86 and x86_64 CUI Platforms...
 rem Launch msbuild across all CUI platform builds
 FOR %%P IN ( Win32, x64 ) DO (
     ECHO.
-    ECHO --%BUILD_LBL% %%P Platform...
-    ECHO.
-    rem Initialize the Visual Studio command line development environment
-    SET PLATFORM=%%P
+    ECHO --%BUILD_LBL% %%P Platform, %CONFIGURATION% Configuration...
+    SET PLATFORM_ARCH=%%P
+    CALL :CONFIGURE_VCTOOLS %%P
     CALL :CONFIGURE_BUILD_ENV
-    rem Assemble command line parameters
-    SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %LP3D_VCTOOLSET% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
     SETLOCAL ENABLEDELAYEDEXPANSION
+    SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P /p:WindowsTargetPlatformVersion=!LP3D_VCVERSION! /p:PlatformToolset=!LP3D_VCTOOLSET! %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
     ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
-    IF NOT %MINIMUM_LOGGING% == 1 ECHO.
-    rem Launch msbuild
+    IF NOT %MINIMUM_LOGGING%==1 ECHO.
     !COMMAND_LINE!
-    rem Perform build check if specified
-    IF %%P == x64 (
-        SET EXE=bin64\%PACKAGE%64%d%.exe
-    ) ELSE (
-        SET EXE=bin32\%PACKAGE%32%d%.exe
-    )
+    IF %%P==Win32 (SET EXE=bin32\%PACKAGE%32%d%.exe)
+    IF %%P==x64 (SET EXE=bin64\%PACKAGE%64%d%.exe)
     IF NOT EXIST "!EXE!" (
        ECHO.
-       ECHO "-ERROR - !EXE! was not successfully built - autobuild will trminate."
-       GOTO :END
+       ECHO "-ERROR - !EXE! was not successfully built - %~nx0 will trminate."
+       GOTO :ERROR_END
     )
     ENDLOCAL
-    IF %CHECK% == 1 CALL :BUILD_CHECK %%P
+    IF %CHECK%==1 (CALL :BUILD_CHECK %%P)
 )
-rem Perform 3rd party install if specified
-IF %THIRD_INSTALL% == 1 (
-    CALL :3RD_PARTY_INSTALL %PLATFORM%
-)
+IF %THIRD_INSTALL%==1 (CALL :3RD_PARTY_INSTALL %PLATFORM_ARCH%)
 GOTO :END
+
+:CONFIGURE_VCTOOLS
+ECHO.
+ECHO -Set MSBuild platform toolset...
+IF %1==x64 (
+  SET LP3D_VCVERSION=10.0.17763.0
+  SET LP3D_VCTOOLSET=v142
+  SET LP3D_VCVARSALL_VER=-vcvars_ver=14.2  
+) ELSE (
+  SET LP3D_VCVERSION=8.1
+  SET LP3D_VCTOOLSET=v140
+  SET LP3D_VCVARSALL_VER=-vcvars_ver=14.0  
+)
+ECHO.
+ECHO   PLATFORM_ARCH..........[%1]
+ECHO   MSVS_VERSION...........[%LP3D_VSVERSION%]
+ECHO   MSVC_VERSION...........[%LP3D_VCVERSION%]
+ECHO   MSVC_TOOLSET...........[%LP3D_VCTOOLSET%]
+EXIT /b
 
 :CONFIGURE_BUILD_ENV
 ECHO.
-ECHO -Configure %PACKAGE% %PLATFORM% build environment...
+ECHO -Configure %PACKAGE% %PLATFORM_ARCH% build environment...
 rem Set vcvars for AppVeyor or local build environments
 IF "%PATH_PREPENDED%" NEQ "True" (
-  IF %PLATFORM% EQU Win32 (
+  IF %PLATFORM_ARCH% EQU Win32 (
     ECHO.
-    CALL "%LP3D_VCVARSALL%\vcvars32.bat" %LP3D_VCVARSALL_VER%
+    IF EXIST "%LP3D_VCVARSALL%\vcvars32.bat" (
+      CALL "%LP3D_VCVARSALL%\vcvars32.bat" %LP3D_VCVARSALL_VER%
+    ) ELSE (
+      ECHO -ERROR: vcvars32.bat not found.
+      ECHO -%~nx0 terminated!
+      GOTO :ERROR_END
+    )
   ) ELSE (
     ECHO.
-    CALL "%LP3D_VCVARSALL%\vcvars64.bat" %LP3D_VCVARSALL_VER%
+    IF EXIST "%LP3D_VCVARSALL%\vcvars64.bat" (
+      CALL "%LP3D_VCVARSALL%\vcvars64.bat" %LP3D_VCVARSALL_VER%
+    ) ELSE (
+      ECHO -ERROR: vcvars64.bat not found.
+      ECHO -%~nx0 terminated!
+      GOTO :ERROR_END
+    )
   )
   rem Display MSVC Compiler settings
   cl -Bv
   ECHO.
 ) ELSE (
   ECHO.
-  ECHO -%PLATFORM% build environment already configured...
+  ECHO -%PLATFORM_ARCH% build environment already configured...
 )
 rem Set the LPub3D-Trace auto-build pre-processor defines
 CALL autobuild_defs.cmd
@@ -512,6 +576,8 @@ SET POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty
 SET ARCH_LABEL=[%PL%bit]
 SET CONFIG_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
 
+CALL :MAKE_BUILD_CHECK_CONF_AND_INI_FILES
+
 IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
 
 IF MAP_FILE_CHECK EQU 1 (
@@ -532,7 +598,11 @@ FOR %%I IN ( conf, ini ) DO (
         COPY /V /Y "%CONFIG_DIR%\povray.CHK_BAK.%%I" "%CONFIG_DIR%\povray.%%I"
         DEL /Q "%CONFIG_DIR%\povray.CHK_BAK.%%I"
     ) ELSE (
-        DEL /Q "%CONFIG_DIR%\povray.%%I"
+        IF EXIST "%CONFIG_DIR%\povray.%%I" (
+            DEL /Q "%CONFIG_DIR%\povray.%%I"
+        ) ELSE (
+            ECHO -WARNING - %CONFIG_DIR%\povray.%%I was not found.
+        )
     )
 )
 EXIT /b
@@ -697,6 +767,11 @@ SET genConfigFile="%CONFIG_DIR%\povray.ini" ECHO
 >>%genConfigFile% Output_File_Type=N8             ; (+/-Ftype)
 EXIT /b
 
+:DIST_DIR_ABS_PATH
+IF [%1] EQU [] (EXIT /B) ELSE SET DIST_DIR=%~f1
+IF %DIST_DIR:~-1%==\ SET DIST_DIR=%DIST_DIR:~0,-1%
+EXIT /B
+
 :PROJECT_MESSAGE
 SET OPTION=%BUILD_LBL% Graphic User Interface ^(GUI^) solution...
 IF %1==1 SET OPTION=%BUILD_LBL% Console User Interface (CUI) project - Default...
@@ -737,7 +812,7 @@ ECHO -01. (FLAG ERROR) Platform or usage flag is invalid [%~nx0 %*].
 ECHO      Use x86 or x86_64 for platforms, -allcui for all CUIs, -run to execute
 ECHO      without building, -rbld to rebuild or -verbose for 'Win Debug' messages.
 ECHO      For usage help use -help.
-GOTO :END
+GOTO :ERROR_END
 
 :CONFIGURATION_ERROR
 ECHO.
@@ -749,23 +824,23 @@ ECHO      -rel for release build, -dbg for debug build, -ins to
 ECHO      install config files, -allins to install all documentation
 ECHO      -chk for Build Check, -run to without building or -rbld to rebuild
 ECHO
-GOTO :END
+GOTO :ERROR_END
 
 :AVX_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -03. (FLAG ERROR) AVX is not compatable with %PLATFORM% platform [%~nx0 %*].
+ECHO -03. (FLAG ERROR) AVX is not compatable with %PLATFORM_ARCH% platform [%~nx0 %*].
 ECHO      Use -avx only with x86_64 flag.
-GOTO :END
+GOTO :ERROR_END
 
 :SSE2_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -04. (FLAG ERROR) SSE2 is not compatable with %PLATFORM% platform [%~nx0 %*].
+ECHO -04. (FLAG ERROR) SSE2 is not compatable with %PLATFORM_ARCH% platform [%~nx0 %*].
 ECHO      Use -sse2 only with x86 flag.
-GOTO :END
+GOTO :ERROR_END
 
 :PROJECT_ERROR
 ECHO.
@@ -774,7 +849,7 @@ ECHO.
 ECHO -05. (FLAG ERROR) Project flag is invalid [%~nx0 %*].
 ECHO      Use -cui for Console UI, -gui for Graphic UI,
 ECHO      -chk for Build Check or -minlog to display build errors only.
-GOTO :END
+GOTO :ERROR_END
 
 :VERBOSE_ERROR
 ECHO.
@@ -782,7 +857,7 @@ CALL :USAGE
 ECHO.
 ECHO -06. (FLAG ERROR) Verbose (Win Debug) or minum console output flag invalid [%~nx0 %*].
 ECHO      Use -verbose for 'Win Debug' messages or -minlog to display build errors only.
-GOTO :END
+GOTO :ERROR_END
 
 :VERBOSE_CUI_ERROR
 ECHO.
@@ -790,7 +865,7 @@ CALL :USAGE
 ECHO.
 ECHO -07. (FLAG ERROR) Verbose (Win Debug) output flag can only be used with the CUI project [%~nx0 %*].
 ECHO      Use -verbose only with -cui or -allcui flags.
-GOTO :END
+GOTO :ERROR_END
 
 :FLAG_CONFLICT_ERROR
 ECHO.
@@ -798,7 +873,7 @@ CALL :USAGE
 ECHO.
 ECHO -08. (FLAG CONFLICT ERROR) Incompatable flag in the command arguments [%~nx0 %*].
 ECHO      See Usage.
-GOTO :END
+GOTO :ERROR_END
 
 :COMMAND_ERROR
 ECHO.
@@ -806,7 +881,7 @@ CALL :USAGE
 ECHO.
 ECHO -09. (COMMAND ERROR) Invalid command string [%~nx0 %*].
 ECHO      See Usage.
-GOTO :END
+GOTO :ERROR_END
 
 :USAGE
 ECHO ----------------------------------------------------------------
@@ -903,9 +978,17 @@ ECHO.
 ECHO -DEBUG - EXECUTION BYPASS
 EXIT /b
 
-:END
+:ELAPSED_BUILD_TIME
+IF [%1] EQU [] (SET start=%build_start%) ELSE (
+  IF "%1"=="Start" (
+    SET build_start=%time%
+    EXIT /b
+  ) ELSE (
+    SET start=%1
+  )
+)
 ECHO.
-ECHO -%~nx0 [%PACKAGE% v%VERSION_BASE%] finished.
+ECHO -%~nx0 finished.
 SET end=%time%
 SET options="tokens=1-4 delims=:.,"
 FOR /f %options% %%a IN ("%start%") DO SET start_h=%%a&SET /a start_m=100%%b %% 100&SET /a start_s=100%%c %% 100&SET /a start_ms=100%%d %% 100
@@ -922,4 +1005,12 @@ IF %hours% lss 0 SET /a hours = 24%hours%
 IF 1%ms% lss 100 SET ms=0%ms%
 ECHO -Elapsed build time %hours%:%mins%:%secs%.%ms%
 ENDLOCAL
+EXIT /b
+
+:ERROR_END
+CALL :ELAPSED_BUILD_TIME
+EXIT /b 3
+
+:END
+CALL :ELAPSED_BUILD_TIME
 EXIT /b

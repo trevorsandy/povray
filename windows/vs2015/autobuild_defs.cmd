@@ -7,7 +7,7 @@ rem needed to build the solution/project.
 rem This script is intended to be called from autobuild.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: June 10, 2021
+rem  Last Update: July 01, 2021
 rem  Copyright (c) 2019 - 2021 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -68,16 +68,16 @@ rem If verbose variable is not empty append tracing define to project build defi
 IF %VERBOSE%==1 SET PovBuildDefs=%PovBuildDefs%WIN_DEBUG=1;
 
 rem Display the define attributes to visually confirm all is well.
+ECHO   MSVS_DEV_VERSION....[%DEV_ENV%]
+ECHO   RELEASE.............[%RELEASE%]
 ECHO   VERSION_MAJ.........[%VERSION_MAJ%]
 ECHO   VERSION_MIN.........[%VERSION_MIN%]
 ECHO   VERSION_REV.........[%VERSION_REV%]
 ECHO   VERSION_PATCH.......[%VERSION_PATCH%]
-ECHO   RELEASE.............[%RELEASE%]
-ECHO   VS_DEV_VERSION......[%DEV_ENV%]
 ECHO   VERSION_BASE........[%VERSION_BASE%]
 ECHO   BUILD_ID.(GIT_SHA)..[%BUILD_ID%]
 ECHO   BUILT_BY............[%BUILT_BY%]
-GOTO :END
+GOTO :EOF
 
 :CLEAN
 rem A little routine to remove quotes and trailing space
@@ -87,5 +87,3 @@ SET INPUT=%INPUT:"=%
 FOR /F "tokens=1*" %%a IN ("!INPUT!") DO ENDLOCAL & SET %1=%%b
 EXIT /b
 
-:END
-rem Done
