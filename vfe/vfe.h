@@ -9,15 +9,16 @@
 /// @copyright
 /// @parblock
 ///
-/// Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
-/// Copyright 1991-2018 Persistence of Vision Raytracer Pty. Ltd.
+/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
+/// specially for LPub3D - An LDraw Building Instruction Editor.
+/// Copyright 2017-2019 by Trevor SANDY.
 ///
-/// POV-Ray is free software: you can redistribute it and/or modify
+/// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
 /// published by the Free Software Foundation, either version 3 of the
 /// License, or (at your option) any later version.
 ///
-/// POV-Ray is distributed in the hope that it will be useful,
+/// LPub3D-Trace is distributed in the hope that it will be useful,
 /// but WITHOUT ANY WARRANTY; without even the implied warranty of
 /// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 /// GNU Affero General Public License for more details.
@@ -27,7 +28,9 @@
 ///
 /// ----------------------------------------------------------------------------
 ///
-/// POV-Ray is based on the popular DKB raytracer version 2.12.
+/// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
+/// Copyright 1991-2019 Persistence of Vision Raytracer Pty. Ltd which is,
+/// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
 ///
@@ -43,6 +46,9 @@
 #include <boost/format.hpp>
 #include <boost/bind.hpp>
 #include <boost/function.hpp>
+
+#include <boost/interprocess/file_mapping.hpp>
+#include <boost/interprocess/mapped_region.hpp>
 
 #include "povms/povmscpp.h"
 #include "povms/povmsid.h"
@@ -211,8 +217,10 @@ namespace vfe
 
     protected:
       vfeSession *m_Session;
-      vector<RGBA8> m_Pixels;
+      void *m_Buffer;
       bool m_VisibleOnCreation;
+      boost::interprocess::file_mapping  *m_FileMapping;
+      boost::interprocess::mapped_region *m_MappedRegion;
   };
 
   class VirtualFrontEnd

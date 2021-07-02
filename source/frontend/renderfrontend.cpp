@@ -1158,6 +1158,14 @@ void OutputOptions(POVMS_Object& cppmsg, TextStreamBuffer *tsb)
         else
             tsb->printf("  Output file..........%s, %d bpp%s %s\n", UCS2toASCIIString(ucs2buf).c_str(), outputQuality, al, t);
 
+		if (cppmsg.Exist(kPOVAttrib_SharedMemory))
+		{
+			l = 1023;
+			ucs2buf[0] = 0;
+			(void)POVMSUtil_GetUCS2String(msg, kPOVAttrib_SharedMemory, ucs2buf, &l);
+			tsb->printf("  Shared map file......%s\n", UCS2toASCIIString(ucs2buf).c_str());
+		}
+
         if ((outputFormat != kPOVList_FileType_JPEG) && (outputFormat != kPOVList_FileType_OpenEXR))
         {
             b = false;

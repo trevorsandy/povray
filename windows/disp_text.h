@@ -56,18 +56,18 @@ namespace pov_frontend
 
             WinConTextDisplay(unsigned int w, unsigned int h, vfeSession *session, bool visible) :
                 WinConDisplay(w, h, session, visible) {};
-            virtual ~WinConTextDisplay() {} ;
-            void Initialise() {};
-            void Close() {};
-            void Show() {};
-            void Hide() {};
-            bool TakeOver(WinConDisplay *display) { return false; };
-            void DrawPixel(unsigned int x, unsigned int y, const RGBA8& colour);
-            bool HandleEvents() { return false; };
-            void UpdateScreen(bool Force = false) {};
-            void PauseWhenDoneNotifyStart() {};
-            bool PauseWhenDoneResumeIsRequested() { return true; };
-            void PauseWhenDoneNotifyEnd() {};
+            virtual ~WinConTextDisplay() override {} ;
+            virtual void Initialise() override;
+            virtual void Close() override {};
+            virtual void Show() override {};
+            virtual void Hide() override {};
+            virtual bool TakeOver(WinConDisplay *display) override { return false; };
+            virtual void DrawPixel(unsigned int x, unsigned int y, const RGBA8& colour) override;
+            virtual bool HandleEvents() override { return false; };
+            virtual void UpdateScreen(bool Force = false) override {};
+            virtual void PauseWhenDoneNotifyStart() override {};
+            virtual bool PauseWhenDoneResumeIsRequested() override { return true; };
+            virtual void PauseWhenDoneNotifyEnd() override {};
     };
 }
 

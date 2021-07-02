@@ -509,8 +509,9 @@ extern "C" int main(int argc, char **argv)
   vfeRenderOptions  opts;
   ReturnValue       retval = RETURN_OK;
   bool              running_benchmark = false;
-  string            bench_ini_name;
-  string            bench_pov_name;
+  bool              mapped_file_mode = false;
+  std::string       bench_ini_name;
+  std::string       bench_pov_name;
   char **           argv_copy=argv; /* because argv is updated later */
   int               argc_copy=argc; /* because it might also be updated */
 
@@ -535,68 +536,81 @@ extern "C" int main(int argc, char **argv)
    return RETURN_ERROR;
   }
 
-  // create display session
-  session = new vfeWinSession();
-  if (session->Initialize(nullptr, nullptr) != vfeNoError)
-    ErrorExit(session);
-
-  // display mode registration
-#ifdef HAVE_LIBSDL
-  if (WinConSDLDisplay::Register(session))
-  {
-      gDisplayMode = DISP_MODE_SDL;
-#ifdef WIN_DEBUG
-      PrintMessage("--INFO", "Display Mode: SDL.\n");
-#endif
-  }
-  else
-#endif
-  if (WinConTextDisplay::Register(session))
-  {
-      gDisplayMode = DISP_MODE_TEXT;
-#ifdef WIN_DEBUG
-      PrintMessage("--INFO", "Display Mode: Text.\n");
-#endif
-  }
-  else
-  {
-      gDisplayMode = DISP_MODE_NONE;
-#ifdef WIN_DEBUG
-      PrintMessage("--INFO", "Display Mode: None.\n");
-#endif
-  }
-
-  // Check for spaces in command line arguments
   if (argc > 1)
   {
 #ifdef WIN_DEBUG
-    std::cerr << "ORIGINAL COMMAND LINE (" << argc << ")" << std::endl;
-    for (int i = 0; i<argc; i++) std::cerr << "- " << i+1 << ". " << argv[i] << std::endl;
+	std::cerr << "ORIGINAL COMMAND LINE (" << argc << ")" << std::endl;
 #endif
     std::string commandline;
     std::vector<std::string> commandargs;
     for (int i = 0; i < argc; i++)
     {
+#ifdef WIN_DEBUG // ORIGINAL COMMAND LINE
+	   std::cerr << "- " << i + 1 << ". " << argv[i] << std::endl;
+#endif
       if (i == 0)
-      commandargs.push_back(std::string(argv[i]));
+		  commandargs.push_back(std::string(argv[i]));
       else
-      commandline.append(std::string(argv[i]).append(" "));
+		  commandline.append(std::string(argv[i]).append(" "));
+
+	  // set mapped file mode
+	  std::size_t found = std::string(argv[i]).find("+SM");
+	  if(found != std::string::npos)
+		  mapped_file_mode = true;
     }
+
+	// Check for spaces in command line arguments
     FormatQuotedArguments(commandargs, commandline);
 
+#ifdef WIN_DEBUG
+	std::cerr << "FORMATTED COMMAND LINE (" << argc << ")" << std::endl;
+#endif
     int n_argc = commandargs.size();
     char **n_argv = (char **)malloc((n_argc + 1) * sizeof(char *));
-    for (int i = 0; i<n_argc; i++)
+    for (int i = 0; i < n_argc; i++)
     {
       n_argv[i] = (char *)malloc(strlen(commandargs[i].c_str()) + 1);
       std::strcpy(n_argv[i], commandargs[i].c_str());
+#ifdef WIN_DEBUG // FORMATTED COMMAND LINE
+	  for (int i = 0; i < argc; i++) std::cerr << "- " << i + 1 << ". " << argv[i] << std::endl;
+#endif
     }
     n_argv[n_argc] = nullptr;
     argc = n_argc;
     argv = n_argv;
+  }
+
+  // create display session
+  session = new vfeWinSession();
+  if (session->Initialize(nullptr, nullptr) != vfeNoError)
+	  ErrorExit(session);
+
+  // display mode registration
+#ifdef HAVE_LIBSDL
+  if (!mapped_file_mode) 
+  {
+	if (WinConSDLDisplay::Register(session))
+	{
+		gDisplayMode = DISP_MODE_SDL;
 #ifdef WIN_DEBUG
-    std::cerr << "FORMATTED COMMAND LINE (" << argc << ")" << std::endl;
-    for (int i = 0; i<argc; i++) std::cerr << "- " << i + 1 << ". " << argv[i] << std::endl;
+		PrintMessage("--INFO", "Display Mode: SDL.\n");
+#endif
+	}
+  }
+  else
+#endif
+  if (WinConTextDisplay::Register(session))
+  {
+     gDisplayMode = DISP_MODE_TEXT;
+#ifdef WIN_DEBUG
+	 PrintMessage("--INFO", "Display Mode: Text.\n");
+#endif
+  }
+  else
+  {
+     gDisplayMode = DISP_MODE_NONE;
+#ifdef WIN_DEBUG
+	 PrintMessage("--INFO", "Display Mode: None.\n");
 #endif
   }
 

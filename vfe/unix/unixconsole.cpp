@@ -416,8 +416,9 @@ int main (int argc, char **argv)
     vfeRenderOptions  opts;
     ReturnValue       retval = RETURN_OK;
     bool              running_benchmark = false;
-    string            bench_ini_name;
-    string            bench_pov_name;
+	bool              mapped_file_mode = false;
+    std::string       bench_ini_name;
+    std::string       bench_pov_name;
     sigset_t          sigset;
     boost::thread    *sigthread;
     char **           argv_copy=argv; /* because argv is updated later */
@@ -429,7 +430,7 @@ int main (int argc, char **argv)
               PACKAGE " Ray Tracer Version " POV_RAY_VERSION_INFO ".\n\n"
               DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 "\n"
               DISTRIBUTION_MESSAGE_LPUB3D_TRACE_2 "\n"
-              DISTRIBUTION_MESSAGE_2 ".\n"
+              DISTRIBUTION_MESSAGE_2 "\n"
               DISTRIBUTION_MESSAGE_3 "\n"
               DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 "\n\n"
               LPUB3D_TRACE_COPYRIGHT "\n"
@@ -460,14 +461,26 @@ int main (int argc, char **argv)
     // create the signal handling thread
     sigthread = new boost::thread(SignalHandler);
 
+    // create display session
     session = new vfeUnixSession();
     if (session->Initialize(nullptr, nullptr) != vfeNoError)
         ErrorExit(session);
 
+	// set mapped file mode
+	for (int i = 0; i < argc; i++)
+    {
+	  std::size_t found = std::string(argv[i]).find("+SM");
+	  if(found != std::string::npos) {
+		  mapped_file_mode = true;
+		  break;
+	  }
+	}
+	
     // display mode registration
 #ifdef HAVE_LIBSDL
-    if (UnixSDLDisplay::Register(session))
-        gDisplayMode = DISP_MODE_SDL;
+    if (! mapped_file_mode)
+        if (UnixSDLDisplay::Register(session))
+            gDisplayMode = DISP_MODE_SDL;
     else
 #endif
     if (UnixTextDisplay::Register(session))
