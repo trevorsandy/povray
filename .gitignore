@@ -166,6 +166,11 @@ $RECYCLE.BIN/
 # POV-Ray Windows build artefacts
 # ===============================
 
+/libraries/ilmbase/Half/eLut.h
+/libraries/ilmbase/Half/toFloat.h
+/libraries/png/pnglibconf.h
+/libraries/tiff/libtiff/tif_config.h
+/libraries/tiff/libtiff/tiffconf.h
 /windows/vs*/.vs/
 /windows/vs*/bin32/
 /windows/vs*/bin64/
@@ -243,8 +248,9 @@ $RECYCLE.BIN/
 /biscuit.pov.cui.png
 # Files created by make in specific subdirectories
 /unix/povray
-# Files created by make in various subdirectories
 .dirstamp
+# Files created by make check
+/povray.ini
 
 # =========================================
 # POV-Ray Cross-compile generated artefacts
@@ -292,3 +298,10 @@ $RECYCLE.BIN/
 /unix/build.sh
 /unix/restore.sh
 
+
+# ========================
+# GitHub Actions artefacts
+# ========================
+
+# Used specifically by our own workflows
+/artifact*
