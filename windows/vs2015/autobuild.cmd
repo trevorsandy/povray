@@ -46,6 +46,7 @@ rem Visual C++ 2017 -vcvars_ver=14.1
 rem Visual C++ 2019 -vcvars_ver=14.2
 SET LP3D_VCVARSALL=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build
 SET LP3D_VCVARSALL_VER=-vcvars_ver=14.2
+SET LP3D_VCTOOLSET=/p:PlatformToolset=v142 /p:WindowsTargetPlatformVersion=10.0.17763.0
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
 SET VERSION_BASE=3.8
@@ -414,7 +415,7 @@ rem Configure buid arguments and set environment variables
 CALL :CONFIGURE_BUILD_ENV
 
 rem Assemble command line
-SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
+SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM% %LP3D_VCTOOLSET% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
 ECHO.
 ECHO   BUILD_COMMAND.....[%COMMAND_LINE%]
 rem Display the build configuration and platform settings
@@ -444,13 +445,23 @@ FOR %%P IN ( Win32, x64 ) DO (
     SET PLATFORM=%%P
     CALL :CONFIGURE_BUILD_ENV
     rem Assemble command line parameters
-    SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
+    SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P %LP3D_VCTOOLSET% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
     SETLOCAL ENABLEDELAYEDEXPANSION
     ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
     IF NOT %MINIMUM_LOGGING% == 1 ECHO.
     rem Launch msbuild
     !COMMAND_LINE!
     rem Perform build check if specified
+    IF %%P == x64 (
+        SET EXE=bin64\%PACKAGE%64%d%.exe
+    ) ELSE (
+        SET EXE=bin32\%PACKAGE%32%d%.exe
+    )
+    IF NOT EXIST "!EXE!" (
+       ECHO.
+       ECHO "-ERROR - !EXE! was not successfully built - autobuild will trminate."
+       GOTO :END
+    )
     ENDLOCAL
     IF %CHECK% == 1 CALL :BUILD_CHECK %%P
 )
@@ -500,8 +511,6 @@ rem Suppress Missing System Povray.conf file as we are only using the user insta
 SET POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty
 SET ARCH_LABEL=[%PL%bit]
 SET CONFIG_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
-
-CALL :MAKE_BUILD_CHECK_CONF_AND_INI_FILES
 
 IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
 

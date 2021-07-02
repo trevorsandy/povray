@@ -1,55 +1,104 @@
-env:
-  global:
-   # Required for clang.
-   - CXXFLAGS="-fno-fast-math"
+language: cpp
+cache: ccache
+sudo: false
+dist: xenial
+
+git:
+  depth: 2000
 
 branches:
-  except:
-  # We're not using tags to trigger deployment, so there's no need to re-build tagged commits.
-  # All our tags start with a version number, including a leading `v`.
-  - /^v[0-9]/
-  # Branches starting with "housekeeping" are intended for small changes that do not affect
-  # the software per se (e.g. fixing typos in documentation or comments); no activity desired.
-  - /^housekeeping/
-  # Branches ending with "-stable" are used only to point to other branches,
-  # which should already have been test-built at this point; no activity needed.
-  - /-stable$/
-
-language: cpp
-
-matrix:
-  include:
-  - os: linux
-    compiler: gcc
-  - os: osx
-    compiler: clang
-
-sudo: false
-dist: trusty
+  only:
+  - lpub3d/raytracer-cui
 
 addons:
   apt:
     packages:
     - libboost-dev
     - libboost-date-time-dev
+    - libboost-thread-dev
     - libjpeg8-dev
     - libopenexr-dev
     - libpng12-dev
-    - libtiff4-dev
+    - libtiff5-dev
+    - libsdl2-dev
     - zlib1g-dev
 
+matrix:
+  fast_finish: true
+  include:
+  - os: linux
+    compiler: gcc
+  - os: osx
+    compiler: clang
+
+before_install:
+  # Skip build if the commit message contains [skip travis] or [travis skip]
+  - >
+      echo "$TRAVIS_COMMIT_MESSAGE"
+      | grep -E  '\[(skip travis|travis skip)\]'
+      && echo "[skip travis] detected, exiting."
+      && exit 0 || true
+  # Build package if commit message contains [build pkg]
+  - >
+      echo "$TRAVIS_COMMIT_MESSAGE"
+      | grep -E  '\[build pkg\]'
+      && echo "[build pkg] detected."
+      && export POV_IGNORE_SYSCONF_MSG=AnyValueOtherThanEmpty
+      && export POV_BUILD_PKG=yes || true
+  # Build and deploy package if commit message contains [deploy pkg]
+  - >
+      echo "$TRAVIS_COMMIT_MESSAGE"
+      | grep -E  '\[deploy pkg\]'
+      && echo "[deploy pkg] detected."
+      && export POV_BUILD_PKG=yes
+      && export POV_DEPLOY_PKG=yes || true
+  # Update repository index and download package dependencies/docker-engine if required
+  - >
+      if [ "$TRAVIS_OS_NAME" = "linux" ]; then
+        sudo apt-get update -qq;
+        export POV_DIST_DIR=lpub3d_linux_3rdparty;
+      else
+        brew update;
+        brew install ccache openexr sdl2;
+        export PATH="/usr/local/opt/ccache/libexec:$PATH";
+        export CXXFLAGS="-fno-fast-math";
+        export POV_DIST_DIR=lpub3d_macos_3rdparty;
+      fi
+
 install:
-- unix/prebuild.sh
-- ./configure COMPILED_BY="Travis CI" --prefix="$(pwd)/build"
-- make check
-- make install
+  - chmod +x unix/prebuild3rdparty.sh && ./unix/prebuild3rdparty.sh
+  - ./configure COMPILED_BY="Trevor SANDY <trevor.sandy@gmail.com> using Travis CI for LPub3D." --prefix="$(pwd)/${POV_DIST_DIR}" LPUB3D_3RD_PARTY="yes" --with-libsdl2 --enable-watch-cursor
+  - make check
+  - make install
 
 script:
-- true
+  - true
+
+before_deploy:
+  # create a tarball of the lpub3d_linux_3rdparty folder
+  - >
+      if [ "$POV_BUILD_PKG" = "yes" ]; then
+        if [ -d ${POV_DIST_DIR} ]; then
+          tar -czf ${POV_DIST_DIR}.tar.gz ${POV_DIST_DIR} && echo "Tarball ${POV_DIST_DIR}.tar.gz created.";
+        fi;
+      fi
+
+deploy:
+  provider: releases
+  api_key:
+    secure: fm2MVQ6fTKeTBADPZHjRGyBUebh8CWbTzXFpibvNR31sJ2IGx+7ppNQChN/7d3ybLZyXCIpjxjkcBBwXOmFOIZ5BjQ5EuDf/aJRaS3Z2AwIt80agxtHTq4MSNmRscn2Hv/q6LoXJro2ZHPfHGzP7yeCELR78gfb9HE64IDd7+ORZY48sMlZ77y48/BdEnN9hmRVmxZw8OQItLjbJR4cHFoRGEET6GR2QtrfBnJVQfRmO4aXwYs6j5l4ncdSKrMVUfPK2o9ab9egEclGXxoQR5wNPHzCUZtlJFpfdyHFOaeYDx4s+CjmQH4hUQB0+4z8v/mdwoYR+2ntgaH8/3jGM0aW6x271XGdUDW0Ri/6m9hQ0bA3JdiHgDAsV1ayXT4dz2BMXEI8Dv6MIyVXw187zTCcDzZhHRbUcRqlp43P+tIjodLOYVT/hiSSVrKczqLUr15q8YLiyyK3/91OgYl5XA2Alm1KHhMn16wplpcbzu/vyOJ/GXRKOnCd2G7CeBGqWh5/Jg1Xp9EjuupMQWNvYKPLzXaPMVagE5zfENjbNamctlPcL0nDEvynliFcz3VhhVEx86DnQPqriTG8PtuI7wE6OvqFQ4zpTufDOfLKx73gXWB3h15fQUh3/qFH7EYz5kCghIkcudoRH5k6Vn/kaTuZ4XBmDYj8aw6cxTFFIbG0=
+  file: ${POV_DIST_DIR}.tar.gz
+  overwrite: true
+  name: ${POV_DIST_DIR}
+  body: 'LPub3D-Trace-CUI - `uname` archive package of LPub3D image renderer based on POV-Ray'
+  prerelease: true
+  skip_cleanup: true
+  on:
+    repo: trevorsandy/povray
+    branch: lpub3d/raytracer-cui
+    condition: $POV_DEPLOY_PKG = yes
 
 notifications:
   email:
-    recipients:
-    - ${NOTIFICATION_EMAIL}
-    on_success: change
+    on_success: never
     on_failure: always
