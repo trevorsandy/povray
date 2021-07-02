@@ -55,25 +55,37 @@
 	- Travis CI CUI build check
 	- Additional little features...
 
-	/// Building the Console User Interface (VS2017 GUI)
+	/// Building the Console User Interface (VS2019 GUI)
 	//////////////////////////////////////////////////////
 	See README.md for comprehensive details on building POV-Ray.
 
 	1. Open `windows\vs2015\povray.sln` in Visual Studio
 
-	2. Set 'Windows Targets > CUI' as the start-up project
+	2. Set 'Windows Targets' > 'CUI(Visual Studio 2015)' as the start-up project
 
-	3. Select the 'Generic POV-Ray > povbase' project
+	3. Select the 'Generic POV-Ray > povbase (Visual Studio 2015)' project
 
-		3a. enable the definition of `_CONSOLE` in	`windows/povconfig/syspovconfig.h`
+		3a. enable the definition of `_CONSOLE` in	povbase > 'Base Headers' > syspovconfig.h
+            (povray\windows\povconfig\syspovconfig.h) and 
 
-		3b. expand 'Backend Headers', then open the file `build.h` listed
-		    within it. Please set `BUILT_BY` to your real name (and contact info)
+        3b. Continuing in povbase > 'Base Headers' > syspovconfig.h, 
+            add: 
+                #ifndef VERSION_BASE
+                #define VERSION_BASE "3.8"
+                #endif // VERSION_BASE
+            on the following 3 lines. 
 
-		3c. Remove the `#error` directive after `BUILT_BY`
+		3c. Set `BUILT_BY` in povbase > 'Base Headers' > build.h
+            (povray\source\base\build.h) to YOUR NAME (YOUR EMAIL)
 
-	4. Select the CUI branch and launch 'Build CUI' (Using 'Build Solution'
-	   will abend because Visual Studio will attempt to build the GUI branch also.)
+		3d. Remark the `#error` directive after `BUILT_BY`
+
+	4. Select 'Windows Targets' > 'CUI(Visual Studio 2015)' and launch 'Build CUI' (Ctrl+B)
+       Using 'Build Solution' (Ctrl+Shift+B) will abend because Visual Studio will attempt 
+       to build the 'GUI(Visual Studio 2015)' also.
+	   
+	5. NOTE: It goes without saying that you should reverse the updates described above 
+	         before committing any changes.
 
 	/// Building LPub3D-Trace from the command line (VS2017 MSBuild)
 	//////////////////////////////////////////////////////
@@ -173,54 +185,72 @@
 
 	/// Updated source files
     /////////////////////////////////////////////////////
-  0.  .gitignore.............../
-  1.  povray.cpp.............../source/backend
+	0.  .gitignore.............../
+	1.  povray.cpp.............../source/backend
 	2.  povray.conf............../distribution......(New)
-	3.  povray.ini.............../distribution/ini..(New)
-	Windows
-	4.  appveyor.yml............./
-	5.  console.vcxproj........../windows/vs2015
-	6.  console.vcxproj.filters../windows/vs2015
-	7.  vfewin.vcxproj.........../windows/vs2015
-	8.  vfewin.vcxproj.filters.../windows/vs2015
-	9.  openexr_eLut.vcxproj...../windows/vs2015
-	10. openexr_toFloat.vcxproj../windows/vs2015
-	11. povray.sln.............../windows/vs2015
-	12. syspovconfig.h.........../windows/povconfig
-	13. vfeplatform.cpp........../vfe/win
-	14. vfeplatform.h............/vfe/win
-	15. disp.h.................../windows...........(New)
-	16. disp_sdl.cpp............./windows...........(New)
-	17. disp_sdl.h.............../windows...........(New)
-	18. disp_text.h............../windows...........(New)
-	19. disp_text.cpp............/windows...........(New)
-	20. winconsole.cpp.........../vfe/win/console
-	21. winoptions.cpp.........../vfe/win/console...(New)
-	22. winoptions.h............./vfe/win/console...(New)
-	23. CUI_README.txt.........../windows...........(New)
-	24. autobuild.cmd............/windows/vs2015....(New)
-	25. autobuild_defs.cmd......./windows/vs2015....(New)
-	26. SDL2.vcxproj............./windows/vs2015....(New)
-	27. SDL2_vcxproj.filters...../windows/vs2015....(New)
-	28. SDL2Main.vcxproj........./windows/vs2015....(New)
-	29. povbackend.vcxproj......./windows/vs2015
-	Unix
-	30. travis.yml.............../
-	31. prebuild3rdparty.sh....../unix..............(New) replaces prebuild.sh
-	32. configure.ac............./unix
-	33. install................../unix
-	34. syspovconfig.h.........../unix
-	35. disp_sdl.cpp............./unix
-	36. disp_sdl.h.............../unix
-	37. acx_pthread.m4.........../unix/config
-	38. ax_check_lib.m4........../unix/config
-	39. ax_check_libjpeg.m4....../unix/config
-	40. ax_check_libtiff.m4....../unix/config
-	41. ax_check_libsdl2.m4....../unix/config.......(New) replaces ax_check_libsdl.m4
-	42. unixconsole.cpp........../vfe/unix
-	43. unixoptions.cpp........../vfe/unix
-	44. unixoptions.h............/vfe/unix
+	3.  povray.ini.............../distribution/ini
+    4.  processrenderoptions.cpp./source/frontend
+	5.  renderfrontend.cpp       /source/frontend
+	6.	povmsid.h................/source/povms
+	7.	vfe.h..................../vfe
+	8.	vfedisplay.cpp.........../vfe
 
+	Windows
+	 9.  appveyor.yml............/
+	10.  console.vcxproj........./windows/vs2015
+    11.  console.vcxproj.filters./windows/vs2015
+    12.  vfewin.vcxproj........../windows/vs2015
+    13.  vfewin.vcxproj.filters../windows/vs2015
+    14.  openexr_eLut.vcxproj..../windows/vs2015
+	15. openexr_toFloat.vcxproj../windows/vs2015
+	16. povray.sln.............../windows/vs2015
+	17. povbackend.vcxproj......./windows/vs2015	
+	18. autobuild.cmd............/windows/vs2015.........(New)
+	19. autobuild_defs.cmd......./windows/vs2015.........(New)
+	20. SDL2.vcxproj............./windows/vs2015.........(New)
+	21. SDL2_vcxproj.filters...../windows/vs2015.........(New)
+	22. SDL2Main.vcxproj........./windows/vs2015.........(New)	
+	23. console.ico............../windows/vs2015.........(New)
+	24. console_resource.rc....../windows/vs2015.........(New)
+	25. csi.ldr.pov............../windows/vs2015/tests/..(New)
+	26. test.cmd................./windows/vs2015/tests/..(New)
+	27. biscuit.pov............../windows/vs2015/tests/space in dir name test/..(New)
+	28. syspovconfig.h.........../windows/povconfig
+	29. vfeplatform.cpp........../vfe/win
+	30. vfeplatform.h............/vfe/win
+	31. winconsole.cpp.........../vfe/win/console
+	32. winoptions.cpp.........../vfe/win/console...(New)
+	33. winoptions.h............./vfe/win/console...(New)
+	34. disp.h.................../windows...........(New)
+	35. disp_sdl.cpp............./windows...........(New)
+	36. disp_sdl.h.............../windows...........(New)
+	37. disp_text.h............../windows...........(New)
+	38. disp_text.cpp............/windows...........(New)
+	39. CUI_README.txt.........../windows...........(New)
+	
+	Unix
+	40. travis.yml.............../
+	41. prebuild3rdparty.sh....../unix..............(New) replaces prebuild.sh
+	42. configure.ac............./unix
+	43. install................../unix
+	44. syspovconfig.h.........../unix
+	45. disp_sdl.cpp............./unix
+	46. disp_sdl.h.............../unix
+	47. disp_text.cpp............/unix
+	48. disp_text.h............../unix	
+	49. acx_pthread.m4.........../unix/config
+	50. ax_check_lib.m4........../unix/config
+	51. ax_check_libjpeg.m4....../unix/config
+	52. ax_check_libtiff.m4....../unix/config
+	53. ax_check_libsdl2.m4....../unix/config.......(New) replaces ax_check_libsdl.m4
+	54. unixconsole.cpp........../vfe/unix
+	55. unixoptions.cpp........../vfe/unix
+	56. unixoptions.h............/vfe/unix
+
+    Libraries
+	57. sdl2...................../libraries/sdl2.....................(New)
+	58. boost::interprocess....../libraries/boost/boost/interprocess.(New)
+		
 	Note: Although I used VS2017 to develop the Windows Console User Interface build
 	components described here. I do not believe there is any material difference
 	between VS2017 and VS2015 so you can substitute VS2017 for 2015.
