@@ -12,7 +12,7 @@
 ///
 /// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 /// specially for LPub3D - An LDraw Building Instruction Editor.
-/// Copyright 2017 by Trevor SANDY.
+/// Copyright 2017-2021 by Trevor SANDY.
 ///
 /// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as
@@ -30,7 +30,7 @@
 /// ----------------------------------------------------------------------------
 ///
 /// LPub3D-Trace is based on Persistence of Vision Ray Tracer ('POV-Ray') version 3.8.
-/// Copyright 1991-2017 Persistence of Vision Raytracer Pty. Ltd which is,
+/// Copyright 1991-2021 Persistence of Vision Raytracer Pty. Ltd which is,
 /// in turn, based on the popular DKB raytracer version 2.12.
 /// DKBTrace was originally written by David K. Buck.
 /// DKBTrace Ver 2.0-2.12 were written by David K. Buck & Aaron A. Collins.
@@ -358,6 +358,6 @@ const int NULL=0;
 /* Description strings */
 #define DESCRIPTION_MESSAGE_LPUB3D_TRACE_3 " " PACKAGE " is developed and maintained by Trevor SANDY."
 /* Copyright string. */
-#define LPUB3D_TRACE_COPYRIGHT "Copyright 2018 Trevor SANDY"
+#define LPUB3D_TRACE_COPYRIGHT "Copyright 2017-2021 Trevor SANDY"
 
 #endif // POVRAY_UNIX_SYSPOVCONFIG_H
