@@ -10,8 +10,8 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: October 27, 2018
-rem  Copyright (c) 2018 by Trevor SANDY
+rem  Last Update: June 10, 2021
+rem  Copyright (c) 2019 - 2021 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
 rem but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -39,7 +39,13 @@ IF "%APPVEYOR%" EQU "True" (
     SET DISP_WIN=+d
     SET DIST_DIR=..\..\..\lpub3d_windows_3rdparty
 )
-SET LP3D_VCVARSALL=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\Build
+rem Visual C++ 2012 -vcvars_ver=11.0
+rem Visual C++ 2013 -vcvars_ver=12.0
+rem Visual C++ 2015 -vcvars_ver=14.0
+rem Visual C++ 2017 -vcvars_ver=14.1
+rem Visual C++ 2019 -vcvars_ver=14.2
+SET LP3D_VCVARSALL=C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build
+SET LP3D_VCVARSALL_VER=-vcvars_ver=14.2
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
 SET VERSION_BASE=3.8
@@ -457,13 +463,14 @@ GOTO :END
 :CONFIGURE_BUILD_ENV
 ECHO.
 ECHO -Configure %PACKAGE% %PLATFORM% build environment...
+rem Set vcvars for AppVeyor or local build environments
 IF "%PATH_PREPENDED%" NEQ "True" (
   IF %PLATFORM% EQU Win32 (
     ECHO.
-    CALL "%LP3D_VCVARSALL%\vcvars32.bat" -vcvars_ver=14.0
+    CALL "%LP3D_VCVARSALL%\vcvars32.bat" %LP3D_VCVARSALL_VER%
   ) ELSE (
     ECHO.
-    CALL "%LP3D_VCVARSALL%\vcvars64.bat" -vcvars_ver=14.0
+    CALL "%LP3D_VCVARSALL%\vcvars64.bat" %LP3D_VCVARSALL_VER%
   )
   rem Display MSVC Compiler settings
   cl -Bv

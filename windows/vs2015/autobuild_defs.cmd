@@ -7,8 +7,8 @@ rem needed to build the solution/project.
 rem This script is intended to be called from autobuild.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: October 27, 2018
-rem  Copyright (c) 2017 by Trevor SANDY
+rem  Last Update: June 10, 2021
+rem  Copyright (c) 2019 - 2021 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
 rem but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,7 +20,9 @@ rem Variables
 SET DEV_ENV=unknown
 SET VERSION_MAJ=unknown
 SET VERSION_MIN=unknown
-SET RELEASE=unknown
+SET VERSION_REV=unknown
+SET VERSION_PATCH=unknown
+SET RELEASE=
 SET GIT_SHA=000000
 SET VERSION_H="..\..\source\base\version.h"
 
@@ -28,8 +30,9 @@ rem Get some source details to populate the required defines
 rem These are not fixed. You can change as you like
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MAJOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MAJ=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MINOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MIN=%%i
-FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PRERELEASE" %VERSION_H%') DO SET RELEASE=%%i
-IF [%RELEASE%]==[] SET RELEASE=alpha
+FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_REVISION_INT" %VERSION_H%') DO SET VERSION_REV=%%i
+FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PATCHLEVEL_INT" %VERSION_H%') DO SET VERSION_PATCH=%%i
+FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PRERELEASE" %VERSION_H%') DO IF NOT DEFINED RELEASE SET RELEASE=%%i
 rem Get the latest version tag sha - if not available locally, try remote
 IF "%APPVEYOR%" EQU "True" (
     SET GIT_SHA=%APPVEYOR_REPO_COMMIT:~0,7%
@@ -46,6 +49,8 @@ FOR /F "tokens=* USEBACKQ" %%i IN (`msbuild -nologo -version`) DO SET DEV_ENV=%%
 rem Remove quotes and trailing space
 CALL :CLEAN VERSION_MAJ %VERSION_MAJ%
 CALL :CLEAN VERSION_MIN %VERSION_MIN%
+CALL :CLEAN VERSION_REV %VERSION_REV%
+CALL :CLEAN VERSION_PATCH %VERSION_PATCH%
 CALL :CLEAN RELEASE %RELEASE%
 
 rem Build version number
@@ -65,8 +70,10 @@ IF %VERBOSE%==1 SET PovBuildDefs=%PovBuildDefs%WIN_DEBUG=1;
 rem Display the define attributes to visually confirm all is well.
 ECHO   VERSION_MAJ.........[%VERSION_MAJ%]
 ECHO   VERSION_MIN.........[%VERSION_MIN%]
+ECHO   VERSION_REV.........[%VERSION_REV%]
+ECHO   VERSION_PATCH.......[%VERSION_PATCH%]
 ECHO   RELEASE.............[%RELEASE%]
-ECHO   DEV_ENV.............[%DEV_ENV%]
+ECHO   VS_DEV_VERSION......[%DEV_ENV%]
 ECHO   VERSION_BASE........[%VERSION_BASE%]
 ECHO   BUILD_ID.(GIT_SHA)..[%BUILD_ID%]
 ECHO   BUILT_BY............[%BUILT_BY%]
