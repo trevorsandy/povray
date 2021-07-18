@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 14.0.23107.0
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Image Libraries", "Image Libraries", "{4178148C-8A0C-4EB0-ACD9-0E09676F2700}"
 EndProject
@@ -35,6 +35,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Boost Libraries", "Boost Libraries", "{31AFDB3C-8769-49DF-9C9E-2013E194D983}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "boost_thread", "boost_thread.vcxproj", "{10B193D4-E27B-4438-A825-BFB3D2B4C74D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "boost_date_time", "boost_date_time.vcxproj", "{35A2DC31-84BC-4F7A-9C93-1D072432AD79}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "OpenEXR Libraries", "OpenEXR Libraries", "{30F7FB89-B9D5-473E-A14D-6A00700C1EA9}"
 EndProject
@@ -317,10 +319,10 @@ Global
 		{39C65232-04FB-4622-8283-34829739887C}.Release|x64.ActiveCfg = Release|x64
 		{39C65232-04FB-4622-8283-34829739887C}.Release|x64.Build.0 = Release|x64
 		{39C65232-04FB-4622-8283-34829739887C}.Release-AVX|Win32.ActiveCfg = Release|Win32
-		{39C65232-04FB-4622-8283-34829739887C}.Release-AVX|x64.ActiveCfg = Release-AVX|x64
-		{39C65232-04FB-4622-8283-34829739887C}.Release-AVX|x64.Build.0 = Release-AVX|x64
-		{39C65232-04FB-4622-8283-34829739887C}.Release-SSE2|Win32.ActiveCfg = Release-SSE2|Win32
-		{39C65232-04FB-4622-8283-34829739887C}.Release-SSE2|Win32.Build.0 = Release-SSE2|Win32
+		{39C65232-04FB-4622-8283-34829739887C}.Release-AVX|x64.ActiveCfg = Release|x64
+		{39C65232-04FB-4622-8283-34829739887C}.Release-AVX|x64.Build.0 = Release|x64
+		{39C65232-04FB-4622-8283-34829739887C}.Release-SSE2|Win32.ActiveCfg = Release|Win32
+		{39C65232-04FB-4622-8283-34829739887C}.Release-SSE2|Win32.Build.0 = Release|Win32
 		{39C65232-04FB-4622-8283-34829739887C}.Release-SSE2|x64.ActiveCfg = Release|x64
 		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Debug|Win32.ActiveCfg = Release|Win32
 		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Debug|Win32.Build.0 = Release|Win32
@@ -331,10 +333,10 @@ Global
 		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release|x64.ActiveCfg = Release|x64
 		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release|x64.Build.0 = Release|x64
 		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-AVX|Win32.ActiveCfg = Release|Win32
-		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-AVX|x64.ActiveCfg = Release-AVX|x64
-		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-AVX|x64.Build.0 = Release-AVX|x64
-		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-SSE2|Win32.ActiveCfg = Release-SSE2|Win32
-		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-SSE2|Win32.Build.0 = Release-SSE2|Win32
+		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-AVX|x64.ActiveCfg = Release|x64
+		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-AVX|x64.Build.0 = Release|x64
+		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-SSE2|Win32.ActiveCfg = Release|Win32
+		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-SSE2|Win32.Build.0 = Release|Win32
 		{9801D5FF-C1E0-46C5-A73E-47DEECE99DDB}.Release-SSE2|x64.ActiveCfg = Release|x64
 		{86D92BC4-4C57-42D1-9F63-26ABF811715B}.Debug|Win32.ActiveCfg = Debug|Win32
 		{86D92BC4-4C57-42D1-9F63-26ABF811715B}.Debug|x64.ActiveCfg = Debug|x64
