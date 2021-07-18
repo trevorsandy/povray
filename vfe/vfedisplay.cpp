@@ -36,9 +36,10 @@
 ///
 /// @endparblock
 ///
+//------------------------------------------------------------------------------
+// SPDX-License-Identifier: AGPL-3.0-or-later
 //******************************************************************************
 
-#include "backend/frame.h"
 #include "vfe.h"
 #include <iostream>
 #include <fstream>
@@ -159,4 +160,4 @@ void vfeDisplay::Clear()
   m_Buffer = NULL;
 }
 
-}
+} // end of namespace
