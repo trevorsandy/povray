@@ -1,5 +1,5 @@
-name: 'Make POV-Ray for Unix'
-description: 'Run `make` build step for POV-Ray for Unix'
+name: 'Make POV-Ray CLI for Unix'
+description: 'Run `make` build step for POV-Ray CLI for Unix'
 
 inputs:
   make-target: 
@@ -12,4 +12,7 @@ runs:
   steps:
   - shell: bash
     run: |
+      if test ${{ inputs.make-target }} == "check"; then
+        export POV_IGNORE_SYSCONF_MSG="yes"
+      fi
       make ${{ inputs.make-target }}

@@ -1,8 +1,8 @@
-name: 'Pre-Build POV-Ray for Unix'
-description: 'Run `prebuild.sh` build step for POV-Ray for Unix'
+name: 'Pre-Build POV-Ray CLI for Unix'
+description: 'Run `prebuild3rdparty.sh` build step for POV-Ray CLI for Unix'
 runs:
   using: composite
   steps:
   - shell: bash
     run: |
-      cd unix && ./prebuild.sh && cd ..
+      cd unix && chmod a+x prebuild3rdparty.sh && ./prebuild3rdparty.sh && cd ..

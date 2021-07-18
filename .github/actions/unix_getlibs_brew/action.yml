@@ -14,7 +14,7 @@ runs:
         brew install libjpeg
         brew install libtiff
         brew install openexr
-        brew install sdl
+        brew install sdl2
         # Make sure we have all the tools we want
         brew install automake
         brew install pkg-config

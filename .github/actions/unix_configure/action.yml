@@ -1,11 +1,15 @@
-name: 'Configure POV-Ray for Unix'
-description: 'Run `configure` build step for POV-Ray for Unix'
+name: 'Configure POV-Ray CLI for Unix'
+description: 'Run `configure` build step for POV-Ray CLI for Unix'
 
 inputs:
+  compiled-by: 
+    description: 'COMPILED_BY value'
+    required: true
+    default: 'GitHub for LPub3D'
   configure-options: 
     description: 'Additional option for `configure` script'
-    required: false
-    default: ''
+    required: true
+    default: 'LPUB3D_3RD_PARTY=yes --enable-watch-cursor --with-libsdl2'
   c-compiler:
     description: 'C Compiler to invoke'
     required: false
@@ -20,12 +24,10 @@ runs:
   steps:
   - shell: bash
     run: |
-      # TODO: Figure out a neat way to compile with SDL to check the build,
-      # but have `make check` pass -D instead of +D to POV-Ray
       if test -n "${{inputs.c-compiler}}" ; then
         export CC="${{inputs.c-compiler}}"
       fi
       if test -n "${{inputs.cxx-compiler}}" ; then
         export CXX="${{inputs.cxx-compiler}}"
       fi
-      ./configure --without-libsdl --without-x ${{inputs.configure-options}} COMPILED_BY="GitHub"
+      ./configure COMPILED_BY="${{inputs.compiled-by}} ${{inputs.configure-options}}"

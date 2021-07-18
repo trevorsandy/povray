@@ -1,5 +1,5 @@
-name: 'Build POV-Ray for Windows Binary'
-description: 'Build POV-Ray for Windows Binary'
+name: 'Build POV-Ray CLI for Windows Binary'
+description: 'Build POV-Ray CLI for Windows Binary'
 
 inputs:
   pov-ray-is-autobuild: 
@@ -12,7 +12,7 @@ inputs:
   built-by: 
     description: 'BUILT_BY value'
     required: true
-    default: 'GitHub'
+    default: 'GitHub for LPub3D'
   solution: 
     description: 'subdirectory of `windows` in which `povray.sln` is located'
     required: true
@@ -41,10 +41,12 @@ runs:
       $env:PovBuildDefs  = 'POV_RAY_IS_AUTOBUILD=${{ inputs.pov-ray-is-autobuild }};'
       $env:PovBuildDefs += 'POV_RAY_BUILD_ID="${{ inputs.pov-ray-build-id }}";'
       $env:PovBuildDefs += 'BUILT_BY="${{ inputs.built-by }}";'
+      $env:PovBuildDefs += '_CONSOLE=1";'
       msbuild `
         /t:Rebuild /m `
         /p:Configuration=${{ inputs.configuration }} `
         /p:Platform=${{ inputs.platform }} `
         /p:PlatformToolset=${{ inputs.toolset }} `
         ${{ inputs.msbuild-options }} `
-        windows/${{ inputs.solution }}/povray.sln
+        windows/${{ inputs.solution }}/console.vcxproj `
+        /clp:ErrorsOnly /nologo

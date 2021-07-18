@@ -17,6 +17,6 @@ runs:
           libjpeg-dev             \
           libtiff-dev             \
           libopenexr-dev          \
-          libsdl-dev
+          libsdl2-dev
         # Make sure we have all the tools we want
         # (nothing here at the moment)
