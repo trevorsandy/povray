@@ -6,10 +6,10 @@ name: 'Check POV-Ray CLI for Windows'
 description: 'Run build check step for POV-Ray CLI for Windows'
 
 inputs:
-  solution: 
+  solution:
     description: 'subdirectory of `windows` in which `povray.sln` is located'
     required: true
-  version-base: 
+  version-base:
     description: 'VERSION_BASE value'
     required: true
   platform:
@@ -31,8 +31,8 @@ inputs:
   check-includes:
     description: 'paths to include ini files'
     required: false
-    default: '+L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"'     
-    
+    default: '+L"..\..\distribution\ini" +L"..\..\distribution\include" +L"..\..\distribution\scenes"'
+
 runs:
   using: composite
   steps:
@@ -48,42 +48,39 @@ runs:
       SET BUILD_CHK_OUTPUT=${{ inputs.check-output }}
       SET BUILD_CHK_POV_FILE=${{ inputs.check-pov-file }}
       SET BUILD_CHK_PARAMS=${{ inputs.check-parameters }}
-      SET BUILD_CHK_INCLUDE=${{ inputs.check-includes }}      
+      SET BUILD_CHK_INCLUDE=${{ inputs.check-includes }}
       IF %PLAFORM% NEQ x64 SET PL=32
       IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
-      SET CONFIG_DIR=%USERPROFILE%\\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
-      SET POVUSERDIR=AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%
-      CD %SOLUTION_PATH%
+      SET CONFIG_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
       IF NOT EXIST "%CONFIG_DIR%\" MKDIR "%CONFIG_DIR%\"
-      ECHO   Create %CONFIG_DIR%\povray.conf...
+      CD %SOLUTION_PATH%
+      ECHO Create %CONFIG_DIR%\povray.conf...
       COPY /V /Y "..\..\distribution\povray.conf" "%CONFIG_DIR%\povray.conf" /A
       SET genConfigFile="%CONFIG_DIR%\povray.conf" ECHO
       :GENERATE build check povray.conf settings file
       >>%genConfigFile%.
-      >>%genConfigFile% ; LPub3D-Trace build check settings...
+      >>%genConfigFile% ; LPub3D-Trace-CUI build check conf settings
       >>%genConfigFile%.
-      >>%genConfigFile% ; %HOME% is hard-coded to '%USERPROFILE%', the (USERPROFILE) environment variable.
-      >>%genConfigFile% read* = "%USERPROFILE%\%POVUSERDIR%\config"
+      >>%genConfigFile% read* = "%CONFIG_DIR%"
       >>%genConfigFile%.
-      >>%genConfigFile% ; The working directory (%CD%) is where LPub3D-Trace is called from.
+      >>%genConfigFile% ; LPub3D-Trace-CUI is called from (%CD%).
       >>%genConfigFile% read* = "..\..\distribution\ini"
       >>%genConfigFile% read* = "..\..\distribution\include"
       >>%genConfigFile% read* = "..\..\distribution\scenes"
       >>%genConfigFile% read+write* = ".\tests\space in dir name test"
-      ECHO   Create %CONFIG_DIR%\povray.ini...
+      ECHO Create %CONFIG_DIR%\povray.ini...
       COPY /V /Y "..\..\distribution\ini\povray.ini" "%CONFIG_DIR%\povray.ini" /A
       SET genConfigFile="%CONFIG_DIR%\povray.ini" ECHO
       :GENERATE build check povray.ini settings file
       >>%genConfigFile%.
-      >>%genConfigFile% ; LPub3D-Trace build check settings...
+      >>%genConfigFile% ; LPub3D-Trace-CUI build check ini settings
       >>%genConfigFile%.
       >>%genConfigFile% Output_to_File=true
       >>%genConfigFile% Output_File_Type=N8             ; (+/-Ftype)
       SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png" %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
-      ECHO   BUILD_CHECK_COMMAND.......[%PACKAGE%%PL%.exe %BUILD_CHK_COMMAND%]
+      ECHO BUILD_CHECK_COMMAND......[%PACKAGE%%PL%.exe %BUILD_CHK_COMMAND%]
       bin%PL%\%PACKAGE%%PL%.exe %BUILD_CHK_COMMAND%
       ENDLOCAL
 
-      
-      
+
 
