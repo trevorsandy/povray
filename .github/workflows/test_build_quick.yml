@@ -88,6 +88,7 @@ jobs:
       uses: trevorsandy/povray/.github/actions/windows_build@gh-actions-raytracer-v1
       with:
         pov-ray-build-id: gh${{github.run_number}}
+        version-base: 3.8
         solution: vs2015
         configuration: Release
         platform: x64

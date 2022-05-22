@@ -13,6 +13,9 @@ inputs:
   pov-ray-build-id: 
     description: 'POV_RAY_BUILD_ID value'
     required: true
+  version-base: 
+    description: 'VERSION_BASE value'
+    required: true
   built-by: 
     description: 'BUILT_BY value'
     required: true
@@ -44,6 +47,7 @@ runs:
     run: |
       $env:PovBuildDefs  = 'POV_RAY_IS_AUTOBUILD=${{ inputs.pov-ray-is-autobuild }};'
       $env:PovBuildDefs += 'POV_RAY_BUILD_ID="${{ inputs.pov-ray-build-id }}";'
+      $env:PovBuildDefs += 'VERSION_BASE="${{ inputs.version-base }}";'
       $env:PovBuildDefs += 'BUILT_BY="${{ inputs.built-by }}";'
       $env:PovBuildDefs += '_CONSOLE=1";'
       msbuild `
