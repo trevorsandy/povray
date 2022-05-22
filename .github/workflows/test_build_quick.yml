@@ -31,13 +31,13 @@ jobs:
 
     - name: 'Prebuild'
       uses: trevorsandy/povray/.github/actions/unix_prebuild@gh-actions-raytracer-v1
-    - name: 'Sanity-Check Working Tree'
-      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
+#   - name: 'Sanity-Check Working Tree'
+#      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
 
     - name: 'Configure'
       uses: trevorsandy/povray/.github/actions/unix_configure@gh-actions-raytracer-v1
-    - name: 'Sanity-Check Working Tree'
-      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
+#    - name: 'Sanity-Check Working Tree'
+#      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
 
     - name: 'Bundle Artifacts for Diagnostics'
       if: ${{ always() }}
@@ -47,15 +47,15 @@ jobs:
 
     - name: 'Build'
       uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v1
-    - name: 'Sanity-Check Working Tree'
-      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
+#   - name: 'Sanity-Check Working Tree'
+#      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
 
     - name: 'Check Functionality'
       uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v1
       with:
         make-target: check
-    - name: 'Sanity-Check Working Tree'
-      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
+#    - name: 'Sanity-Check Working Tree'
+#      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
 
 #    - name: 'Install'
 #      uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v1
@@ -94,5 +94,5 @@ jobs:
         platform: x64
         toolset: v140
         msbuild-options: ''
-    - name: 'Sanity-Check Working Tree'
-      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
+#    - name: 'Sanity-Check Working Tree'
+#      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v1
