@@ -8,12 +8,12 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - raytracer-cui
+      - lpub3d/raytracer-cui
     # For now, there's nothing in the following directories that we're actually checking.
     paths-ignore: [ 'distribution/**', 'doc/**', 'source-doc/**' ]
   pull_request:
     branches:
-      - raytracer-cui
+      - lpub3d/raytracer-cui
     # For now, there's nothing in the following directories that we're actually checking.
     paths-ignore: [ 'distribution/**', 'doc/**', 'source-doc/**' ]
 
