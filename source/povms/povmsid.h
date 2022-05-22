@@ -10,7 +10,7 @@
 ///
 /// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 /// specially for LPub3D - An LDraw Building Instruction Editor.
-/// Copyright 2017-2021 by Trevor SANDY.
+/// Copyright 2017-2022 by Trevor SANDY.
 ///
 /// LPub3D-Trace is free software: you can redistribute it and/or modify
 /// it under the terms of the GNU Affero General Public License as

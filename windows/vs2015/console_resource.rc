@@ -22,7 +22,7 @@ VS_VERSION_INFO VERSIONINFO
 				VALUE "CompanyName", "LPub3D Software\0"
 				VALUE "FileDescription", "LPub3D-Trace (POV-Ray) CUI for Windows.\0"
 				VALUE "FileVersion", "3.8.0.0\0"
-				VALUE "LegalCopyright", "Copyright (c) 2021 Trevor SANDY\0"
+				VALUE "LegalCopyright", "Copyright (c) 2022 Trevor SANDY\0"
 				VALUE "OriginalFilename", "lpub3d_trace_cui.exe\0"
 				VALUE "ProductName", "LPub3D-Trace-CUI\0"
 				VALUE "ProductVersion", "3.8.0.0\0"

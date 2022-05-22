@@ -8,7 +8,7 @@ rem This script is intended to be called from autobuild.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
 rem  Last Update: July 01, 2021
-rem  Copyright (c) 2019 - 2021 by Trevor SANDY
+rem  Copyright (c) 2019 - 2022 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
 rem but WITHOUT ANY WARRANTY; without even the implied warranty of
