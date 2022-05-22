@@ -1,3 +1,7 @@
+# LPub3D Raytracer-cui build actions
+# Trevor SANDY <trevor.sandy@gmail.com>
+# Last Update: May 22, 2022
+#
 name: 'Configure POV-Ray CLI for Unix'
 description: 'Run `configure` build step for POV-Ray CLI for Unix'
 

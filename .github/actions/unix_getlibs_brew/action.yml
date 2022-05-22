@@ -1,3 +1,7 @@
+# LPub3D Raytracer-cui build actions
+# Trevor SANDY <trevor.sandy@gmail.com>
+# Last Update: May 22, 2022
+#
 name: 'Install Packages (brew)'
 description: 'Install required packages using brew'
 runs:

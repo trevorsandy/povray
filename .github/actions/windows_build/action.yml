@@ -1,3 +1,7 @@
+# LPub3D Raytracer-cui build actions
+# Trevor SANDY <trevor.sandy@gmail.com>
+# Last Update: May 22, 2022
+#
 name: 'Build POV-Ray CLI for Windows Binary'
 description: 'Build POV-Ray CLI for Windows Binary'
 
