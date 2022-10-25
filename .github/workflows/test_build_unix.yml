@@ -1,3 +1,7 @@
+# LPub3D Raytracer-cui build actions
+# Trevor SANDY <trevor.sandy@gmail.com>
+# Last Update: October 25, 2022
+#
 name: 'Unix Build Compatibility Tests'
 
 on:
@@ -39,7 +43,7 @@ jobs:
         ${{matrix.c-compiler}} --version
 
     - name: 'Check out Repository'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 'Install Prerequisites'
       uses: POV-Ray/povray/.github/actions/unix_getlibs@gh-actions-v1
@@ -85,7 +89,7 @@ jobs:
 
     - name: 'Upload Artifacts for Diagnostics'
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: artifact_diag_${{ matrix.os }}_${{ matrix.c-compiler }}
         path: artifact_diag_${{ matrix.os }}_${{ matrix.c-compiler }}.tar.gz

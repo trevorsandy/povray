@@ -1,3 +1,7 @@
+# LPub3D Raytracer-cui build actions
+# Trevor SANDY <trevor.sandy@gmail.com>
+# Last Update: October 25, 2022
+#
 name: 'Release Build'
 
 on:
@@ -18,7 +22,7 @@ jobs:
     steps:
 
     - name: 'Check out Repository'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 'Extract Source Version Information'
       uses: POV-Ray/povray/.github/actions/get_source_version@gh-actions-v1
@@ -56,7 +60,7 @@ jobs:
     steps:
 
     - name: 'Check out Repository'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 'Extract Source Version Information'
       uses: POV-Ray/povray/.github/actions/get_source_version@gh-actions-v1
@@ -100,7 +104,7 @@ jobs:
         gzip "${tarfile}"
 
     - name: 'Upload Artifacts for Release'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: artifact_unix_package
         path: povunix-*.tar.gz
@@ -113,7 +117,7 @@ jobs:
     steps:
 
     - name: 'Check out Repository'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 'Extract Source Version Information'
       uses: POV-Ray/povray/.github/actions/get_source_version@gh-actions-v1
@@ -147,7 +151,7 @@ jobs:
         cp *.pdf "${basedir}/artifact/povray-v${POV_RAY_FULL_VERSION}-sourcedoc.pdf"
 
     - name: 'Upload Artifacts for Installer Release'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: artifact_sourcedoc
         path: artifact/*
@@ -220,10 +224,10 @@ jobs:
         echo "${{ toJSON(matrix) }}"
 
     - name: 'Check out Repository'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 'Add MSBuild to PATH'
-      uses: microsoft/setup-msbuild@v1.0.2
+      uses: microsoft/setup-msbuild@v1.1.3
 
     - name: 'Build'
       uses: POV-Ray/povray/.github/actions/windows_build@gh-actions-v2
@@ -248,7 +252,7 @@ jobs:
         }
 
     - name: 'Upload Artifacts for Installer Build'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: artifact_installer_tree
         path: installer/*
@@ -261,7 +265,7 @@ jobs:
     steps:
 
     - name: 'Check out Repository'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 'Populate Installer Tree'
       env:
@@ -289,7 +293,7 @@ jobs:
         cp -R "distribution/scenes/."                                   "installer/user/scenes"
 
     - name: 'Retrieve Artifacts for Installer Build'
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: artifact_installer_tree
         path: installer
@@ -302,14 +306,14 @@ jobs:
         version-prototype: "installer/core/bin/pvengine64.exe"
 
     - name: 'Upload Artifacts for Release'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: artifact_installer
         path: ${{ steps.build-installer.outputs.installer-file }}
 
     - name: 'Upload Installer Artifacts for Diagnostics'
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: artifact_installer_diag
         path: installer/*
@@ -329,25 +333,25 @@ jobs:
         ${{ needs.sanity_check.result == 'success' }}
 
     - name: 'Check out Repository'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 'Retrieve Installer Artifacts for Release'
       if: ${{ needs.build_windows_installer.result == 'success' }}
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: artifact_installer
         path: installer
 
     - name: 'Retrieve Source Documentation Artifacts for Release'
       if: ${{ needs.build_sourcedoc.result == 'success' }}
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: artifact_sourcedoc
         path: sourcedoc
 
     - name: 'Retrieve Unix Source Package Artifacts for Release'
       if: ${{ needs.build_unix_package.result == 'success' }}
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: artifact_unix_package
         path: unix_package

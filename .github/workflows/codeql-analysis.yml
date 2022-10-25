@@ -1,3 +1,7 @@
+# LPub3D Raytracer-cui build actions
+# Trevor SANDY <trevor.sandy@gmail.com>
+# Last Update: October 25, 2022
+#
 name: 'Code Analysis'
 
 on:
@@ -21,10 +25,10 @@ jobs:
     steps:
 
     - name: 'Check out Repository'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 'Initialize CodeQL'
-      uses: github/codeql-action/init@v1
+      uses: github/codeql-action/init@v2
       with:
         languages: cpp
         # Comment out the following to perform just the bare minimum of checks:
@@ -43,4 +47,4 @@ jobs:
       uses: POV-Ray/povray/.github/actions/unix_make@gh-actions-v1
 
     - name: 'Perform CodeQL Analysis'
-      uses: github/codeql-action/analyze@v1
+      uses: github/codeql-action/analyze@v2
