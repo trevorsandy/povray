@@ -10,7 +10,7 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: Jun 03, 2022
+rem  Last Update: August 29, 2023
 rem  Copyright (c) 2019 - 2023 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -21,8 +21,28 @@ rem It is expected that this script will reside in .\windows\vs2015
 
 CALL :ELAPSED_BUILD_TIME Start
 
-rem Variables
-IF "%LP3D_VSVERSION%" == "" SET LP3D_VSVERSION=2019
+IF "%LP3D_VSVERSION%" == "" SET "LP3D_VSVERSION=2019"
+
+IF "%GITHUB%" EQU "True" (
+  SET "BUILD_WORKER=True"
+  SET "BUILD_WORKER_JOB=%GITHUB_JOB%"
+  SET "BUILD_WORKER_REF=%GITHUB_REF%"
+  SET "BUILD_WORKER_OS=%RUNNER_OS%"
+  SET "BUILD_WORKER_REPO=%GITHUB_REPOSITORY%"
+  SET "BUILD_WORKER_IMAGE=Visual Studio %LP3D_VSVERSION%"
+  SET "BUILD_WORKER_HOST=GITHUB CONTINUOUS INTEGRATION SERVICE"
+  SET "BUILD_WORKSPACE=%GITHUB_WORKSPACE%"
+)
+
+IF "%LP3D_CONDA_BUILD%" EQU "True" (
+  SET "BUILD_WORKER=True"
+  SET "BUILD_WORKER_JOB=%LP3D_CONDA_JOB%"
+  SET "BUILD_WORKER_OS=%LP3D_CONDA_RUNNER_OS%"
+  SET "BUILD_WORKER_REPO=%LP3D_CONDA_REPOSITORY%"
+  SET "BUILD_WORKER_IMAGE=%CMAKE_GENERATOR%"
+  SET "BUILD_WORKER_HOST=CONDA BUILD INTEGRATION SERVICE"
+  SET "BUILD_WORKSPACE=%LP3D_CONDA_WORKSPACE%"
+)
 
 rem Static defaults
 IF "%CI%" EQU "True" (
@@ -30,9 +50,6 @@ IF "%CI%" EQU "True" (
       ECHO.
       ECHO  -ERROR: Distribution directory path not defined.
       GOTO :ERROR_END
-    )
-    IF "%GITHUB%" EQU "True" (
-      SET GITHUB_RUNNER_IMAGE=Visual Studio %LP3D_VSVERSION%
     )
     IF "%APPVEYOR%" EQU "True" (
       SET APPVEYOR_BUILD_WORKER_IMAGE=Visual Studio %LP3D_VSVERSION%
@@ -48,29 +65,36 @@ IF "%CI%" EQU "True" (
     CALL :DIST_DIR_ABS_PATH ..\..\..\lpub3d_windows_3rdparty
 )
 
-IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\%LP3D_VSVERSION%\Community\VC\Auxiliary\Build" (
-  SET LP3D_VCVARSALL=C:\Program Files ^(x86^)\Microsoft Visual Studio\%LP3D_VSVERSION%\Community\VC\Auxiliary\Build
+IF "%LP3D_CONDA_BUILD%" NEQ "True" (
+  IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\%LP3D_VSVERSION%\Professional\VC\Auxiliary\Build" (
+    SET LP3D_VCVARSALL_DIR=C:\Program Files ^(x86^)\Microsoft Visual Studio\%LP3D_VSVERSION%\Professional\VC\Auxiliary\Build
+  )  
+  IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\%LP3D_VSVERSION%\Community\VC\Auxiliary\Build" (
+    SET LP3D_VCVARSALL_DIR=C:\Program Files ^(x86^)\Microsoft Visual Studio\%LP3D_VSVERSION%\Community\VC\Auxiliary\Build
+  )
+  IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\%LP3D_VSVERSION%\BuildTools\VC\Auxiliary\Build" (
+    SET LP3D_VCVARSALL_DIR=C:\Program Files ^(x86^)\Microsoft Visual Studio\%LP3D_VSVERSION%\BuildTools\VC\Auxiliary\Build
+  )
+  IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\%LP3D_VSVERSION%\Enterprise\VC\Auxiliary\Build" (
+    SET LP3D_VCVARSALL_DIR=C:\Program Files ^(x86^)\Microsoft Visual Studio\%LP3D_VSVERSION%\Enterprise\VC\Auxiliary\Build
+  )
 )
-IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\%LP3D_VSVERSION%\BuildTools\VC\Auxiliary\Build" (
-  SET LP3D_VCVARSALL=C:\Program Files ^(x86^)\Microsoft Visual Studio\%LP3D_VSVERSION%\BuildTools\VC\Auxiliary\Build
-)
-IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\%LP3D_VSVERSION%\Enterprise\VC\Auxiliary\Build" (
-  SET LP3D_VCVARSALL=C:\Program Files ^(x86^)\Microsoft Visual Studio\%LP3D_VSVERSION%\Enterprise\VC\Auxiliary\Build
-)
-IF "%LP3D_VCVARSALL%" == "" (
+IF NOT EXIST "%LP3D_VCVARSALL_DIR%" (
   ECHO.
-  ECHO  -ERROR: Microsoft Visual Studio C++ environment not defined.
+  ECHO  -ERROR - Microsoft Visual Studio C++ environment not defined.
   GOTO :ERROR_END
 )
 
-rem Visual C++ 2012 -vcvars_ver=11.0
-rem Visual C++ 2013 -vcvars_ver=12.0
-rem Visual C++ 2015 -vcvars_ver=14.0
-rem Visual C++ 2017 -vcvars_ver=14.1
-rem Visual C++ 2019 -vcvars_ver=14.2
-IF "%LP3D_VCVARSALL_VER%" == "" SET LP3D_VCVARSALL_VER=-vcvars_ver=14.0
-IF "%LP3D_VCVERSION%" == "" SET LP3D_VCVERSION=8.1
+rem Visual C++ 2012 -vcvars_ver=11.0 version 11.0  _MSC_VER 1700
+rem Visual C++ 2013 -vcvars_ver=12.0 version 12.0  _MSC_VER 1800
+rem Visual C++ 2015 -vcvars_ver=14.0 version 14.0  _MSC_VER 1900
+rem Visual C++ 2017 -vcvars_ver=14.1 version 15.9  _MSC_VER 1916
+rem Visual C++ 2019 -vcvars_ver=14.2 version 16.11 _MSC_VER 1929
+rem Visual C++ 2022 -vcvars_ver=14.2 version 17.3  _MSC_VER 1933
+IF "%LP3D_MSC_VER%" == "" SET LP3D_MSC_VER=1929
+IF "%LP3D_VCSDKVER%" == "" SET LP3D_VCSDKVER=8.1
 IF "%LP3D_VCTOOLSET%" == "" SET LP3D_VCTOOLSET=v140
+IF "%LP3D_VCVARSALL_VER%" == "" SET LP3D_VCVARSALL_VER=-vcvars_ver=14.0
 
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
@@ -400,13 +424,13 @@ rem Display the attributges and arguments to visually confirm all is well.
 ECHO.
 ECHO -Build Parameters:
 ECHO.
-IF "%GITHUB%" EQU "True" (
-    ECHO   BUILD_HOST..........[GITHUB CONTINUOUS INTEGRATION SERVICE]
-    ECHO   BUILD_WORKER_IMAGE..[%GITHUB_RUNNER_IMAGE%]
-    ECHO   BUILD_JOB...........[%GITHUB_JOB%]
-    ECHO   GITHUB_REF..........[%GITHUB_REF%]
-    ECHO   GITHUB_RUNNER_OS....[%RUNNER_OS%]
-    ECHO   PROJECT REPOSITORY..[%GITHUB_REPOSITORY%]
+IF "%BUILD_WORKER%" EQU "True" (
+    ECHO   BUILD_HOST..........[%BUILD_WORKER_HOST%]
+    ECHO   BUILD_WORKER_IMAGE..[%BUILD_WORKER_IMAGE%]
+    ECHO   BUILD_WORKER_JOB....[%BUILD_WORKER_JOB%]
+    ECHO   BUILD_WORKER_REF....[%BUILD_WORKER_REF%]
+    ECHO   BUILD_WORKER_OS.....[%BUILD_WORKER_OS%]
+    ECHO   PROJECT REPOSITORY..[%BUILD_WORKER_REPO%]
 )
 IF "%APPVEYOR%" EQU "True" (
     ECHO   BUILD_HOST..........[APPVEYOR CONTINUOUS INTEGRATION SERVICE]
@@ -456,7 +480,7 @@ CALL :CONFIGURE_VCTOOLS %PLATFORM_ARCH%
 rem Configure buid arguments and set environment variables
 CALL :CONFIGURE_BUILD_ENV
 rem Assemble command line
-SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM_ARCH% /p:WindowsTargetPlatformVersion=%LP3D_VCVERSION% /p:PlatformToolset=%LP3D_VCTOOLSET% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
+SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%PLATFORM_ARCH% /p:WindowsTargetPlatformVersion=%LP3D_VCSDKVER% /p:PlatformToolset=%LP3D_VCTOOLSET% %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
 ECHO   BUILD_COMMAND.....[%COMMAND_LINE%]
 IF NOT %MINIMUM_LOGGING%==1 ECHO.
 rem Launch msbuild
@@ -487,7 +511,7 @@ FOR %%P IN ( Win32, x64 ) DO (
     CALL :CONFIGURE_VCTOOLS %%P
     CALL :CONFIGURE_BUILD_ENV
     SETLOCAL ENABLEDELAYEDEXPANSION
-    SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P /p:WindowsTargetPlatformVersion=!LP3D_VCVERSION! /p:PlatformToolset=!LP3D_VCTOOLSET! %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
+    SET COMMAND_LINE=msbuild /m /p:Configuration=%CONFIGURATION% /p:Platform=%%P /p:WindowsTargetPlatformVersion=!LP3D_VCSDKVER! /p:PlatformToolset=!LP3D_VCTOOLSET! %PROJECT% %LOGGING_FLAGS% %DO_REBUILD%
     ECHO   BUILD_COMMAND.....[!COMMAND_LINE!]
     IF NOT %MINIMUM_LOGGING%==1 ECHO.
     !COMMAND_LINE!
@@ -508,49 +532,62 @@ GOTO :END
 ECHO.
 ECHO -Set MSBuild platform toolset...
 IF %1==x64 (
-  SET LP3D_VCVERSION=10.0.17763.0
-  SET LP3D_VCTOOLSET=v142
-  SET LP3D_VCVARSALL_VER=-vcvars_ver=14.2  
+  IF "%LP3D_CONDA_BUILD%" NEQ "True" (
+    SET LP3D_MSC_VER=1929
+    SET LP3D_VCSDKVER=10.0
+    SET LP3D_VCTOOLSET=v142
+    SET LP3D_VCVARSALL_VER=-vcvars_ver=14.2
+  )
 ) ELSE (
-  SET LP3D_VCVERSION=8.1
+  SET LP3D_VCSDKVER=8.1
   SET LP3D_VCTOOLSET=v140
-  SET LP3D_VCVARSALL_VER=-vcvars_ver=14.0  
+  SET LP3D_VCVARSALL_VER=-vcvars_ver=14.0
 )
 ECHO.
 ECHO   PLATFORM_ARCH..........[%1]
 ECHO   MSVS_VERSION...........[%LP3D_VSVERSION%]
-ECHO   MSVC_VERSION...........[%LP3D_VCVERSION%]
+ECHO   MSVC_SDK_VERSION.......[%LP3D_VCSDKVER%]
 ECHO   MSVC_TOOLSET...........[%LP3D_VCTOOLSET%]
+ECHO   MSVC_VCVARSALL_VER.....[%LP3D_VCVARSALL_VER%]
+ECHO   MSVC_VCVARSALL_DIR.....[%LP3D_VCVARSALL_DIR%]
 EXIT /b
 
 :CONFIGURE_BUILD_ENV
-ECHO.
-ECHO -Configure %PACKAGE% %PLATFORM_ARCH% build environment...
-rem Set vcvars for AppVeyor or local build environments
 IF "%PATH_PREPENDED%" NEQ "True" (
-  IF %PLATFORM_ARCH% EQU Win32 (
-    ECHO.
-    IF EXIST "%LP3D_VCVARSALL%\vcvars32.bat" (
-      CALL "%LP3D_VCVARSALL%\vcvars32.bat" %LP3D_VCVARSALL_VER%
-    ) ELSE (
-      ECHO -ERROR: vcvars32.bat not found.
-      GOTO :ERROR_END
-    )
+  IF "%LP3D_CONDA_BUILD%" EQU "True" (
+    SET "PATH=%PATH%"
   ) ELSE (
-    ECHO.
-    IF EXIST "%LP3D_VCVARSALL%\vcvars64.bat" (
-      CALL "%LP3D_VCVARSALL%\vcvars64.bat" %LP3D_VCVARSALL_VER%
+    IF %PLATFORM_ARCH% EQU Win32 (
+      ECHO.
+      IF EXIST "%LP3D_VCVARSALL_DIR%\vcvars32.bat" (
+        CALL "%LP3D_VCVARSALL_DIR%\vcvars32.bat" %LP3D_VCVARSALL_VER%
+      ) ELSE (
+        ECHO -ERROR: vcvars32.bat not found.
+        GOTO :ERROR_END
+      )
     ) ELSE (
-      ECHO -ERROR: vcvars64.bat not found.
-      GOTO :ERROR_END
+      ECHO.
+      IF EXIST "%LP3D_VCVARSALL_DIR%\vcvars64.bat" (
+        CALL "%LP3D_VCVARSALL_DIR%\vcvars64.bat" %LP3D_VCVARSALL_VER%
+      ) ELSE (
+        ECHO -ERROR: vcvars64.bat not found.
+        GOTO :ERROR_END
+      )
     )
   )
   rem Display MSVC Compiler settings
-  cl -Bv
+  ECHO.
+  ECHO.%LP3D_MSC_VER% > %TEMP%\settings.c
+  cl.exe -Bv -EP %TEMP%\settings.c >NUL
   ECHO.
 ) ELSE (
   ECHO.
   ECHO -%PLATFORM_ARCH% build environment already configured...
+)
+ECHO.
+SETLOCAL ENABLEDELAYEDEXPANSION
+ECHO( -PATH......[!PATH!]
+  ENDLOCAL
 )
 rem Set the LPub3D-Trace auto-build pre-processor defines
 CALL autobuild_defs.cmd
