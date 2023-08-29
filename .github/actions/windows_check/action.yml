@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: May 22, 2022
+# Last Update: August 29, 2023
 #
 name: 'Check POV-Ray CLI for Windows'
 description: 'Run build check step for POV-Ray CLI for Windows'
@@ -57,7 +57,7 @@ runs:
       ECHO Create %CONFIG_DIR%\povray.conf...
       COPY /V /Y "..\..\distribution\povray.conf" "%CONFIG_DIR%\povray.conf" /A
       SET genConfigFile="%CONFIG_DIR%\povray.conf" ECHO
-      :GENERATE build check povray.conf settings file
+      :GENERATE build check povray.conf settings file - append read+write settings
       >>%genConfigFile%.
       >>%genConfigFile% ; LPub3D-Trace-CUI build check conf settings
       >>%genConfigFile%.
@@ -71,7 +71,7 @@ runs:
       ECHO Create %CONFIG_DIR%\povray.ini...
       COPY /V /Y "..\..\distribution\ini\povray.ini" "%CONFIG_DIR%\povray.ini" /A
       SET genConfigFile="%CONFIG_DIR%\povray.ini" ECHO
-      :GENERATE build check povray.ini settings file
+      :GENERATE build check povray.ini settings file - append output settings
       >>%genConfigFile%.
       >>%genConfigFile% ; LPub3D-Trace-CUI build check ini settings
       >>%genConfigFile%.
@@ -81,6 +81,3 @@ runs:
       ECHO BUILD_CHECK_COMMAND......[%PACKAGE%%PL%.exe %BUILD_CHK_COMMAND%]
       bin%PL%\%PACKAGE%%PL%.exe %BUILD_CHK_COMMAND%
       ENDLOCAL
-
-
-

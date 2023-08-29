@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: May 22, 2022
+# Last Update: August 29, 2023
 #
 name: 'Build POV-Ray CLI for Windows Binary'
 description: 'Build POV-Ray CLI for Windows Binary'
@@ -21,22 +21,26 @@ inputs:
     required: true
     default: 'GitHub for LPub3D'
   solution:
-    description: 'subdirectory of `windows` in which `povray.sln` is located'
+    description: 'Subdirectory of `windows` in which `povray.sln` is located - vs2015'
     required: true
   configuration:
-    description: 'solution configuration to build'
+    description: 'Solution configuration to build - Release, Release-SSE2'
     required: false
     default: 'Release'
   platform:
-    description: 'solution platform to build'
+    description: 'Solution platform to build - x64, Win32'
     required: false
     default: 'x64'
   toolset:
-    description: 'Platform toolset version'
+    description: 'Platform toolset version - v142(x64), v140(Win32)'
     required: false
-    default: 'v140'
+    default: 'v142'
+  compatibility:
+    description: 'Toolset compatibility -e.g. _xp(Win32)'
+    required: false
+    default: ''    
   msbuild-options:
-    description: 'additional MSBuild options'
+    description: 'Additional MSBuild options -e.g. /p:TargetUniversalCRTVersion=10.0.10586.0(Win32)'
     required: false
     default: ''
 
@@ -54,7 +58,7 @@ runs:
         /t:Rebuild /m `
         /p:Configuration=${{ inputs.configuration }} `
         /p:Platform=${{ inputs.platform }} `
-        /p:PlatformToolset=${{ inputs.toolset }} `
+        /p:PlatformToolset=${{ inputs.toolset }}${{ inputs.compatibility }} `
         ${{ inputs.msbuild-options }} `
         windows/${{ inputs.solution }}/console.vcxproj `
         /clp:ErrorsOnly /nologo
