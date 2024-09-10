@@ -18,7 +18,7 @@ on:
 jobs:
   build_unix:
     # if: ${{ false }} # uncomment to disable
-    name: '${{ matrix.os }} ${{ matrix.c-compiler }}'
+    name: 'build-${{ matrix.os }} ${{ matrix.c-compiler }}'
 
     runs-on: ${{ matrix.os }}
     strategy:
@@ -88,8 +88,24 @@ jobs:
 
   build_windows:
     # if: ${{ false }} # uncomment to disable
-    name: 'Windows VS 2022'
-    runs-on: windows-2022
+    name: 'build-${{ matrix.runner }} ${{ matrix.platform }}'
+
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [windows-2022]
+        platform: [Win32, x64]
+        include:
+        - platform: Win32
+          toolset: v140
+          compatibility: '_xp'
+          msbuild-options: ''
+        - platform: x64
+          toolset: v143
+          compatibility: ''
+          msbuild-options: ''
+
     steps:
 
     - name: 'Check out Repository'
@@ -101,14 +117,14 @@ jobs:
     - name: 'Build'
       uses: trevorsandy/povray/.github/actions/windows_build@gh-actions-raytracer-v3
       with:
-        pov-ray-build-id: gh+vs2022+${{ github.run_number }}
+        pov-ray-build-id: gh+vs2022+${{ matrix.platform }}+${{ github.run_number }}
         version-base: 3.8
         solution: vs2015
         configuration: Release
-        platform: x64
-        toolset: v143
-        compatibility: ''
-        msbuild-options: ''
+        platform: ${{ matrix.platform }}
+        toolset: ${{ matrix.toolset }}
+        compatibility: ${{ matrix.compatibility }}
+        msbuild-options: ${{ matrix.msbuild-options }}
 
     - name: 'Build Check'
       if: ${{ success() }}
@@ -116,4 +132,11 @@ jobs:
       with:
         version-base: 3.8
         solution: vs2015
-        platform: x64
+        platform: ${{ matrix.platform }}
+
+    - name: 'Upload Artifacts for Diagnostics'
+      if: ${{ failure() }}
+      uses: actions/upload-artifact@v3
+      with:
+        name: artifact_diag_${{ matrix.runner }}_${{ matrix.platform }}
+        path: artifact_diag_${{ matrix.runner }}_${{ matrix.platform }}.zip
