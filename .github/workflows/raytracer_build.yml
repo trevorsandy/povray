@@ -1,8 +1,8 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: August 29, 2023
+# Last Update: September 10, 2024
 #
-name: 'Test Builds'
+name: 'LPub3D Trace CUI Builds'
 
 on:
   workflow_dispatch:
@@ -18,21 +18,53 @@ on:
 jobs:
   build_unix:
     # if: ${{ false }} # uncomment to disable
-    name: 'Unix Build'
-    runs-on: ubuntu-latest
+    name: '${{ matrix.os }} ${{ matrix.c-compiler }}'
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, macos-13]
+        c-compiler: [gcc, clang]
+        exclude:
+        - os: macos-13
+          c-compiler: gcc
+        include:
+        # os-specific
+        - os: ubuntu-22.04
+        - os: macos-13
+        # compiler-specific
+        - c-compiler: gcc
+          cxx-compiler: g++
+        - c-compiler: clang
+          cxx-compiler: clang++
+
     steps:
 
+    - name: 'Matrix Diagnostics'
+      shell: bash
+      run: |
+        echo '${{ toJSON(matrix) }}'
+        ${{matrix.c-compiler}} --version
+
     - name: 'Check out Repository'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 'Install Prerequisites'
       uses: trevorsandy/povray/.github/actions/unix_getlibs@gh-actions-raytracer-v2
 
     - name: 'Prebuild'
       uses: trevorsandy/povray/.github/actions/unix_prebuild@gh-actions-raytracer-v2
+    - name: 'Sanity-Check Working Tree'
+      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v2
 
     - name: 'Configure'
       uses: trevorsandy/povray/.github/actions/unix_configure@gh-actions-raytracer-v2
+      with:
+        c-compiler: ${{ matrix.c-compiler }}
+        cxx-compiler: ${{ matrix.cxx-compiler }}
+    - name: 'Sanity-Check Working Tree'
+      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v2
 
     - name: 'Bundle Artifacts for Diagnostics'
       if: ${{ always() }}
@@ -42,41 +74,45 @@ jobs:
 
     - name: 'Build'
       uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v2
+    - name: 'Sanity-Check Working Tree'
+      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v2
 
     - name: 'Build Check'
       if: ${{ success() }}
       uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v2
       with:
         make-target: check
+    - name: 'Sanity-Check Working Tree'
+      uses: trevorsandy/povray/.github/actions/git_check_repo@gh-actions-raytracer-v2
 
     - name: 'Upload Artifacts for Diagnostics'
       if: ${{ failure() }}
       uses: actions/upload-artifact@v3
       with:
-        name: artifact_diag_unix
-        path: artifact_diag_unix.tar.gz
+        name: artifact_diag_${{ matrix.os }}_${{ matrix.c-compiler }}
+        path: artifact_diag_${{ matrix.os }}_${{ matrix.c-compiler }}.tar.gz
 
   build_windows:
     # if: ${{ false }} # uncomment to disable
-    name: 'Windows Build'
-    runs-on: windows-2019
+    name: 'Windows VS 2022'
+    runs-on: windows-2022
     steps:
 
     - name: 'Check out Repository'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
 
     - name: 'Add MSBuild to PATH'
-      uses: microsoft/setup-msbuild@v1.1
+      uses: microsoft/setup-msbuild@v2
 
     - name: 'Build'
       uses: trevorsandy/povray/.github/actions/windows_build@gh-actions-raytracer-v2
       with:
-        pov-ray-build-id: gh+vs2019+${{ github.run_number }}
+        pov-ray-build-id: gh+vs2022+${{ github.run_number }}
         version-base: 3.8
         solution: vs2015
         configuration: Release
         platform: x64
-        toolset: v142
+        toolset: v143
         compatibility: ''
         msbuild-options: ''
 
