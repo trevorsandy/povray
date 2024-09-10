@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: May 22, 2022
+# Last Update: September 10, 2022
 #
 name: 'Sanity-Check Working Tree'
 description: 'Verify that working tree (and index) of repository is "clean"'
@@ -23,7 +23,13 @@ runs:
         echo "::error::Build process tampers with tracked files."
       fi
       echo "::group::Offending files:"
-      echo "$untracked"
-      echo "$changed"
+      if test -n "$untracked" ; then
+        echo "Added files:"
+        echo "$untracked"
+      fi
+      if test -n "$changed" ; then
+        echo "Changed files:"
+        echo "$changed"
+      fi
       echo "::endgroup::"
       exit 1
