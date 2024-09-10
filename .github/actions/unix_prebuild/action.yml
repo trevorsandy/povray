@@ -9,4 +9,4 @@ runs:
   steps:
   - shell: bash
     run: |
-      cd unix && ./prebuild3rdparty.sh && cd ..
+      cd unix && chmod a+x prebuild3rdparty.sh && ./prebuild3rdparty.sh && cd ..
