@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: May 22, 2022
+# Last Update: September 10, 2024
 #
 name: 'Pre-Build POV-Ray CLI for Unix'
 description: 'Run `prebuild3rdparty.sh` build step for POV-Ray CLI for Unix'
@@ -9,4 +9,4 @@ runs:
   steps:
   - shell: bash
     run: |
-      cd unix && chmod a+x prebuild3rdparty.sh && ./prebuild3rdparty.sh && cd ..
+      cd unix && ./prebuild3rdparty.sh && cd ..
