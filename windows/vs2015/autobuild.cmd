@@ -11,7 +11,7 @@ rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
 rem  Last Update: August 29, 2023
-rem  Copyright (c) 2019 - 2023 by Trevor SANDY
+rem  Copyright (c) 2019 - 2024 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
 rem but WITHOUT ANY WARRANTY; without even the implied warranty of

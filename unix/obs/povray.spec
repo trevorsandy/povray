@@ -1,7 +1,7 @@
 #
 # spec file for package lpub3d
 #
-# Copyright © 2017-2023 Trevor SANDY
+# Copyright © 2017 - 2024 Trevor SANDY
 # Using RPM Spec file examples from SUSE LINUX GmbH, Nuernberg, Germany.
 # This file and all modifications and additions to the pristine
 # package are under the same license as the package itself.
