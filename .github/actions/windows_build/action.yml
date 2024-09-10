@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: August 29, 2023
+# Last Update: September 10, 2024
 #
 name: 'Build POV-Ray CLI for Windows Binary'
 description: 'Build POV-Ray CLI for Windows Binary'
@@ -47,25 +47,26 @@ inputs:
 runs:
   using: composite
   steps:
-  - shell: pwsh
+  - name: VC v140 Build Tools
+    if: ${{ inputs.platform == 'Win32' }}
     run: |
-      if ('${{ inputs.platform }}' -eq 'Win32')
-      {
-        echo "::group::Win32 MSVS 2015 VC v140 Build Tools"
-        Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
-        $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
-        $ComponentsToAdd= @("Microsoft.VisualStudio.Component.VC.140")
-        [string]$WorkloadArgs = $ComponentsToAdd | ForEach-Object {" --add " +  $_}
-        $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$WorkloadArgs, '--quiet', '--norestart', '--nocache')
-        # should be run twice
-        $Process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
-        $Process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
-        echo "::endgroup::"
-        echo "::group::Win32 Windows 8.1 SDK"
-        Invoke-WebRequest -Method Get -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdksetup.exe -UseBasicParsing
-        Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit" # Optional feature: , "OptionId.NetFxSoftwareDevelopmentKit"
-        echo "::endgroup::"
-      }
+      Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
+      $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+      $ComponentsToAdd= @("Microsoft.VisualStudio.Component.VC.140")
+      [string]$WorkloadArgs = $ComponentsToAdd | ForEach-Object {" --add " +  $_}
+      $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$WorkloadArgs, '--quiet', '--norestart', '--nocache')
+      # should be run twice
+      $Process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+      $Process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+    shell: pwsh
+  - name: Windows 8.1 SDK
+    if: ${{ inputs.platform == 'Win32' }}
+    run: |
+      Invoke-WebRequest -Method Get -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdksetup.exe -UseBasicParsing
+      Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit"
+    shell: pwsh
+  - name: Build ${{ inputs.platform }}
+    run: |
       $env:PovBuildDefs  = 'POV_RAY_IS_AUTOBUILD=${{ inputs.pov-ray-is-autobuild }};'
       $env:PovBuildDefs += 'POV_RAY_BUILD_ID="${{ inputs.pov-ray-build-id }}";'
       $env:PovBuildDefs += 'VERSION_BASE="${{ inputs.version-base }}";'
@@ -79,3 +80,4 @@ runs:
         ${{ inputs.msbuild-options }} `
         windows/${{ inputs.solution }}/console.vcxproj `
         /clp:ErrorsOnly /nologo
+    shell: pwsh
