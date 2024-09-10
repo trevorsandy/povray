@@ -45,6 +45,10 @@
 #include "Iex.h"
 #include <string.h>
 #include <map>
+// error C2039: 'binary_function': is not a member of 'std'
+#if defined(_MSC_VER) && _MSC_VER >= 1930
+#include <functional>
+#endif // Visual Studio 2020 v170 or later
 
 #include "ImfNamespace.h"
 
