@@ -10,7 +10,7 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: August 29, 2023
+rem  Last Update: September 09, 2024
 rem  Copyright (c) 2019 - 2024 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -21,7 +21,7 @@ rem It is expected that this script will reside in .\windows\vs2015
 
 CALL :ELAPSED_BUILD_TIME Start
 
-IF "%LP3D_VSVERSION%" == "" SET "LP3D_VSVERSION=2019"
+IF "%LP3D_VSVERSION%" == "" SET "LP3D_VSVERSION=2022"
 
 IF "%GITHUB%" EQU "True" (
   SET "BUILD_WORKER=True"
@@ -66,6 +66,12 @@ IF "%CI%" EQU "True" (
 )
 
 IF "%LP3D_CONDA_BUILD%" NEQ "True" (
+  IF EXIST "C:\Program Files\Microsoft Visual Studio\%LP3D_VSVERSION%\Community\VC\Auxiliary\Build" (
+    SET LP3D_VCVARSALL_DIR=C:\Program Files\Microsoft Visual Studio\%LP3D_VSVERSION%\Community\VC\Auxiliary\Build
+  )
+  IF EXIST "C:\Program Files\Microsoft Visual Studio\%LP3D_VSVERSION%\Enterprise\VC\Auxiliary\Build" (
+    SET LP3D_VCVARSALL_DIR=C:\Program Files\Microsoft Visual Studio\%LP3D_VSVERSION%\Enterprise\VC\Auxiliary\Build
+  )
   IF EXIST "C:\Program Files (x86)\Microsoft Visual Studio\%LP3D_VSVERSION%\Professional\VC\Auxiliary\Build" (
     SET LP3D_VCVARSALL_DIR=C:\Program Files ^(x86^)\Microsoft Visual Studio\%LP3D_VSVERSION%\Professional\VC\Auxiliary\Build
   )  
@@ -91,7 +97,7 @@ rem Visual C++ 2015 -vcvars_ver=14.0 version 14.0  _MSC_VER 1900
 rem Visual C++ 2017 -vcvars_ver=14.1 version 15.9  _MSC_VER 1916
 rem Visual C++ 2019 -vcvars_ver=14.2 version 16.11 _MSC_VER 1929
 rem Visual C++ 2022 -vcvars_ver=14.2 version 17.3  _MSC_VER 1933
-IF "%LP3D_MSC_VER%" == "" SET LP3D_MSC_VER=1929
+IF "%LP3D_MSC_VER%" == "" SET LP3D_MSC_VER=1900
 IF "%LP3D_VCSDKVER%" == "" SET LP3D_VCSDKVER=8.1
 IF "%LP3D_VCTOOLSET%" == "" SET LP3D_VCTOOLSET=v140
 IF "%LP3D_VCVARSALL_VER%" == "" SET LP3D_VCVARSALL_VER=-vcvars_ver=14.0
@@ -533,10 +539,10 @@ ECHO.
 ECHO -Set MSBuild platform toolset...
 IF %1==x64 (
   IF "%LP3D_CONDA_BUILD%" NEQ "True" (
-    SET LP3D_MSC_VER=1929
+    SET LP3D_MSC_VER=1933
     SET LP3D_VCSDKVER=10.0
-    SET LP3D_VCTOOLSET=v142
-    SET LP3D_VCVARSALL_VER=-vcvars_ver=14.2
+    SET LP3D_VCTOOLSET=v143
+    SET LP3D_VCVARSALL_VER=-vcvars_ver=14.3
   )
 ) ELSE (
   SET LP3D_VCSDKVER=8.1
