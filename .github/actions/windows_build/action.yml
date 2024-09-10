@@ -38,7 +38,7 @@ inputs:
   compatibility:
     description: 'Toolset compatibility -e.g. _xp(Win32)'
     required: false
-    default: ''    
+    default: ''
   msbuild-options:
     description: 'Additional MSBuild options -e.g. /p:TargetUniversalCRTVersion=10.0.10586.0(Win32)'
     required: false
@@ -49,6 +49,23 @@ runs:
   steps:
   - shell: pwsh
     run: |
+      if (${{ inputs.platform }} -eq 'Win32')
+      {
+        echo "::group::Win32 MSVS 2015 VC v140 Build Tools"
+        Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
+        InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
+        ComponentsToAdd= @("Microsoft.VisualStudio.Component.VC.140")
+        [string]$WorkloadArgs = $ComponentsToAdd | ForEach-Object {" --add " +  $_}
+        Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$WorkloadArgs, '--quiet', '--norestart', '--nocache')
+        # should be run twice
+        Process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+        Process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
+        echo "::endgroup::"
+        echo "::group::Win32 Windows 8.1 SDK"
+        Invoke-WebRequest -Method Get -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdksetup.exe -UseBasicParsing
+        Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit" # Optional feature: , "OptionId.NetFxSoftwareDevelopmentKit"
+        echo "::endgroup::"
+      }
       $env:PovBuildDefs  = 'POV_RAY_IS_AUTOBUILD=${{ inputs.pov-ray-is-autobuild }};'
       $env:PovBuildDefs += 'POV_RAY_BUILD_ID="${{ inputs.pov-ray-build-id }}";'
       $env:PovBuildDefs += 'VERSION_BASE="${{ inputs.version-base }}";'
