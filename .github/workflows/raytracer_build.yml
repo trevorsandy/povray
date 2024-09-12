@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: September 10, 2024
+# Last Update: September 12, 2024
 #
 name: 'LPub3D Trace CUI Builds'
 
@@ -53,29 +53,29 @@ jobs:
       uses: actions/checkout@v4
 
     - name: 'Install Prerequisites'
-      uses: trevorsandy/povray/.github/actions/unix_getlibs@gh-actions-raytracer-v3
+      uses: trevorsandy/povray/.github/actions/unix_getlibs@gh-actions-raytracer-v4
 
     - name: 'Prebuild'
-      uses: trevorsandy/povray/.github/actions/unix_prebuild@gh-actions-raytracer-v3
+      uses: trevorsandy/povray/.github/actions/unix_prebuild@gh-actions-raytracer-v4
 
     - name: 'Configure'
-      uses: trevorsandy/povray/.github/actions/unix_configure@gh-actions-raytracer-v3
+      uses: trevorsandy/povray/.github/actions/unix_configure@gh-actions-raytracer-v4
       with:
         c-compiler: ${{ matrix.c-compiler }}
         cxx-compiler: ${{ matrix.cxx-compiler }}
 
     - name: 'Bundle Artifacts for Diagnostics'
       if: ${{ always() }}
-      uses: trevorsandy/povray/.github/actions/git_bundle_ignored@gh-actions-raytracer-v3
+      uses: trevorsandy/povray/.github/actions/git_bundle_ignored@gh-actions-raytracer-v4
       with:
         name: artifact_diag_unix.tar.gz
 
     - name: 'Build'
-      uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v3
+      uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v4
 
     - name: 'Build Check'
       if: ${{ success() }}
-      uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v3
+      uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v4
       with:
         make-target: check
 
@@ -115,7 +115,7 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: 'Build'
-      uses: trevorsandy/povray/.github/actions/windows_build@gh-actions-raytracer-v3
+      uses: trevorsandy/povray/.github/actions/windows_build@gh-actions-raytracer-v4
       with:
         pov-ray-build-id: gh+vs2022+${{ matrix.platform }}+${{ github.run_number }}
         version-base: 3.8
@@ -128,7 +128,7 @@ jobs:
 
     - name: 'Build Check'
       if: ${{ success() }}
-      uses: trevorsandy/povray/.github/actions/windows_check@gh-actions-raytracer-v3
+      uses: trevorsandy/povray/.github/actions/windows_check@gh-actions-raytracer-v4
       with:
         version-base: 3.8
         solution: vs2015
