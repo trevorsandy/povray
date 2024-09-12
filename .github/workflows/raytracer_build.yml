@@ -98,8 +98,8 @@ jobs:
         platform: [Win32, x64]
         include:
         - platform: Win32
-          toolset: v140
-          compatibility: '_xp'
+          toolset: v141
+          compatibility: ''
           msbuild-options: ''
         - platform: x64
           toolset: v143
