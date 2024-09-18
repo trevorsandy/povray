@@ -81,7 +81,7 @@ jobs:
 
     - name: 'Upload Artifacts for Diagnostics'
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: artifact_diag_${{ matrix.os }}_${{ matrix.c-compiler }}
         path: artifact_diag_${{ matrix.os }}_${{ matrix.c-compiler }}.tar.gz
@@ -136,7 +136,7 @@ jobs:
 
     - name: 'Upload Artifacts for Diagnostics'
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: artifact_diag_${{ matrix.runner }}_${{ matrix.platform }}
         path: artifact_diag_${{ matrix.runner }}_${{ matrix.platform }}.zip

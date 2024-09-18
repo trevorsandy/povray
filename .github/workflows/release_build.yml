@@ -104,7 +104,7 @@ jobs:
         gzip "${tarfile}"
 
     - name: 'Upload Artifacts for Release'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: artifact_unix_package
         path: povunix-*.tar.gz
@@ -151,7 +151,7 @@ jobs:
         cp *.pdf "${basedir}/artifact/povray-v${POV_RAY_FULL_VERSION}-sourcedoc.pdf"
 
     - name: 'Upload Artifacts for Installer Release'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: artifact_sourcedoc
         path: artifact/*
@@ -252,7 +252,7 @@ jobs:
         }
 
     - name: 'Upload Artifacts for Installer Build'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: artifact_installer_tree
         path: installer/*
@@ -306,14 +306,14 @@ jobs:
         version-prototype: "installer/core/bin/pvengine64.exe"
 
     - name: 'Upload Artifacts for Release'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: artifact_installer
         path: ${{ steps.build-installer.outputs.installer-file }}
 
     - name: 'Upload Installer Artifacts for Diagnostics'
       if: ${{ failure() }}
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: artifact_installer_diag
         path: installer/*

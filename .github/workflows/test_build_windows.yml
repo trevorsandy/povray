@@ -78,7 +78,7 @@ jobs:
     - name: 'Sanity-Check Working Tree'
       uses: POV-Ray/povray/.github/actions/git_check_repo@gh-actions-v1
     - name: 'Upload Artifacts for Manual Testing'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: artifact_bin_${{matrix.visual-studio}}_${{matrix.variant}}${{matrix.compatibility}}
         path: windows/${{matrix.solution}}/bin*/*.exe
