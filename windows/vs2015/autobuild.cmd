@@ -676,7 +676,7 @@ IF  %INSTALL_ALL% == 1  SET DIST_INSTALL_SRC="..\..\distribution\platform-specif
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\CUI_README.txt" "%DIST_INSTALL_PATH%" /A
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\LICENSE" "%DIST_INSTALL_PATH%\LICENSE.txt" /A
 IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\changes.txt" "%DIST_INSTALL_PATH%\ChangeLog.txt" /A
-IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\unix\AUTHORS" "%DIST_INSTALL_PATH%\AUTHORS.txt" /A
+IF  %INSTALL_ALL% == 1  COPY /V /Y "..\..\unix\prebuild\AUTHORS" "%DIST_INSTALL_PATH%\AUTHORS.txt" /A
 IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_INSTALL_SRC%\Help" "%DIST_INSTALL_PATH%\help"
 IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Installing Resources...
