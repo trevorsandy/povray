@@ -332,7 +332,12 @@ const int NULL=0;
 #elif defined(__CYGWIN__)
     // Cygwin detected.
     // Not officially supported yet; comment-out the following line to try with default POSIX settings.
-    #error "Cygwin detected, but not explicitly supported yet; proceed at your own risk."
+    // #error "Cygwin detected, but not explicitly supported yet; proceed at your own risk."
+    #include "syspovconfig_posix.h"
+#elif defined(__MINGW64__)
+    // Cygwin detected.
+    // Not officially supported yet; comment-out the following line to try with default POSIX settings.
+    #warning "MinGW-64 detected, but not explicitly supported yet; proceed at your own risk."
     #include "syspovconfig_posix.h"
 #elif defined(__unix__)
     // Some Unix other than the above detected.

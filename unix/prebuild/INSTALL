@@ -406,6 +406,9 @@ Additional POV-Ray specific options are:
     below.
     BETA: support for the cygwin environment hasn't been tested much.
 
+--with-x (default) or without-x
+	enable or disable the X Window display using the X11 library.
+	
 --enable-watch-cursor
     enables the mouse pointer to show up as a watch cursor over the X Window
     display while rendering the image.
@@ -496,7 +499,6 @@ C99_COMPATIBLE_RADIOSITY={1,2,3,4}
     top of the octree.cpp source file.  On platforms where integer ('int')
     and single-precision floating-point ('float') numbers are not 32-bit,
     configure will try to determine automatically which function to use.
-
 
 =================
 5. Reporting bugs
