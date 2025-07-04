@@ -45,12 +45,12 @@
 #ifndef POVRAY_WINDOWS_SYSPOVCONFIG_H
 #define POVRAY_WINDOWS_SYSPOVCONFIG_H
 
-#ifdef BUILDING_AMD64
-  #if !defined(_M_AMD64) && !defined(_M_X64)
+#if defined(BUILDING_AMD64) || defined(BUILDING_ARM64)
+  #if !defined(_M_AMD64) && !defined(_M_X64) && !defined(_M_ARM64)
     #error "you are compiling the x64 project using a 32-bit compiler"
   #endif
 #else
-  #if defined(_M_AMD64) || defined(_M_X64)
+  #if defined(_M_AMD64) || defined(_M_X64) || defined(_M_ARM64)
     #error "you are compiling the 32-bit project using a 64-bit compiler"
   #endif
 #endif
@@ -124,7 +124,11 @@ using boost::intrusive_ptr;
 
 #ifdef _WIN64
   #define POVRAY_PLATFORM_NAME "win64"
+  #ifdef _M_ARM64
+  #define BUILD_ARCH "ARM-based arm64"
+  #else
   #define BUILD_ARCH "Intel-based x86_64"
+  #endif
   #define BUILT_FOR "Microsoft Windows 64bit"
 #else
   #define POVRAY_PLATFORM_NAME "win32"
@@ -148,7 +152,7 @@ using boost::intrusive_ptr;
   #error "Currently not supported."
   #include "syspovconfig_borland.h"
   #define COMPILER_VENDOR "Borland C/C++"
-#elif defined(_MSC_VER)                     /* Microsoft and Intel C++ */
+#elif defined(_MSC_VER)                     /* Microsoft C++ */
   #include "syspovconfig_msvc.h"
   #define COMPILER_VENDOR "Microsoft Visual C++"
 #else

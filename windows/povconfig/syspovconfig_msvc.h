@@ -146,10 +146,15 @@
     // The following settings are just guesswork, and have never been tested:
     #define POV_CPP11_SUPPORTED               0
   // NB: The Microsoft Visual Studio developers seem to have skipped internal version number 13 entirely.
-  #elif _MSC_VER >= 1900 && _MSC_VER < 2000
+  #elif _MSC_VER >= 1900 && _MSC_VER < 1930
     // MS Visual C++ 2015 (aka 14.0)
     #define POV_COMPILER_VER                  "msvc14"
     #define METADATA_COMPILER_STRING          "msvc 14"
+    #define POV_CPP11_SUPPORTED               1
+  #elif _MSC_VER >= 1930 && _MSC_VER < 2000
+    // MS Visual C++ 2022 (aka 14.3)
+    #define POV_COMPILER_VER                  "msvc14.3"
+    #define METADATA_COMPILER_STRING          "msvc 14.3"
     #define POV_CPP11_SUPPORTED               1
   #else
     #error "Please update syspovconfig_msvc.h to include this version of MSVC"
@@ -162,6 +167,8 @@
 #ifdef _WIN64
   #if defined(_M_X64)
     #define METADATA_PLATFORM_STRING        "x86_64-pc-win"
+  #elif defined(_M_ARM64)
+    #define METADATA_PLATFORM_STRING        "arm64-pc-win"
   #else
     #error "Please update msvc.h to include this 64-bit architecture"
   #endif
@@ -220,22 +227,24 @@
 #define ALIGN32                             __declspec(align(32))
 #define MACHINE_INTRINSICS_H                <intrin.h>
 
-#if _MSC_VER >= 1600
-    // compiler supports AVX.
-    #define TRY_OPTIMIZED_NOISE                 // optimized noise master switch.
-    #define TRY_OPTIMIZED_NOISE_AVX_PORTABLE    // AVX-only compiler-optimized noise.
-    #define TRY_OPTIMIZED_NOISE_AVX             // AVX-only hand-optimized noise (Intel).
-    #define TRY_OPTIMIZED_NOISE_AVXFMA4         // AVX/FMA4 hand-optimized noise (AMD).
+#ifndef _M_ARM64
+  #if _MSC_VER >= 1600
+      // compiler supports AVX.
+      #define TRY_OPTIMIZED_NOISE                 // optimized noise master switch.
+      #define TRY_OPTIMIZED_NOISE_AVX_PORTABLE    // AVX-only compiler-optimized noise.
+      #define TRY_OPTIMIZED_NOISE_AVX             // AVX-only hand-optimized noise (Intel).
+      #define TRY_OPTIMIZED_NOISE_AVXFMA4         // AVX/FMA4 hand-optimized noise (AMD).
+  #endif
+  
+  #if _MSC_VER >= 1900
+      // compiler supports AVX2.
+      #define TRY_OPTIMIZED_NOISE                 // optimized noise master switch.
+      #define TRY_OPTIMIZED_NOISE_AVX2FMA3        // AVX2/FMA3 hand-optimized noise (Intel).
+  #endif
+  
+  #define POV_CPUINFO         CPUInfo::GetFeatures()
+  #define POV_CPUINFO_DETAILS CPUInfo::GetDetails()
+  #define POV_CPUINFO_H       "cpuid.h"
 #endif
-
-#if _MSC_VER >= 1900
-    // compiler supports AVX2.
-    #define TRY_OPTIMIZED_NOISE                 // optimized noise master switch.
-    #define TRY_OPTIMIZED_NOISE_AVX2FMA3        // AVX2/FMA3 hand-optimized noise (Intel).
-#endif
-
-#define POV_CPUINFO         CPUInfo::GetFeatures()
-#define POV_CPUINFO_DETAILS CPUInfo::GetDetails()
-#define POV_CPUINFO_H       "cpuid.h"
 
 #endif // POVRAY_WINDOWS_SYSPOVCONFIG_MSVC_H

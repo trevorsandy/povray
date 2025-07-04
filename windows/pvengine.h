@@ -40,12 +40,12 @@
 #ifndef PVENGINE_H_INCLUDED
 #define PVENGINE_H_INCLUDED
 
-#ifdef BUILDING_AMD64
-  #if !defined(_M_AMD64) && !defined(_M_X64)
+#if defined(BUILDING_AMD64) || defined(BUILDING_ARM64)
+  #if !defined(_M_AMD64) && !defined(_M_X64) && !defined(_M_ARM64)
     #error "you are compiling the x64 project using a 32-bit compiler"
   #endif
 #else
-  #if defined(_M_AMD64) || defined(_M_X64)
+  #if defined(_M_AMD64) || defined(_M_X64) || defined(_M_ARM64)
     #error "you are compiling the 32-bit project using a 64-bit compiler"
   #endif
 #endif
@@ -91,13 +91,21 @@
 
 #if POV_RAY_IS_OFFICIAL
   #ifdef _WIN64
-    #define CLASSNAMEPREFIX "Pov" POV_RAY_MAJOR_VERSION POV_RAY_MINOR_VERSION "-Win64-"
+    #ifdef _M_ARM64
+	  #define CLASSNAMEPREFIX "Pov" POV_RAY_MAJOR_VERSION POV_RAY_MINOR_VERSION "-ARM64-"
+	#else
+      #define CLASSNAMEPREFIX "Pov" POV_RAY_MAJOR_VERSION POV_RAY_MINOR_VERSION "-Win64-"
+    #endif
   #else
     #define CLASSNAMEPREFIX "Pov" POV_RAY_MAJOR_VERSION POV_RAY_MINOR_VERSION "-Win32-"
   #endif
 #else
   #ifdef _WIN64
-    #define CLASSNAMEPREFIX "Unofficial-Pov" POV_RAY_MAJOR_VERSION POV_RAY_MINOR_VERSION "-Win64-"
+    #ifdef _M_ARM64
+	  #define CLASSNAMEPREFIX "Unofficial-Pov" POV_RAY_MAJOR_VERSION POV_RAY_MINOR_VERSION "-ARM64-"
+	#else
+      #define CLASSNAMEPREFIX "Unofficial-Pov" POV_RAY_MAJOR_VERSION POV_RAY_MINOR_VERSION "-Win64-"
+	#endif
   #else
     #define CLASSNAMEPREFIX "Unofficial-Pov" POV_RAY_MAJOR_VERSION POV_RAY_MINOR_VERSION "-Win32-"
   #endif
@@ -105,7 +113,11 @@
 
 #ifdef DEVELOPMENT
   #ifdef _WIN64
-    #define CAPTIONPREFIX "[WIN64]"
+    #ifdef _M_ARM64
+      #define CAPTIONPREFIX "[ARM64]"
+    #else
+      #define CAPTIONPREFIX "[WIN64]"
+    #endif
   #else
     #define CAPTIONPREFIX "[WIN32]"
   #endif
