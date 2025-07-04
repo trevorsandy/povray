@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: September 12, 2024
+# Last Update: July 04, 2025
 #
 name: 'LPub3D Trace CUI Builds'
 
@@ -24,10 +24,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-22.04, macos-13, macos-14]
+        os: [ubuntu-24.04, macos-13, macos-14]
         c-compiler: [gcc, clang]
         exclude:
-        - os: ubuntu-22.04
+        - os: ubuntu-24.04
           c-compiler: clang
         - os: macos-13
           c-compiler: gcc
@@ -35,7 +35,7 @@ jobs:
           c-compiler: gcc
         include:
         # os-specific
-        - os: ubuntu-22.04
+        - os: ubuntu-24.04
         - os: macos-13
         - os: macos-14       
         # compiler-specific
@@ -97,14 +97,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: [windows-2022]
+        runner: [windows-2025]
         platform: [Win32, x64]
         include:
         - platform: Win32
+          solution: vs2015
           toolset: v141
           compatibility: ''
           msbuild-options: ''
         - platform: x64
+          solution: vs2015
           toolset: v143
           compatibility: ''
           msbuild-options: ''
@@ -122,7 +124,7 @@ jobs:
       with:
         pov-ray-build-id: gh+vs2022+${{ matrix.platform }}+${{ github.run_number }}
         version-base: 3.8
-        solution: vs2015
+        solution: ${{ matrix.solution }}
         configuration: Release
         platform: ${{ matrix.platform }}
         toolset: ${{ matrix.toolset }}
@@ -134,7 +136,7 @@ jobs:
       uses: trevorsandy/povray/.github/actions/windows_check@gh-actions-raytracer-v4
       with:
         version-base: 3.8
-        solution: vs2015
+        solution: ${{ matrix.solution }}
         platform: ${{ matrix.platform }}
 
     - name: 'Upload Artifacts for Diagnostics'
