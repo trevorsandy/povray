@@ -1,12 +1,14 @@
 #!/bin/awk -f
+
 # Check a list of symbols against the master definition
 # (official) list.  Arguments:
 #
 # awk -f checksym.awk official-def list-to-check
 #
 # Output is a file in the current directory called 'symbols.new',
-# stdout holds error messages.  Error code indicates success or
-# failure.
+# the value of the awk variable "of" (which can be changed on the
+# command line if required.)  stdout holds error messages.  Error
+# code indicates success or failure.
 #
 # NOTE: this is a pure, old fashioned, awk script.  It will
 # work with any awk
@@ -21,6 +23,7 @@ BEGIN{
    mastero = 0      # highest ordinal in master file
    symbolo = 0      # highest ordinal in png.h
    missing = "error"# log an error on missing symbols
+   of="symbols.new" # default to a fixed name
 }
 
 # Read existing definitions from the master file (the first
@@ -103,14 +106,26 @@ NF==2 && $2 ~ /^@[1-9][0-9]*$/ { # exported symbol
 # At the end check for symbols marked as both duplicated and removed
 END{
    if (symbolo > lasto) {
-      print "highest symbol ordinal in png.h,", symbolo ", exceeds last ordinal from png.h", lasto
+      print "highest symbol ordinal in png.h,",
+            symbolo ", exceeds last ordinal from png.h", lasto
       err = 1
    }
    if (mastero > lasto) {
-      print "highest symbol ordinal in", master ",", mastero ", exceeds last ordinal from png.h", lasto
+      print "highest symbol ordinal in", master ",",
+            mastero ", exceeds last ordinal from png.h", lasto
       err = 1
    }
    unexported=0
+   # Add a standard header to symbols.new:
+   print ";Version INSERT-VERSION-HERE" >of
+   print ";--------------------------------------------------------------" >of
+   print "; LIBPNG symbol list as a Win32 DEF file" >of
+   print "; Contains all the symbols that can be exported from libpng" >of
+   print ";--------------------------------------------------------------" >of
+   print "LIBRARY" >of
+   print "" >of
+   print "EXPORTS" >of
+
    for (o=1; o<=lasto; ++o) {
       if (symbol[o] == "" && removed[o] == "") {
          if (unexported == 0) unexported = o
@@ -136,26 +151,30 @@ END{
          unexported = 0
       }
       if (symbol[o] != "" && removed[o] != "") {
-         print "png.h: symbol", o, "both exported as '" symbol[o] "' and removed as '" removed[o] "'"
+         print "png.h: symbol", o,
+               "both exported as '" symbol[o] "' and removed as '" removed[o] "'"
          err = 1
       } else if (symbol[o] != official[o]) {
          # either the symbol is missing somewhere or it changed
          err = 1
          if (symbol[o] == "")
-            print "png.h: symbol", o, "is exported as '" official[o] "' in", master
+            print "png.h: symbol", o,
+                  "is exported as '" official[o] "' in", master
          else if (official[o] == "")
-            print "png.h: exported symbol", o, "'" symbol[o] "' not present in", master
+            print "png.h: exported symbol", o,
+                  "'" symbol[o] "' not present in", master
          else
-            print "png.h: exported symbol", o, "'" symbol[o] "' exists as '" official[o] "' in", master
+            print "png.h: exported symbol", o,
+                  "'" symbol[o] "' exists as '" official[o] "' in", master
       }
 
       # Finally generate symbols.new
       if (symbol[o] != "")
-         print " " symbol[o], "@" o > "symbols.new"
+         print " " symbol[o], "@" o > of
    }
 
    if (err != 0) {
-      print "*** A new list is in symbols.new ***"
+      print "*** A new list is in", of, "***"
       exit 1
    }
 }

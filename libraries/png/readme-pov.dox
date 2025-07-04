@@ -4,7 +4,7 @@
 @ingroup PovLibraries
 @brief Source code of _libpng_ 3rd party PNG library (subset).
 
-This directory contains a subset of the libpng 1.5.14 source distribution,
+This directory contains a subset of the libpng 1.6.51 source distribution,
 and is part of the POV-Ray source distribution package.
 
 @note
