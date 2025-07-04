@@ -1,7 +1,7 @@
     ///
     /// LPub3D-Trace Windows Console User Interface (CUI) build
 	/// @author Trevor SANDY <trevor.sandy@gmail.com>
-	/// November 05, 2017
+	/// Last Update: July 04, 2025
 	///
 	/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 	/// specially for LPub3D - An LDraw Building Instruction Editor.
@@ -45,19 +45,12 @@
 	- Build CUI and GUI projects from the command line
 	- Modify confa and ini file default directory locations
 	- Additional little features...
-	Updated Unix Console User Interface (CUI) LPub3D-Trace build, including:
-	- Rename to LPub3D-Trace (respect license terms)
-	- Quoted command line arguments allowign spaces in path names
-	- Updated SDL library (Using SDL2 v2.0.5 built from source or system SDL2)
-	- Integrate SDL2 v2.0.5 library source to enable build from source option
-	- Cross compile i386 target on x86_64 host
-	- Modify conf and ini file default directory locations
-	- Travis CI CUI build check
-	- Additional little features...
 
-	/// Building the Console User Interface (VS2019 GUI)
+	/// Building the Console User Interface (VS2022 GUI)
 	//////////////////////////////////////////////////////
 	See README.md for comprehensive details on building POV-Ray.
+	Required build environment components: 
+		- Intel v140: Visual Studio 2015 build tools
 
 	1. Open `windows\vs2015\povray.sln` in Visual Studio
 
@@ -227,29 +220,10 @@
 	37. disp_text.h............../windows...........(New)
 	38. disp_text.cpp............/windows...........(New)
 	39. CUI_README.txt.........../windows...........(New)
-	
-	Unix
-	40. travis.yml.............../
-	41. prebuild3rdparty.sh....../unix..............(New) replaces prebuild.sh
-	42. configure.ac............./unix
-	43. install................../unix
-	44. syspovconfig.h.........../unix
-	45. disp_sdl.cpp............./unix
-	46. disp_sdl.h.............../unix
-	47. disp_text.cpp............/unix
-	48. disp_text.h............../unix	
-	49. acx_pthread.m4.........../unix/config
-	50. ax_check_lib.m4........../unix/config
-	51. ax_check_libjpeg.m4....../unix/config
-	52. ax_check_libtiff.m4....../unix/config
-	53. ax_check_libsdl2.m4....../unix/config.......(New) replaces ax_check_libsdl.m4
-	54. unixconsole.cpp........../vfe/unix
-	55. unixoptions.cpp........../vfe/unix
-	56. unixoptions.h............/vfe/unix
 
     Libraries
-	57. sdl2...................../libraries/sdl2.....................(New)
-	58. boost::interprocess....../libraries/boost/boost/interprocess.(New)
+	40. sdl2...................../libraries/sdl2.....................(New)
+	41. boost::interprocess....../libraries/boost/boost/interprocess.(New)
 		
 	Note: Although I used VS2017 to develop the Windows Console User Interface build
 	components described here. I do not believe there is any material difference
