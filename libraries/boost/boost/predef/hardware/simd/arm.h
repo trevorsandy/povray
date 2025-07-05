@@ -39,7 +39,7 @@ http://www.boost.org/LICENSE_1_0.txt)
 #define BOOST_HW_SIMD_ARM BOOST_VERSION_NUMBER_NOT_AVAILABLE
 
 #undef BOOST_HW_SIMD_ARM
-#if !defined(BOOST_HW_SIMD_ARM) && (defined(__ARM_NEON__) || defined(__aarch64__) || defined (_M_ARM))
+#if !defined(BOOST_HW_SIMD_ARM) && (defined(__ARM_NEON__) || defined(__aarch64__) || defined (_M_ARM) || defined (_M_ARM64))
 #   define BOOST_HW_SIMD_ARM BOOST_HW_SIMD_ARM_NEON_VERSION
 #endif
 

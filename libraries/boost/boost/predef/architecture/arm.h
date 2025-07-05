@@ -39,9 +39,10 @@ http://www.boost.org/LICENSE_1_0.txt)
 
 #if defined(__arm__) || defined(__arm64) || defined(__thumb__) || \
     defined(__TARGET_ARCH_ARM) || defined(__TARGET_ARCH_THUMB) || \
-    defined(_M_ARM)
+    defined(_M_ARM) || defined(_M_ARM64)
 #   undef BOOST_ARCH_ARM
-#   if !defined(BOOST_ARCH_ARM) && defined(__arm64)
+#   if !defined(BOOST_ARCH_ARM) && ( \
+        defined(__arm64) || defined(_M_ARM64) )
 #       define BOOST_ARCH_ARM BOOST_VERSION_NUMBER(8,0,0)
 #   endif
 #   if !defined(BOOST_ARCH_ARM) && defined(__TARGET_ARCH_ARM)
