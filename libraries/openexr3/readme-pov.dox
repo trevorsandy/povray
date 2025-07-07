@@ -1,0 +1,19 @@
+/**
+
+@dir
+@ingroup PovLibraries
+@brief Source code of _OpenEXR_ 3rd party EXR library.
+
+This directory contains a slightly adapted OpenEXR 3.3.4 source distribution,
+and is part of the POV-Ray source distribution package.
+
+@note
+    This distribution of OpenEXR differs from the original in the omission of
+    the overly complex cmake build implementation. Instead, we have simplified the
+    folder tree to directly use the Microsoft Visual Studio .vcxproj build process.
+
+Official OpenExr source distribution packages can be obtained via <https://openexr.com/>.
+
+See `LICENSE` file in this directory for licensing information.
+
+*/
