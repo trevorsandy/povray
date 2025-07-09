@@ -285,8 +285,8 @@ namespace pov_base
 #define BUILTIN_IO_RESTRICTIONS "enabled"
 /* I/O restrictions. */
 #define IO_RESTRICTIONS_DISABLED 0
-/* SDL display library */
-#define HAVE_LIBSDL
+/* SDL3 display library */
+#define HAVE_LIBSDL3
 
 /* Distribution strings */
 #define DISTRIBUTION_MESSAGE_LPUB3D_TRACE_1 PACKAGE_NAME " is a modified, unofficial distribution of"

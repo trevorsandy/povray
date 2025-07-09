@@ -147,7 +147,7 @@ static vfeDisplay *WinConDisplayCreator(unsigned int width, unsigned int height,
   WinConDisplay *display = GetRenderWindow();
   switch (gDisplayMode)
   {
-#ifdef HAVE_LIBSDL
+#ifdef HAVE_LIBSDL3
   case DISP_MODE_SDL:
     if (display != nullptr && display->GetWidth() == width && display->GetHeight() == height)
     {
@@ -205,7 +205,7 @@ static void PrintStatusChanged (vfeSession *session, State force = kUnknown)
       fprintf (stderr, "==== [Parsing...] ==========================================================\n");
       break;
     case kRendering:
-#ifdef HAVE_LIBSDL
+#ifdef HAVE_LIBSDL3
       if ((gDisplay != nullptr) && (gDisplayMode == DISP_MODE_SDL))
       {
           fprintf (stderr, "==== [Rendering... Press p to pause, q to quit] ============================\n");
@@ -219,7 +219,7 @@ static void PrintStatusChanged (vfeSession *session, State force = kUnknown)
 #endif
       break;
     case kPausedRendering:
-#ifdef HAVE_LIBSDL
+#ifdef HAVE_LIBSDL3
       if ((gDisplay != nullptr) && (gDisplayMode == DISP_MODE_SDL))
       {
           fprintf (stderr, "==== [Paused... Press p to resume] =========================================\n");
@@ -586,7 +586,7 @@ extern "C" int main(int argc, char **argv)
 	  ErrorExit(session);
 
   // display mode registration
-#ifdef HAVE_LIBSDL
+#ifdef HAVE_LIBSDL3
   if (!mapped_file_mode) 
   {
 	if (WinConSDLDisplay::Register(session))

@@ -139,12 +139,30 @@
     // get the SDL version from its system header when dynamically loading
     // or statically set the version when building SDL from source
     #ifndef LIBSDL_MISSING
-        #ifndef LIBSDL_BLT_FRM_SRC
-            #include <SDL_version.h>
+        #ifdef HAVE_LIBSDL3
+            #include <SDL3/SDL_version.h>
+            #define SDL_PACKAGE_STRING "SDL3"
         #else
-            #define SDL_MAJOR_VERSION   2
-            #define SDL_MINOR_VERSION   0
-            #define SDL_PATCHLEVEL      5
+            #include <SDL_version.h>
+            #define SDL_PACKAGE_STRING "SDL"
+        #endif
+
+        #ifndef SDL_MAJOR_VERSION
+            #define SDL_MAJOR_VERSION   3
+        #endif
+        #ifndef SDL_MINOR_VERSION
+            #define SDL_MINOR_VERSION   3
+        #endif
+        #if (SDL_MAJOR_VERSION < 3)
+            #ifndef SDL_PATCHLEVEL
+                #define SDL_PATCHLEVEL  0
+            #endif
+        #else
+            #ifndef SDL_MICRO_VERSION
+                #define SDL_PATCHLEVEL  0
+            #else
+                #define SDL_PATCHLEVEL SDL_MICRO_VERSION
+            #endif
         #endif
     #endif
 
@@ -231,6 +249,7 @@ const char *ContributingDevelopers[] =
     "Ron Parker",
     "William F. Pokorny",
     "Bill Pulver",
+    "Trevor Sandy",
     "Eduard Schwan",
     "Wlodzimierz Skiba",
     "Robert Skinner",
@@ -535,20 +554,26 @@ void BuildInitInfo(POVMSObjectPtr msg)
 #endif  // OPENEXR_MISSING
 
 #ifndef LIBSDL_MISSING
-    // SDL2 version and copyright notice
+    // SDL version and copyright notice
     if(err == kNoErr)
     {
         err = POVMSAttr_New(&attr);
         if(err == kNoErr)
         {
-            #ifndef LIBSDL_BLT_FRM_SRC
-                SDL_version sdl_linked_version;
-                SDL_GetVersion(&sdl_linked_version);
-                const char *tempstr = pov_tsprintf("SDL2 %d.%d.%d, Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>",
-                sdl_linked_version.major, sdl_linked_version.minor, sdl_linked_version.patch);
+            #if !defined (LIBSDL_BLT_FRM_SRC)
+                #ifdef HAVE_LIBSDL3
+                    const int linked = SDL_GetVersion();  /* reported by linked SDL library */
+                    const char* tempstr = pov_tsprintf("SDL3 %d.%d.%d, Copyright (C) Sam Lantinga <slouken@libsdl.org>",
+                    SDL_VERSIONNUM_MAJOR(linked), SDL_VERSIONNUM_MINOR(linked), SDL_VERSIONNUM_MICRO(linked));
+                #else
+                    SDL_version sdl_linked_version;
+                    SDL_GetVersion(&sdl_linked_version);
+                    const char *tempstr = pov_tsprintf("%s %d.%d.%d, Copyright (C) Sam Lantinga <slouken@libsdl.org>",
+                    SDL_PACKAGE_STRING, sdl_linked_version.major, sdl_linked_version.minor, sdl_linked_version.patch);
+                #endif
             #else
-                const char *tempstr = pov_tsprintf("SDL2 %d.%d.%d, Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>",
-                SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
+                const char* tempstr = pov_tsprintf("%s %d.%d.%d, Copyright (C) 1997-2025 Sam Lantinga <slouken@libsdl.org>",
+                SDL_PACKAGE_STRING, SDL_MAJOR_VERSION, SDL_MINOR_VERSION, SDL_PATCHLEVEL);
             #endif
 
             err = POVMSAttr_Set(&attr, kPOVMSType_CString, reinterpret_cast<const void *>(tempstr), (int) strlen(tempstr) + 1);

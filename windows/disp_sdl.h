@@ -36,7 +36,7 @@
 ///
 //*******************************************************************************
 
-#ifdef HAVE_LIBSDL
+#ifdef HAVE_LIBSDL3
 
 #ifndef POVRAY_WINDOWS_DISP_SDL_H
 #define POVRAY_WINDOWS_DISP_SDL_H
@@ -45,7 +45,8 @@
 #include "console\winoptions.h"
 #include "disp.h"
 
-#include <SDL.h>
+#include <SDL3/SDL.h>
+
 /**
 *  On Windows, to launch an SDL window without the console window you have to declare WinMain()
 *  instead of main() so SDL looks for and replaces main() with SDL_main() and then provides
@@ -130,4 +131,4 @@ namespace pov_frontend
 
 #endif /* POVRAY_WINDOWS_DISP_SDL_H */
 
-#endif /* HAVE_LIBSDL */
+#endif /* HAVE_LIBSDL3 */

@@ -38,7 +38,7 @@
 
 #include "syspovconfig.h"
 
-#ifdef HAVE_LIBSDL
+#ifdef HAVE_LIBSDL3
 
 #include "disp_sdl.h"
 
@@ -72,6 +72,10 @@ namespace pov_frontend
     WinConSDLDisplay::WinConSDLDisplay(unsigned int w, unsigned int h, vfeSession *session, bool visible) :
         WinConDisplay(w, h, session, visible)
     {
+        m_PxCnt = 0;
+        m_screen_rect = {0,0,0,0};
+        m_update_rect = m_screen_rect;
+        m_Initialized = false;
         m_valid = false;
         m_display_scaled = false;
         m_display_scale = 1.;
@@ -133,7 +137,7 @@ namespace pov_frontend
         m_valid = false;
 
 		// Deallocate display surface
-		SDL_FreeSurface(m_display);
+		SDL_DestroySurface(m_display);
 		m_display = nullptr;
 
 		// Destroy window
@@ -168,7 +172,8 @@ namespace pov_frontend
         if (!m_valid)
         {
             // Initialize SDL
-			if (SDL_Init(SDL_INIT_VIDEO) < 0)
+            bool success = SDL_Init(SDL_INIT_VIDEO);
+			if (success == false)
             {
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't initialize SDL: %s", SDL_GetError());
                 return;
@@ -182,16 +187,14 @@ namespace pov_frontend
 			// determine desktop area
 			if (UxSession->GetWinConOptions()->isOptionSet("display", "scaled"))
 			{
-				SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "linear");			   // make the scaled rendering look smoother.
-
-				SDL_DisplayMode mode;
-				static int display_in_use = 0;										// only using first display
-				if (SDL_GetDesktopDisplayMode(display_in_use, &mode) < 0) {
-					SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't get desktop display mode: %s", SDL_GetError());
-					return;
-				}
-				width = min(mode.w - 10, width);
-				height = min(mode.h - 80, height);
+				static SDL_DisplayID display_in_use = 0; // only using first display
+                const SDL_DisplayMode *mode = SDL_GetDesktopDisplayMode(display_in_use);
+                if (mode == nullptr) {
+                    SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't get desktop display mode: %s", SDL_GetError());
+                    return;
+                }
+				width = min(mode->w - 10, width);
+				height = min(mode->h - 80, height);
 			}
 
             // calculate display area
@@ -203,7 +206,13 @@ namespace pov_frontend
                 height = int(float(width)/AspectRatio_Full);
 
 			// create display window
-			m_window = SDL_CreateWindow(PACKAGE_NAME, SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, width, height, SDL_WINDOW_SHOWN);
+            SDL_PropertiesID props = SDL_CreateProperties();
+            SDL_SetStringProperty(props, SDL_PROP_WINDOW_CREATE_TITLE_STRING, PACKAGE_NAME);
+            SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_X_NUMBER, SDL_WINDOWPOS_UNDEFINED);
+            SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_Y_NUMBER, SDL_WINDOWPOS_UNDEFINED);
+            SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_WIDTH_NUMBER, width);
+            SDL_SetNumberProperty(props, SDL_PROP_WINDOW_CREATE_HEIGHT_NUMBER, height);
+            m_window = SDL_CreateWindowWithProperties(props);
 			if (m_window == nullptr)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create W%d x H%d SDL window: %s", width, height, SDL_GetError());
@@ -211,11 +220,12 @@ namespace pov_frontend
 			}
 
 #ifdef WIN_DEBUG
-			SDL_version v;
-	        SDL_VERSION(&v);
-	        printf("SDL compiled against %d.%d.%d\n", v.major, v.minor, v.patch);
-	        SDL_GetVersion(&v);
-	        printf("SDL running against %d.%d.%d\n", v.major, v.minor, v.patch);
+            const int compiled = SDL_VERSION;     /* hardcoded number from SDL headers */
+            const int linked = SDL_GetVersion();  /* reported by linked SDL library */
+	        printf("SDL compiled against %d.%d.%d\n",
+                SDL_VERSIONNUM_MAJOR(compiled), SDL_VERSIONNUM_MINOR(compiled), SDL_VERSIONNUM_MICRO(compiled));
+	        printf("SDL running against %d.%d.%d\n",
+                SDL_VERSIONNUM_MAJOR(linked), SDL_VERSIONNUM_MINOR(linked), SDL_VERSIONNUM_MICRO(linked));
 #endif
 
             // Initialize the display
@@ -228,29 +238,22 @@ namespace pov_frontend
 
 			int depth = 32;
 			int unused = 0;
-			Uint32 Rmask, Gmask, Bmask, Amask;
+            SDL_PixelFormat RGBAMask;
 #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-			Rmask = 0xff000000;
-			Gmask = 0x00ff0000;
-			Bmask = 0x0000ff00;
-			Amask = 0x000000ff;
+            RGBAMask = SDL_PIXELFORMAT_RGBA8888;
 #else
-			Rmask = 0x000000ff;
-			Gmask = 0x0000ff00;
-			Bmask = 0x00ff0000;
-			Amask = 0xff000000;
+            RGBAMask = SDL_PIXELFORMAT_ABGR8888;
 #endif
-			SDL_Surface *optimized_surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, depth, Rmask, Gmask, Bmask, Amask);
+            SDL_Surface* optimized_surface = SDL_CreateSurface(width, height, RGBAMask);
 			if (optimized_surface == nullptr)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create optimized RGB surface for repeated blitting:: %s", SDL_GetError());
 				return;
 			}
 
-			SDL_PixelFormat* pixelFormat = m_screen->format;
-			Uint32 pixelFormatEnum = pixelFormat->format;
-			m_display = SDL_ConvertSurfaceFormat(optimized_surface, pixelFormatEnum, unused);
-			SDL_FreeSurface(optimized_surface);
+			SDL_PixelFormat pixelFormat = m_screen->format;
+			m_display = SDL_ConvertSurface(optimized_surface, pixelFormat);
+			SDL_DestroySurface(optimized_surface);
 			if (m_display == nullptr)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't convert to optimized RGB display surface for repeated blitting:: %s", SDL_GetError());
@@ -297,11 +300,12 @@ namespace pov_frontend
 
     inline void WinConSDLDisplay::SetPixel(unsigned int x, unsigned int y, const RGBA8& colour)
     {
-        Uint8 *p = (Uint8 *) m_display->pixels + y * m_display->pitch + x * m_display->format->BytesPerPixel;
+        Uint8 bytes_per_pixel = SDL_BYTESPERPIXEL(m_display->format);
+        Uint8* p = (Uint8*)m_display->pixels + y * m_display->pitch + x * bytes_per_pixel;
 
-        Uint32 sdl_col = SDL_MapRGBA(m_display->format, colour.red, colour.green, colour.blue, colour.alpha);
+        Uint32 sdl_col = SDL_MapSurfaceRGBA(m_display, colour.red, colour.green, colour.blue, colour.alpha);
 
-        switch (m_display->format->BytesPerPixel)
+        switch (bytes_per_pixel)
         {
             case 1:
                 *p = sdl_col;
@@ -334,12 +338,13 @@ namespace pov_frontend
         unsigned int ix = x * m_display_scale;
         unsigned int iy = y * m_display_scale;
 
-        Uint8 *p = (Uint8 *) m_display->pixels + iy * m_display->pitch + ix * m_display->format->BytesPerPixel;
+        Uint8 bytes_per_pixel = SDL_BYTESPERPIXEL(m_display->format);
+        Uint8 *p = (Uint8 *) m_display->pixels + iy * m_display->pitch + ix * bytes_per_pixel;
 
         Uint8 r, g, b, a;
         Uint32 old = *(Uint32 *) p;
 
-        SDL_GetRGBA(old, m_display->format, &r, &g, &b, &a);
+        SDL_GetRGBA(old, SDL_GetPixelFormatDetails(m_display->format), SDL_GetSurfacePalette(m_display) ,&r, &g, &b, &a);
 
         unsigned int ofs = ix + iy * m_display->w;
         r = (r*m_PxCount[ofs] + colour.red  ) / (m_PxCount[ofs]+1);
@@ -347,9 +352,9 @@ namespace pov_frontend
         b = (b*m_PxCount[ofs] + colour.blue ) / (m_PxCount[ofs]+1);
         a = (a*m_PxCount[ofs] + colour.alpha) / (m_PxCount[ofs]+1);
 
-        Uint32 sdl_col = SDL_MapRGBA(m_display->format, r, g, b, a);
+        Uint32 sdl_col = SDL_MapSurfaceRGBA(m_display, r, g, b, a);
 
-        switch (m_display->format->BytesPerPixel)
+        switch (bytes_per_pixel)
         {
             case 1:
                 *p = sdl_col;
@@ -418,8 +423,12 @@ namespace pov_frontend
     {
         if (!m_valid || x >= GetWidth() || y >= GetHeight())
             return;
-        if (SDL_MUSTLOCK(m_display) && SDL_LockSurface(m_display) < 0)
-            return;
+        if (SDL_MUSTLOCK(m_display))
+        {
+            bool success = SDL_LockSurface(m_display);
+            if (success == false)
+                return;
+        }
 
         if (m_display_scaled)
         {
@@ -448,8 +457,12 @@ namespace pov_frontend
         int iy1 = min(y1, GetHeight()-1);
         int iy2 = min(y2, GetHeight()-1);
 
-        if (SDL_MUSTLOCK(m_display) && SDL_LockSurface(m_display) < 0)
-            return;
+        if (SDL_MUSTLOCK(m_display))
+        {
+            bool success = SDL_LockSurface(m_display);
+            if (success == false)
+                return;
+        }
 
         if (m_display_scaled)
         {
@@ -508,16 +521,22 @@ namespace pov_frontend
 
         UpdateCoord(ix1, iy1, ix2, iy2);
 
-        Uint32 sdl_col = SDL_MapRGBA(m_display->format, colour.red, colour.green, colour.blue, colour.alpha);
+        Uint32 sdl_col = SDL_MapSurfaceRGBA(m_display, colour.red, colour.green, colour.blue, colour.alpha);
 
         SDL_Rect tempRect;
         tempRect.x = ix1;
         tempRect.y = iy1;
         tempRect.w = ix2 - ix1 + 1;
         tempRect.h = iy2 - iy1 + 1;
-        SDL_FillRect(m_display, &tempRect, sdl_col);
-
-        m_PxCnt = UpdateInterval;
+        if (SDL_FillSurfaceRect(m_display, &tempRect, sdl_col))
+        {
+            m_PxCnt = UpdateInterval;
+        }
+        else
+        {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't fill SDL surface: %s", SDL_GetError());
+            return;
+        }
     }
 
     void WinConSDLDisplay::DrawPixelBlock(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, const RGBA8 *colour)
@@ -530,8 +549,12 @@ namespace pov_frontend
         unsigned int iy1 = min(y1, GetHeight()-1);
         unsigned int iy2 = min(y2, GetHeight()-1);
 
-        if (SDL_MUSTLOCK(m_display) && SDL_LockSurface(m_display) < 0)
-            return;
+        if (SDL_MUSTLOCK(m_display))
+        {
+            bool success = SDL_LockSurface(m_display);
+            if (success == false)
+                return;
+        }
 
         if (m_display_scaled)
         {
@@ -563,10 +586,15 @@ namespace pov_frontend
         m_update_rect.y = 0;
         m_update_rect.w = m_display->w;
         m_update_rect.h = m_display->h;
-
-        SDL_FillRect(m_display, &m_update_rect, (Uint32)0);
-
-        m_PxCnt = UpdateInterval;
+        if (SDL_FillSurfaceRect(m_display, &m_update_rect, (Uint32)0))
+        {
+            m_PxCnt = UpdateInterval;
+        }
+        else
+        {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't fill SDL surface: %s", SDL_GetError());
+            return;
+        }
     }
 
     void WinConSDLDisplay::UpdateScreen(bool Force = false)
@@ -575,13 +603,14 @@ namespace pov_frontend
             return;
         if (Force || m_PxCnt >= UpdateInterval)
         {
-			if (SDL_BlitSurface(m_display, &m_update_rect, m_screen, &m_update_rect) < 0)
+            bool success = SDL_BlitSurface(m_display, &m_update_rect, m_screen, &m_update_rect);
+			if (success == false)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't copy display surface to screen surface: %s", SDL_GetError());
 				exit(1);
 			}
-
-			if (SDL_UpdateWindowSurface(m_window) < 0)
+            success = SDL_UpdateWindowSurface(m_window);
+			if (success == false)
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't update window surface: %s", SDL_GetError());
 				exit(1);
@@ -619,12 +648,12 @@ namespace pov_frontend
         {
             switch (event.type)
             {
-                case SDL_KEYDOWN:
-                    if ( event.key.keysym.sym == SDLK_p || event.key.keysym.sym == SDLK_q ||
-                         event.key.keysym.sym == SDLK_RETURN || event.key.keysym.sym == SDLK_KP_ENTER )
+                case SDL_EVENT_KEY_DOWN:
+                    if ( event.key.key == SDLK_P || event.key.key == SDLK_Q ||
+                         event.key.key == SDLK_RETURN || event.key.key == SDLK_KP_ENTER )
                         do_quit = true;
                     break;
-                case SDL_MOUSEBUTTONDOWN:
+                case SDL_EVENT_MOUSE_BUTTON_DOWN:
                     do_quit = true;
                     break;
             }
@@ -645,10 +674,10 @@ namespace pov_frontend
         {
             switch (event.type)
             {
-                case SDL_KEYDOWN:
-                    if ( event.key.keysym.sym == SDLK_q )
+                case SDL_EVENT_KEY_DOWN:
+                    if ( event.key.key == SDLK_Q )
                         do_quit = true;
-                    else if ( event.key.keysym.sym == SDLK_p )
+                    else if ( event.key.key == SDLK_P )
                     {
                         if (!m_Session->IsPausable())
                             break;
@@ -664,7 +693,7 @@ namespace pov_frontend
                         }
                     }
                     break;
-                case SDL_QUIT:
+                case SDL_EVENT_QUIT:
                     do_quit = true;
                     break;
             }
@@ -677,4 +706,4 @@ namespace pov_frontend
 
 }
 
-#endif /* HAVE_LIBSDL */
+#endif /* HAVE_LIBSDL3 */
