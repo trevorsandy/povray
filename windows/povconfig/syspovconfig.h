@@ -57,7 +57,16 @@
 
 // _CONSOLE must be defined when building the console version of POVWIN.
 // failure to do so will lead to link errors.
-// #define _CONSOLE
+#define _CONSOLE
+#ifndef POV_RAY_IS_AUTOBUILD
+#define POV_RAY_IS_AUTOBUILD 1
+#endif // POV_RAY_IS_AUTOBUILD
+#ifndef POV_RAY_BUILD_ID
+#define POV_RAY_BUILD_ID "vs2022+v143"
+#endif // POV_RAY_BUILD_ID
+#ifndef VERSION_BASE
+#define VERSION_BASE "3.8"
+#endif // VERSION_BASE
 
 // C++ variants of C standard headers
 #include <cmath>
@@ -84,7 +93,9 @@
 #include <fcntl.h>
 
 // use this to verbose debug tracing
-//#define WIN_DEBUG
+#ifndef WIN_DEBUG
+#define WIN_DEBUG
+#endif // WIN_DEBUG
 
 #ifndef STD_TYPES_DECLARED
 #define STD_TYPES_DECLARED
