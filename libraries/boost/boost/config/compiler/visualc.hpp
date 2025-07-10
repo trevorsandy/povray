@@ -283,8 +283,14 @@
 #     define BOOST_COMPILER_VERSION 11.0
 #   elif _MSC_VER < 1900
 #     define BOOST_COMPILER_VERSION 12.0
-#   elif _MSC_VER < 2000
+#   elif _MSC_VER < 1910
 #     define BOOST_COMPILER_VERSION 14.0
+#   elif _MSC_VER < 1920
+#     define BOOST_COMPILER_VERSION 14.1
+#   elif _MSC_VER < 1930
+#     define BOOST_COMPILER_VERSION 14.2
+#   elif _MSC_VER < 1940
+#     define BOOST_COMPILER_VERSION 14.3
 #   else
 #     define BOOST_COMPILER_VERSION _MSC_VER
 #   endif
@@ -297,8 +303,8 @@
 // last known and checked version is 19.00.23026 (VC++ 2015 RTM):
 #if (_MSC_VER > 1900)
 #  if defined(BOOST_ASSERT_CONFIG)
-#     error "Unknown compiler version - please run the configure tests and report the results"
-#  else
-#     pragma message("Unknown compiler version - please run the configure tests and report the results")
+#     error "Boost.Config is older than your current compiler version - last checked compiler version is 19.00.23026 (VC++ 2015 RTM)."
+#  elif !defined(BOOST_CONFIG_SUPPRESS_OUTDATED_MESSAGE)
+#     pragma message("Boost.Config is older than your compiler version - last checked compiler version is 19.00.23026 (VC++ 2015 RTM).")
 #  endif
 #endif
