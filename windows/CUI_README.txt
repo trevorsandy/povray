@@ -1,7 +1,7 @@
     ///
     /// LPub3D-Trace Windows Console User Interface (CUI) build
 	/// @author Trevor SANDY <trevor.sandy@gmail.com>
-	/// Last Update: July 04, 2025
+	/// Last Update: July 10, 2025
 	///
 	/// LPub3D Ray Tracer ('LPub3D-Trace') version 3.8. is built
 	/// specially for LPub3D - An LDraw Building Instruction Editor.
@@ -34,16 +34,21 @@
 	Updated Windows Console User Interface (CUI) LPub3D-Trace build, including:
 	- Rename to LPub3D-Trace (respect license terms)
 	- Port Unix CUI functionality to Windows project
-	- SDL2 image display window (Using SDL2 v2.0.5 built from source)
-	- Integrate SDL2 v2.0.5 library source to enable build from source
+	- SDL3 image display window (Using SDL3 v3.3.0 built from source)
+	- Update SDL library source to SDL3 v3.3.0
+	- Update OpenEXR library source to v3.3.4
+	- Update PNG library source to v1.16.51
+	- Enable Windows ARM64 builds
+	- Add ARM64 configuration to Visual Studio solution files
 	- Options processor class
 	- Benchmark, help and version options
 	- Detailed console output_iterator
 	- Uses povray.conf just as Unix build
 	- Console signal management
-	- GUI and CUI AppVeyor CI build check
+	- Win32, ARM64 and x64 GitHub builds
+	- GUI and CUI GitHub CI build check
 	- Build CUI and GUI projects from the command line
-	- Modify confa and ini file default directory locations
+	- Modify config and ini file default directory locations
 	- Additional little features...
 
 	/// Building the Console User Interface (VS2022 GUI)
@@ -200,9 +205,9 @@
 	17. povbackend.vcxproj......./windows/vs2015	
 	18. autobuild.cmd............/windows/vs2015.........(New)
 	19. autobuild_defs.cmd......./windows/vs2015.........(New)
-	20. SDL2.vcxproj............./windows/vs2015.........(New)
-	21. SDL2_vcxproj.filters...../windows/vs2015.........(New)
-	22. SDL2Main.vcxproj........./windows/vs2015.........(New)	
+	20. SDL3.vcxproj............./windows/vs2015.........(New)
+	21. SDL3_vcxproj.filters...../windows/vs2015.........(New)
+	22. SDL3Main.vcxproj........./windows/vs2015.........(New)	
 	23. console.ico............../windows/vs2015.........(New)
 	24. console_resource.rc....../windows/vs2015.........(New)
 	25. csi.ldr.pov............../windows/vs2015/tests/..(New)
@@ -222,7 +227,7 @@
 	39. CUI_README.txt.........../windows...........(New)
 
     Libraries
-	40. sdl2...................../libraries/sdl2.....................(New)
+	40. sdl3...................../libraries/sdl3.....................(New)
 	41. boost::interprocess....../libraries/boost/boost/interprocess.(New)
 		
 	Note: Although I used VS2017 to develop the Windows Console User Interface build
