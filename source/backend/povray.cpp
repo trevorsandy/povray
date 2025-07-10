@@ -111,7 +111,11 @@
         #if (OPENEXR_VERSION_MAJOR < 3)
             #include <IlmBaseConfig.h>
         #else
-            #include <Imath/ImathConfig.h>
+            #ifdef OPENEXR_BLT_FRM_SRC
+                #include <ImathConfig.h>
+            #else
+                #include <Imath/ImathConfig.h>
+            #endif
         #endif
 
         // NOTE:
