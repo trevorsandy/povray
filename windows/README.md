@@ -46,13 +46,23 @@ These groups provide the best means for support with relation to this subject.
 Compilers
 =========
 
+Currently the only officially supported means of building the Windows
+version of POV-Ray is via the provided Visual Studio 2015 solutions.
+Note that you can set the toolset attribute to enable building
+on pretty much any version of Visual Studio after vs2015 - this is,
+of course, granted that you have installed to desired toolset.
+
+Toolset v143 or later is required to build AVX512 support.
+
+Visual Studio 2022
+------------------
+
+You can use Visual Studio 2022 (Community Edition will suffice) or later.
+
 Visual Studio 2015
 ------------------
 
-Currently the only officially supported means of building the Windows
-version of POV-Ray is via the provided Visual Studio 2015 solution.
-
-You will need Visual Studio 2015 (Community Edition will suffice) or later.
+You will need at least Visual Studio 2015 (Community Edition will suffice) or later.
 
 Earlier Versions of Visual Studio
 ---------------------------------
@@ -60,7 +70,6 @@ Earlier Versions of Visual Studio
 Due to the free availability of Visual Studio 2015 Community Edition
 and better performance of the generated binaries, we have ceased support
 for earlier versions of Visual Studio.
-
 
 
 Including the Editor Support DLL (cmedit) in the Build
@@ -150,9 +159,9 @@ Build Steps
 (if they are present), as they are not actively maintained, and may
 generate flawed binaries or fail to compile at all:
 
--   `Release-AVX|Win32` (This target would be useless, as to the best of
-    our knowledge there are no 32-bit processors or operating systems with
-    AVX support.)
+-   `Release-AVX|Win32` and `Release-AVX512|Win32` (These targets would be useless,
+    as to the best of our knowledge there are no 32-bit processors or operating
+     systems with AVX/AVX2/AVX512 support.)
 -   `Release-SSE2|x64` (This target would be redundant, as SSE2 is a
     standard feature of the x64 architecture and is therefore implicitly
     enabled in all `x64` builds, including vanilla `Release|x64`.)
@@ -168,6 +177,10 @@ in mind' at the end.
 
 Building for Legacy Windows Versions
 ------------------------------------
+
+**Attention:** By default, binaries generated with Visual Studio 2022 will only
+run on Windows 10 or later. (Present version with VS2022 not tested with earlier
+windows versions. Retained the Old README in this part).
 
 By default, binaries generated with Visual Studio 2015 will only run on
 Windows Vista or later. Visual Studio 2015 can be used to generate binaries

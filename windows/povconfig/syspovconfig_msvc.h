@@ -237,9 +237,10 @@
   #endif
   
   #if _MSC_VER >= 1900
-      // compiler supports AVX2.
+      // compiler supports AVX2 and AVX512.
       #define TRY_OPTIMIZED_NOISE                 // optimized noise master switch.
       #define TRY_OPTIMIZED_NOISE_AVX2FMA3        // AVX2/FMA3 hand-optimized noise (Intel).
+      #define TRY_OPTIMIZED_NOISE_AVX512          // AVX512 hand-optimized noise
   #endif
   
   #define POV_CPUINFO         CPUInfo::GetFeatures()
@@ -247,4 +248,5 @@
   #define POV_CPUINFO_H       "cpuid.h"
 #endif
 
+    #define TRY_OPTIMIZED_NOISE_AVX512          // AVX512 hand-optimized noise
 #endif // POVRAY_WINDOWS_SYSPOVCONFIG_MSVC_H
