@@ -242,7 +242,7 @@ static void PrintVersion(void)
 {
   // TODO -- GNU/Linux customs would be to print to stdout (among other differences).
   fprintf(stderr,
-    "%s %s\n\n"
+    "\n%s %s\n\n"
     "%s\n%s\n%s\n%s\n"
     "%s\n%s\n%s\n\n"
     "%s\n%s\n%s\n\n",
