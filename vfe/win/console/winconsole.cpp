@@ -434,22 +434,26 @@ static void CleanupBenchmark(vfeWinSession *session, string& ini, string& pov)
   session->DeleteTemporaryFile(ASCIItoUCS2String(pov.c_str()));
 }
 
-// Tokenize quoted command line arguments
-// Single and double quoted arguments stored in a string vector
+// Tokenize quoted command line arguments.
+// Single and double quoted arguments are stored in a string vector.
+// If argument has space(s) and is and is not quoted, it will be qouted.
 // Quotes can start before or after the '+|-' character e.g.
 // "+Idir with space in the name/f o o.pov" or
-// +I"dir with space in the name/f o o.pov"
+// +I"dir with space in the name/f o o.pov".
 void FormatQuotedArguments(std::vector<std::string>& cmdargs, const std::string& commandline)
 {
-    int len = commandline.length();
-    bool dqot = false, sqot = false, optflag = false;
-    int arglen, adjustment, qotpos;
+    int arglen = 0, adjustment = 0, qotpos = 0, len = commandline.length();
+    bool dqot = false, sqot = false, optflag = false, quoted = false, optioned = false;
+    size_t found = 0;
+    std::string argument;
     for (size_t i = 0; i < len; i++) {
         int start = i;
+        quoted = false;
+        optioned = false;
         if (commandline[i] == '\"') dqot = true;
         else if (commandline[i] == '\'') sqot = true;
         else if (commandline[i] == '+' || commandline[i] == '-') {
-            optflag = true; qotpos = i + 2;
+            optioned = optflag = true; qotpos = i + 2;
             if (qotpos < len) {
                 if (commandline[qotpos] == '\"') dqot = true;
                 else if (commandline[qotpos] == '\'') sqot = true;
@@ -468,6 +472,7 @@ void FormatQuotedArguments(std::vector<std::string>& cmdargs, const std::string&
             }
             arglen = adjustment - start;
             i++;
+            quoted = true;
         }
         else if (sqot) {
             i++;
@@ -480,13 +485,20 @@ void FormatQuotedArguments(std::vector<std::string>& cmdargs, const std::string&
             }
             arglen = adjustment - start;
             i++;
+            quoted = true;
         }
         else {
-            while (i<len && commandline[i] != ' ')
+            while (i<len && commandline[i] != '|')
                 i++;
             arglen = i - start;
         }
-        cmdargs.push_back(commandline.substr(start, arglen));
+        argument = commandline.substr(start, arglen);
+        found = argument.find(" ");
+        if (!quoted && found != std::string::npos) {
+            int qotpos = optioned ? 2 : 0;
+            argument.insert(qotpos, "\"").append("\"");
+        }
+        cmdargs.push_back(argument);
     }
     if (dqot || sqot) fprintf(stderr, "One of the command line quotes is open\n");
 }
@@ -551,7 +563,7 @@ extern "C" int main(int argc, char **argv)
       if (i == 0)
 		  commandargs.push_back(std::string(argv[i]));
       else
-		  commandline.append(std::string(argv[i]).append(" "));
+		  commandline.append(std::string(argv[i]).append("|"));
 
 	  // set mapped file mode
 	  std::size_t found = std::string(argv[i]).find("+SM");
@@ -562,17 +574,17 @@ extern "C" int main(int argc, char **argv)
 	// Check for spaces in command line arguments
     FormatQuotedArguments(commandargs, commandline);
 
-#ifdef WIN_DEBUG
-	std::cerr << "FORMATTED COMMAND LINE (" << argc << ")" << std::endl;
-#endif
     int n_argc = commandargs.size();
+#ifdef WIN_DEBUG
+	std::cerr << "FORMATTED COMMAND LINE (" << n_argc << ")" << std::endl;
+#endif
     char **n_argv = (char **)malloc((n_argc + 1) * sizeof(char *));
     for (int i = 0; i < n_argc; i++)
     {
       n_argv[i] = (char *)malloc(strlen(commandargs[i].c_str()) + 1);
       std::strcpy(n_argv[i], commandargs[i].c_str());
 #ifdef WIN_DEBUG // FORMATTED COMMAND LINE
-	  for (int i = 0; i < argc; i++) std::cerr << "- " << i + 1 << ". " << argv[i] << std::endl;
+	  std::cerr << "- " << i + 1 << ". " << n_argv[i] << std::endl;
 #endif
     }
     n_argv[n_argc] = nullptr;
