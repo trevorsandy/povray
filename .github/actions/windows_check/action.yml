@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: August 29, 2023
+# Last Update: July 13, 2025
 #
 name: 'Check POV-Ray CLI for Windows'
 description: 'Run build check step for POV-Ray CLI for Windows'
@@ -8,12 +8,13 @@ description: 'Run build check step for POV-Ray CLI for Windows'
 inputs:
   solution:
     description: 'subdirectory of `windows` in which `povray.sln` is located'
-    required: true
+    default: 'vs2015'
+    required: false
   version-base:
     description: 'VERSION_BASE value'
     required: true
   platform:
-    description: 'solution platform to build'
+    description: 'Solution platform to build - x64, Win32, ARM64'
     required: false
     default: 'x64'
   check-output:
@@ -42,14 +43,15 @@ runs:
       SET PL=64
       SET PACKAGE=lpub3d_trace_cui
       SET POV_IGNORE_SYSCONF_MSG=yes
-      SET PLAFORM=${{ inputs.platform }}
+      SET PLATFORM=${{ inputs.platform }}
       SET VERSION_BASE=${{ inputs.version-base }}
       SET SOLUTION_PATH=windows/${{ inputs.solution }}/
       SET BUILD_CHK_OUTPUT=${{ inputs.check-output }}
       SET BUILD_CHK_POV_FILE=${{ inputs.check-pov-file }}
       SET BUILD_CHK_PARAMS=${{ inputs.check-parameters }}
       SET BUILD_CHK_INCLUDE=${{ inputs.check-includes }}
-      IF %PLAFORM% NEQ x64 SET PL=32
+      IF %PLATFORM% EQU ARM64 (ECHO Skipping build check on platform %PLATFORM%. && EXIT 0 )
+      IF %PLATFORM% EQU Win32 SET PL=32
       IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
       SET CONFIG_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
       IF NOT EXIST "%CONFIG_DIR%\" MKDIR "%CONFIG_DIR%\"

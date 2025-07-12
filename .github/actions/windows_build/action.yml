@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: September 10, 2024
+# Last Update: July 12, 2025
 #
 name: 'Build POV-Ray CLI for Windows Binary'
 description: 'Build POV-Ray CLI for Windows Binary'
@@ -22,19 +22,20 @@ inputs:
     default: 'GitHub for LPub3D'
   solution:
     description: 'Subdirectory of `windows` in which `povray.sln` is located - vs2015'
-    required: true
+    required: false
+    default: 'vs2015'
   configuration:
-    description: 'Solution configuration to build - Release, Release-SSE2'
+    description: 'Solution configuration to build - Release, Release-SSE2, Release-AVX512'
     required: false
     default: 'Release'
   platform:
-    description: 'Solution platform to build - x64, Win32'
+    description: 'Solution platform to build - x64, Win32, ARM64'
     required: false
     default: 'x64'
   toolset:
-    description: 'Platform toolset version - v142(x64), v140(Win32)'
+    description: 'Platform toolset version - v143(x64), v142(Win32)'
     required: false
-    default: 'v142'
+    default: 'v143'
   compatibility:
     description: 'Toolset compatibility -e.g. _xp(Win32)'
     required: false
@@ -47,12 +48,12 @@ inputs:
 runs:
   using: composite
   steps:
-  - name: VC 141 Build Tools
-    if: ${{ inputs.platform == 'Win32' }}
+  - name: VC ${{ inputs.toolset }} Build Tools
+    if: ${{ inputs.platform == 'Win32' }} && ${{ inputs.toolset == 'v141' }}
     run: |
       Set-Location "C:\Program Files (x86)\Microsoft Visual Studio\Installer\"
       $InstallPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise"
-      $ComponentsToAdd= @("Microsoft.VisualStudio.Component.VC.v141.x86.x64")
+      $ComponentsToAdd= @("Microsoft.VisualStudio.Component.VC.${{ inputs.toolset }}.x86.x64")
       [string]$WorkloadArgs = $ComponentsToAdd | ForEach-Object {" --add " +  $_}
       $Arguments = ('/c', "vs_installer.exe", 'modify', '--installPath', "`"$InstallPath`"",$WorkloadArgs, '--quiet', '--norestart', '--nocache')
       # should be run twice
@@ -60,7 +61,7 @@ runs:
       $Process = Start-Process -FilePath cmd.exe -ArgumentList $Arguments -Wait -PassThru -WindowStyle Hidden
     shell: pwsh
   - name: Windows 8.1 SDK
-    if: ${{ inputs.platform == 'Win32' }}
+    if: ${{ inputs.platform == 'Win32' }} && ${{ inputs.toolset == 'v141' }}
     run: |
       Invoke-WebRequest -Method Get -Uri https://go.microsoft.com/fwlink/p/?LinkId=323507 -OutFile sdksetup.exe -UseBasicParsing
       Start-Process -Wait sdksetup.exe -ArgumentList "/q", "/norestart", "/features", "OptionId.WindowsDesktopSoftwareDevelopmentKit"
