@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: July 04, 2025
+# Last Update: July 12, 2025
 #
 name: 'LPub3D Trace CUI Builds'
 
@@ -51,34 +51,33 @@ jobs:
       run: |
         echo '${{ toJSON(matrix) }}'
         ${{matrix.c-compiler}} --version
-
     - name: 'Check out Repository'
       uses: actions/checkout@v4
 
     - name: 'Install Prerequisites'
-      uses: trevorsandy/povray/.github/actions/unix_getlibs@gh-actions-raytracer-v4
+      uses: trevorsandy/povray/.github/actions/unix_getlibs@gh-actions-raytracer-v5
 
     - name: 'Prebuild'
-      uses: trevorsandy/povray/.github/actions/unix_prebuild@gh-actions-raytracer-v4
+      uses: trevorsandy/povray/.github/actions/unix_prebuild@gh-actions-raytracer-v5
 
     - name: 'Configure'
-      uses: trevorsandy/povray/.github/actions/unix_configure@gh-actions-raytracer-v4
+      uses: trevorsandy/povray/.github/actions/unix_configure@gh-actions-raytracer-v5
       with:
         c-compiler: ${{ matrix.c-compiler }}
         cxx-compiler: ${{ matrix.cxx-compiler }}
 
     - name: 'Bundle Artifacts for Diagnostics'
       if: ${{ always() }}
-      uses: trevorsandy/povray/.github/actions/git_bundle_ignored@gh-actions-raytracer-v4
+      uses: trevorsandy/povray/.github/actions/git_bundle_ignored@gh-actions-raytracer-v5
       with:
         name: artifact_diag_unix.tar.gz
 
     - name: 'Build'
-      uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v4
+      uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v5
 
     - name: 'Build Check'
       if: ${{ success() }}
-      uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v4
+      uses: trevorsandy/povray/.github/actions/unix_make@gh-actions-raytracer-v5
       with:
         make-target: check
 
@@ -98,15 +97,17 @@ jobs:
       fail-fast: false
       matrix:
         runner: [windows-2025]
-        platform: [Win32, x64]
+        platform: [Win32, x64, ARM64]
         include:
         - platform: Win32
-          solution: vs2015
-          toolset: v141
+          toolset: v142
           compatibility: ''
           msbuild-options: ''
         - platform: x64
-          solution: vs2015
+          toolset: v143
+          compatibility: ''
+          msbuild-options: ''
+        - platform: ARM64
           toolset: v143
           compatibility: ''
           msbuild-options: ''
@@ -120,11 +121,10 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: 'Build'
-      uses: trevorsandy/povray/.github/actions/windows_build@gh-actions-raytracer-v4
+      uses: trevorsandy/povray/.github/actions/windows_build@gh-actions-raytracer-v5
       with:
         pov-ray-build-id: gh+vs2022+${{ matrix.platform }}+${{ github.run_number }}
         version-base: 3.8
-        solution: ${{ matrix.solution }}
         configuration: Release
         platform: ${{ matrix.platform }}
         toolset: ${{ matrix.toolset }}
@@ -133,10 +133,9 @@ jobs:
 
     - name: 'Build Check'
       if: ${{ success() }}
-      uses: trevorsandy/povray/.github/actions/windows_check@gh-actions-raytracer-v4
+      uses: trevorsandy/povray/.github/actions/windows_check@gh-actions-raytracer-v5
       with:
         version-base: 3.8
-        solution: ${{ matrix.solution }}
         platform: ${{ matrix.platform }}
 
     - name: 'Upload Artifacts for Diagnostics'
