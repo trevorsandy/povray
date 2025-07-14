@@ -222,6 +222,57 @@
       <Path>
       </Path>
     </BuildLog>
+    <PostBuildEvent>
+      <Command>@ECHO OFF &amp; SETLOCAL
+PUSHD ..\..\distribution
+FOR /F "tokens=*" %%g IN ('CD') do (SET DIST_DIR=%%g)
+POPD
+SET PL=64
+SET PACKAGE=lpub3d_trace_cui
+SET POV_IGNORE_SYSCONF_MSG=yes
+SET VERSION_BASE=3.8
+SET BUILD_CHK_OUTPUT=tests\space in dir name test\biscuit space in file name test
+SET BUILD_CHK_POV_FILE=tests\space in dir name test\biscuit.pov
+SET BUILD_CHK_PARAMS=-d -p +a0.3 +UA +A +w320 +h240
+SET BUILD_CHK_INCLUDE=+L"%DIST_DIR%\ini" +L"%DIST_DIR%\include" +L"%DIST_DIR%\scenes"
+IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
+SET CONFIG_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config
+IF NOT EXIST "%CONFIG_DIR%\" MKDIR "%CONFIG_DIR%\"
+ECHO Create %CONFIG_DIR%\povray.conf...
+COPY /V /Y "%DIST_DIR%\povray.conf" "%CONFIG_DIR%\povray.conf" /A
+SET genConfigFile="%CONFIG_DIR%\povray.conf" ECHO
+:GENERATE build check povray.conf settings file - append read+write settings
+>>%genConfigFile%.
+>>%genConfigFile% ; LPub3D-Trace-CUI build check conf settings
+>>%genConfigFile%.
+>>%genConfigFile% read* = "%CONFIG_DIR%"
+>>%genConfigFile%.
+>>%genConfigFile% ; LPub3D-Trace-CUI is called from (%CD%).
+>>%genConfigFile% read* = "%DIST_DIR%\ini"
+>>%genConfigFile% read* = "%DIST_DIR%\include"
+>>%genConfigFile% read* = "%DIST_DIR%\scenes"
+>>%genConfigFile% read+write* = ".\tests\space in dir name test"
+ECHO Create %CONFIG_DIR%\povray.ini...
+COPY /V /Y "%DIST_DIR%\ini\povray.ini" "%CONFIG_DIR%\povray.ini" /A
+SET genConfigFile="%CONFIG_DIR%\povray.ini" ECHO
+:GENERATE build check povray.ini settings file - append output settings
+>>%genConfigFile%.
+>>%genConfigFile% ; LPub3D-Trace-CUI build check ini settings
+>>%genConfigFile%.
+>>%genConfigFile% Output_to_File=true
+>>%genConfigFile% Output_File_Type=N8             ; (+/-Ftype)
+SET BUILD_CHK_COMMAND=+I"%BUILD_CHK_POV_FILE%" +O"%BUILD_CHK_OUTPUT%.%PL%bit.png" %BUILD_CHK_PARAMS% %BUILD_CHK_INCLUDE%
+ECHO BUILD_CHECK_COMMAND......[%PACKAGE%%PL%d.exe %BUILD_CHK_COMMAND%]
+bin%PL%\%PACKAGE%%PL%d.exe %BUILD_CHK_COMMAND%
+IF %ERRORLEVEL% NEQ 0 GOTO :cmEnd
+:cmEnd
+ENDLOCAL &amp; CALL :cmErrorLevel %ERRORLEVEL% &amp; GOTO :cmDone
+:cmErrorLevel
+EXIT /b %1
+:cmDone
+IF %ERRORLEVEL% NEQ 0 GOTO :VCEnd</Command>
+      <Message>Integrated build check</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <Midl />
