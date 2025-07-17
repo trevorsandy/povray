@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: July 13, 2025
+# Last Update: July 17, 2025
 #
 name: 'Check POV-Ray CLI for Windows'
 description: 'Run build check step for POV-Ray CLI for Windows'
@@ -17,6 +17,14 @@ inputs:
     description: 'Solution platform to build - x64, Win32, ARM64'
     required: false
     default: 'x64'
+  vcvarsver:
+    description: 'Microsoft C++ runtime library version'
+    required: false
+    default: 14.4
+  mscversion:
+    description: 'Microsoft C++ compiler version'
+    required: false
+    default: 1944
   check-output:
     description: 'check output file with path'
     required: false
@@ -39,7 +47,21 @@ runs:
   steps:
   - shell: cmd
     run: |
-      @ECHO OFF &SETLOCAL
+      IF /I ${{ inputs.platform }} EQU ARM64 (
+        @ECHO OFF &SETLOCAL
+        ECHO Skipping build check on ARM64 platform. && EXIT 0
+        IF EXIST "%LIBPATH%" (
+          ECHO ARM64 environment variables already set.
+        ) ELSE (
+          PUSHD "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build"
+          vcvarsamd64_arm64.bat -vcvars_ver=${{ inputs.vcvarsver }}
+          ECHO.${{ inputs.mscversion }} > %TEMP%\settings.c
+          cl.exe -Bv -EP %TEMP%\settings.c >NUL
+          POPD
+        )
+      ) ELSE (
+        @ECHO OFF &SETLOCAL
+      )
       SET PL=64
       SET PACKAGE=lpub3d_trace_cui
       SET POV_IGNORE_SYSCONF_MSG=yes
@@ -50,7 +72,6 @@ runs:
       SET BUILD_CHK_POV_FILE=${{ inputs.check-pov-file }}
       SET BUILD_CHK_PARAMS=${{ inputs.check-parameters }}
       SET BUILD_CHK_INCLUDE=${{ inputs.check-includes }}
-      IF %PLATFORM% EQU ARM64 (ECHO Skipping build check on platform %PLATFORM%. && EXIT 0 )
       IF %PLATFORM% EQU Win32 SET PL=32
       IF EXIST "%BUILD_CHK_OUTPUT%" DEL /Q "%BUILD_CHK_OUTPUT%"
       SET CONFIG_DIR=%USERPROFILE%\AppData\Local\LPub3D Software\LPub3D\3rdParty\%PACKAGE%-%VERSION_BASE%\config

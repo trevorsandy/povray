@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: July 12, 2025
+# Last Update: July 17, 2025
 #
 name: 'Build POV-Ray CLI for Windows Binary'
 description: 'Build POV-Ray CLI for Windows Binary'
@@ -36,6 +36,14 @@ inputs:
     description: 'Platform toolset version - v143(x64), v142(Win32)'
     required: false
     default: 'v143'
+  vcvarsver:
+    description: 'Microsoft C++ runtime library version'
+    required: false
+    default: 14.4
+  mscversion:
+    description: 'Microsoft C++ compiler version'
+    required: false
+    default: 1944
   compatibility:
     description: 'Toolset compatibility -e.g. _xp(Win32)'
     required: false
@@ -68,6 +76,23 @@ runs:
     shell: pwsh
   - name: Build ${{ inputs.platform }}
     run: |
+      if ( '${{ inputs.platform }}' -eq 'ARM64' )
+      {
+        if (Test-Path env:LIBPATH) {
+          Write-Host "ARM64 environment variables already set."
+        } else {
+          Push-Location "C:\Program Files\Microsoft Visual Studio\2022\Enterprise\VC\Auxiliary\Build"
+          cmd /c "vcvarsamd64_arm64.bat -vcvars_ver=${{ inputs.vcvarsver }}&set" |
+            ForEach-Object {
+              If ($_ -match "=") {
+                $v = $_.split("="); Set-Item -Force -Path "ENV:\$($v[0])" -Value "$($v[1])"
+              }
+            }
+          Write-Host ${{ inputs.mscversion }} 6>&1 | Out-File $env:TEMP\settings.c
+          cl.exe -Bv -EP $env:TEMP\settings.c | Out-Null
+          Pop-Location
+        }
+      }
       $env:PovBuildDefs  = 'POV_RAY_IS_AUTOBUILD=${{ inputs.pov-ray-is-autobuild }};'
       $env:PovBuildDefs += 'POV_RAY_BUILD_ID="${{ inputs.pov-ray-build-id }}";'
       $env:PovBuildDefs += 'VERSION_BASE="${{ inputs.version-base }}";'
