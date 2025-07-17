@@ -7,7 +7,7 @@ rem needed to build the solution/project.
 rem This script is intended to be called from autobuild.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: July 01, 2021
+rem  Last Update: July 18, 2025
 rem  Copyright (c) 2019 - 2025 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -22,7 +22,7 @@ SET VERSION_MAJ=unknown
 SET VERSION_MIN=unknown
 SET VERSION_REV=unknown
 SET VERSION_PATCH=unknown
-SET RELEASE=
+SET PRE_RELEASE=
 SET GIT_SHA=000000
 SET VERSION_H="..\..\source\base\version.h"
 
@@ -32,7 +32,7 @@ FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MAJOR_VERSION_INT" %VERS
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_MINOR_VERSION_INT" %VERSION_H%') DO SET VERSION_MIN=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_REVISION_INT" %VERSION_H%') DO SET VERSION_REV=%%i
 FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PATCHLEVEL_INT" %VERSION_H%') DO SET VERSION_PATCH=%%i
-FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PRERELEASE" %VERSION_H%') DO IF NOT DEFINED RELEASE SET RELEASE=%%i
+FOR /F "tokens=3*" %%i IN ('FINDSTR /c:"#define POV_RAY_PRERELEASE" %VERSION_H%') DO IF NOT DEFINED PRE_RELEASE SET PRE_RELEASE=%%i
 rem Get the latest version tag sha - if not available locally, try remote
 IF "%APPVEYOR%" EQU "True" (
     SET GIT_SHA=%APPVEYOR_REPO_COMMIT:~0,7%
@@ -51,7 +51,7 @@ CALL :CLEAN VERSION_MAJ %VERSION_MAJ%
 CALL :CLEAN VERSION_MIN %VERSION_MIN%
 CALL :CLEAN VERSION_REV %VERSION_REV%
 CALL :CLEAN VERSION_PATCH %VERSION_PATCH%
-CALL :CLEAN RELEASE %RELEASE%
+CALL :CLEAN PRE_RELEASE %PRE_RELEASE%
 
 rem Build version number
 SET VERSION_BASE="%VERSION_MAJ%.%VERSION_MIN%"
@@ -69,7 +69,7 @@ IF %VERBOSE%==1 SET PovBuildDefs=%PovBuildDefs%WIN_DEBUG=1;
 
 rem Display the define attributes to visually confirm all is well.
 ECHO   MSVS_DEV_VERSION....[%DEV_ENV%]
-ECHO   RELEASE.............[%RELEASE%]
+ECHO   PRE_RELEASE.........[%PRE_RELEASE%]
 ECHO   VERSION_MAJ.........[%VERSION_MAJ%]
 ECHO   VERSION_MIN.........[%VERSION_MIN%]
 ECHO   VERSION_REV.........[%VERSION_REV%]
@@ -86,4 +86,3 @@ SET INPUT=%*
 SET INPUT=%INPUT:"=%
 FOR /F "tokens=1*" %%a IN ("!INPUT!") DO ENDLOCAL & SET %1=%%b
 EXIT /b
-

@@ -10,7 +10,7 @@ rem It is possible to build either the GUI or CUI project - see usage below.
 rem This script is requires autobuild_defs.cmd
 rem --
 rem  Trevor SANDY <trevor.sandy@gmail.com>
-rem  Last Update: September 12, 2024
+rem  Last Update: August 01, 2025
 rem  Copyright (c) 2019 - 2025 by Trevor SANDY
 rem --
 rem This script is distributed in the hope that it will be useful,
@@ -91,21 +91,55 @@ IF NOT EXIST "%LP3D_VCVARSALL_DIR%" (
   GOTO :ERROR_END
 )
 
+rem https://learn.microsoft.com/en-us/cpp/overview/compiler-versions
 rem Visual C++ 2012 -vcvars_ver=11.0 Toolset v110 VSVersion 11.0    _MSC_VER 1700
 rem Visual C++ 2013 -vcvars_ver=12.0 Toolset v120 VSVersion 12.0    _MSC_VER 1800
 rem Visual C++ 2015 -vcvars_ver=14.0 Toolset v140 VSVersion 14.0    _MSC_VER 1900
 rem Visual C++ 2017 -vcvars_ver=14.1 Toolset v141 VSVersion 15.9    _MSC_VER 1916
 rem Visual C++ 2019 -vcvars_ver=14.2 Toolset v142 VSVersion 16.11.3 _MSC_VER 1929
-rem Visual C++ 2022 -vcvars_ver=14.4 Toolset v143 VSVersion 17.11.2 _MSC_VER 1933 (-vcvars_ver set to 14.4 since VSVersion 17.10)
-IF "%LP3D_MSC_VER%" == "" SET LP3D_MSC_VER=1941
-IF "%LP3D_VCSDKVER%" == "" SET LP3D_VCSDKVER=8.1
-IF "%LP3D_VCTOOLSET%" == "" SET LP3D_VCTOOLSET=v141
-IF "%LP3D_VCVARSALL_VER%" == "" SET LP3D_VCVARSALL_VER=-vcvars_ver=14.1
+rem Visual C++ 2022 -vcvars_ver=14.4 Toolset v143 VSVersion 17.14.0 _MSC_VER 1944
+IF "%LP3D_MSC32_VER%" == "" (
+    SET LP3D_MSC32_VER=1942
+) ELSE (
+    IF %LP3D_MSC32_VER% LSS 1942 SET LP3D_MSC32_VER=1942
+)
+SETLOCAL ENABLEDELAYEDEXPANSION
+IF "%LP3D_VC32SDKVER%" == ""  (
+    SET LP3D_VC32SDKVER=10.0
+) ELSE (
+    SET LP3D_VCPARAM=%LP3D_VC32SDKVER:.=%
+    IF !LP3D_VCPARAM! LSS 100 SET LP3D_VC32SDKVER=10.0
+)
+IF "%LP3D_VC32TOOLSET%" == "" (
+    SET LP3D_VC32TOOLSET=v142
+) ELSE (
+    SET LP3D_VCPARAM=%LP3D_VC32TOOLSET:~1%
+    IF !LP3D_VCPARAM! LSS 142 SET LP3D_VC32TOOLSET=v142
+)
+IF "%LP3D_VC32VARSALL_VER%" == "" (
+    SET LP3D_VC32VARSALL_VER=-vcvars_ver=14.2
+) ELSE (
+    FOR /f "tokens=2 delims==" %%P IN ("%LP3D_VC32VARSALL_VER%") DO SET LP3D_VCPARAM=%%P
+    SET LP3D_VCPARAM=!LP3D_VCPARAM:.=!
+    IF !LP3D_VCPARAM! LSS 142 SET LP3D_VC32VARSALL_VER=-vcvars_ver=14.2
+)
+SETLOCAL DISABLEDELAYEDEXPANSION
+
+IF "%LP3D_MSC64_VER%" == "" SET LP3D_MSC64_VER=1944
+IF "%LP3D_VC64SDKVER%" == "" SET LP3D_VC64SDKVER=10.0
+IF "%LP3D_VC64TOOLSET%" == "" SET LP3D_VC64TOOLSET=v143
+IF "%LP3D_VC64VARSALL_VER%" == "" SET LP3D_VC64VARSALL_VER=-vcvars_ver=14.4
+
+IF "%LP3D_MSCARM64_VER%" == "" SET LP3D_MSCARM64_VER=1944
+IF "%LP3D_VCARM64SDKVER%" == "" SET LP3D_VCARM64SDKVER=10.0
+IF "%LP3D_VCARM64TOOLSET%" == "" SET LP3D_VCARM64TOOLSET=v143
+IF "%LP3D_VCARM64VARSALL_VER%" == "" SET LP3D_VCARM64VARSALL_VER=-vcvars_ver=14.4
 
 SET PACKAGE=lpub3d_trace_cui
 SET DEFAULT_PLATFORM=x64
 SET VERSION_BASE=3.8
 SET DEBUG=0
+SET LP3D_AMD64_ARM64_CROSS=0
 
 rem Build checks settings - set according to your check requirements - do not add quotes
 rem Check 01
@@ -181,13 +215,15 @@ ECHO -Start %PACKAGE% %~nx0 with commandline args: [%*].
 
 rem Check if invalid platform flag
 IF NOT [%1]==[] (
-    IF NOT "%1"=="x86" (
-        IF NOT "%1"=="x86_64" (
-            IF NOT "%1"=="-allcui" (
-                IF NOT "%1"=="-run" (
-                    IF NOT "%1"=="-rbld" (
-                        IF NOT "%1"=="-verbose" (
-                            IF NOT "%1"=="-help" GOTO :PLATFORM_ERROR
+    IF /I NOT "%1"=="x86" (
+        IF /I NOT "%1"=="x86_64" (
+            IF /I NOT "%1"=="arm64" (
+                IF /I NOT "%1"=="-allcui_amd" (
+                    IF /I NOT "%1"=="-run" (
+                        IF /I NOT "%1"=="-rbld" (
+                            IF /I NOT "%1"=="-verbose" (
+                                IF /I NOT "%1"=="-help" GOTO :PLATFORM_ERROR
+                            )
                         )
                     )
                 )
@@ -197,7 +233,7 @@ IF NOT [%1]==[] (
 )
 rem Parse platform input flag
 IF [%1]==[] (
-    SET PLATFORM_ARCH=-allcui
+    SET PLATFORM_ARCH=-allcui_amd
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="x86" (
@@ -208,15 +244,19 @@ IF /I "%1"=="x86_64" (
     SET PLATFORM_ARCH=x64
     GOTO :SET_CONFIGURATION
 )
-IF /I "%1"=="-allcui" (
-    SET PLATFORM_ARCH=-allcui
+IF /I "%1"=="arm64" (
+    SET PLATFORM_ARCH=ARM64
+    GOTO :SET_CONFIGURATION
+)
+IF /I "%1"=="-allcui_amd" (
+    SET PLATFORM_ARCH=-allcui_amd
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-run" (
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-rbld" (
-    SET PLATFORM_ARCH=-allcui
+    SET PLATFORM_ARCH=-allcui_amd
     GOTO :SET_CONFIGURATION
 )
 IF /I "%1"=="-verbose" (
@@ -231,15 +271,17 @@ GOTO :COMMAND_ERROR
 :SET_CONFIGURATION
 rem Check if invalid configuration flag
 IF NOT [%2]==[] (
-    IF NOT "%2"=="-rel" (
-        IF NOT "%2"=="-dbg" (
-            IF NOT "%2"=="-avx" (
-                IF NOT "%2"=="-ins" (
-                    IF NOT "%2"=="-allins" (
-                        IF NOT "%2"=="-chk" (
-                            IF NOT "%2"=="-run" (
-                                IF NOT "%2"=="-rbld" (
-                                    IF NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+    IF /I NOT "%2"=="-rel" (
+        IF /I NOT "%2"=="-dbg" (
+            IF /I NOT "%2"=="-avx" (
+                IF /I NOT "%2"=="-avx512" (
+                    IF /I NOT "%2"=="-ins" (
+                        IF /I NOT "%2"=="-allins" (
+                            IF /I NOT "%2"=="-chk" (
+                                IF /I NOT "%2"=="-run" (
+                                    IF /I NOT "%2"=="-rbld" (
+                                        IF /I NOT "%2"=="-sse2" GOTO :CONFIGURATION_ERROR
+                                    )
                                 )
                             )
                         )
@@ -253,6 +295,12 @@ rem  Set the default platform
 IF "%PLATFORM_ARCH%"=="unknown" (
     SET PLATFORM_ARCH=%DEFAULT_PLATFORM%
 )
+rem Setup library options and set ARM64 cross compilation
+IF /I "%PLATFORM_ARCH%" == "ARM64" (
+  IF /I "%PROCESSOR_ARCHITECTURE%" == "AMD64" (
+    SET LP3D_AMD64_ARM64_CROSS=1
+  )
+)
 rem Run a render check without building
 IF /I "%1"=="-run" SET RUN_CHK=true
 IF /I "%2"=="-run" SET RUN_CHK=true
@@ -263,7 +311,7 @@ IF /I "%RUN_CHK%"=="true" (
     GOTO :END
 )
 rem Perform verbose (debug) build
-IF "%1"=="-verbose" (
+IF /I "%1"=="-verbose" (
     SET CHECK=1
     SET THIRD_INSTALL=0
     SET INSTALL_ALL=0
@@ -322,19 +370,21 @@ IF [%2]==[] (
     GOTO :BUILD
 )
 rem Check if %1=x86_64 and %2=AVX
-IF "%PLATFORM_ARCH%"=="x64" (
+IF /I "%PLATFORM_ARCH%"=="x64" (
     IF /I "%2"=="-avx" GOTO :SET_AVX
+    IF /I "%2"=="-avx512" GOTO :SET_AVX512
 )
 rem Check if  %1=x86 and %2=SSE2
-IF "%PLATFORM_ARCH%"=="Win32" (
+IF /I "%PLATFORM_ARCH%"=="Win32" (
     IF /I "%2"=="-sse2" GOTO :SET_SSE2
 )
 rem Check if bad platform and configuration flag combination -  %1=Win32 and %2=-avx
-IF "%PLATFORM_ARCH%"=="Win32" (
+IF /I "%PLATFORM_ARCH%"=="Win32" (
     IF /I "%2"=="-avx" GOTO :AVX_ERROR
+    IF /I "%2"=="-avx512" GOTO :AVX_ERROR
 )
 rem Check if bad platform and configuration flag combination -  %1=x64 and %2=-sse2
-IF "%PLATFORM_ARCH%"=="x64" (
+IF /I "%PLATFORM_ARCH%"=="x64" (
     IF /I "%2"=="-sse2" GOTO :SSE2_ERROR
 )
 rem If we get here display invalid command message
@@ -343,6 +393,11 @@ GOTO :COMMAND_ERROR
 :SET_AVX
 rem AVX Configuration
 SET CONFIGURATION=Release-AVX
+GOTO :BUILD
+
+:SET_AVX512
+rem AVX512 Configuration
+SET CONFIGURATION=Release-AVX512
 GOTO :BUILD
 
 :SET_SSE2
@@ -359,17 +414,17 @@ IF %REBUILD%==1 (
     SET BUILD_LBL=Rebuilding
 )
 rem Check if build all platforms
-IF /I "%1"=="-allcui" (
+IF /I "%1"=="-allcui_amd" (
     SET CONSOLE=1
     SET PROJECT=console.vcxproj
     SET CONFIGURATION=%DEFAULT_CONFIGURATION%
 )
 rem Check if invalid command line flag
 IF NOT [%3]==[] (
-    IF NOT "%3"=="-gui" (
-        IF NOT "%3"=="-cui" (
-            IF NOT "%3"=="-chk" (
-                IF NOT "%3"=="-minlog" GOTO :PROJECT_ERROR
+    IF /I NOT "%3"=="-gui" (
+        IF /I NOT "%3"=="-cui" (
+            IF /I NOT "%3"=="-chk" (
+                IF /I NOT "%3"=="-minlog" GOTO :PROJECT_ERROR
             )
         )
     )
@@ -381,8 +436,8 @@ IF [%3]==[] (
     SET PROJECT=console.vcxproj
 )
 IF /I "%3"=="-gui" (
-    IF "%1"=="-allcui" (
-        SET FLAG_CONFLICT=-allcui flag detected, -gui flag ignored.
+    IF /I "%1"=="-allcui_amd" (
+        SET FLAG_CONFLICT=-allcui_amd flag detected, -gui flag ignored.
         CALL :FLAG_CONFLICT_DETECTED %*
     ) ELSE (
         SET CONSOLE=0
@@ -390,15 +445,15 @@ IF /I "%3"=="-gui" (
     )
 )
 IF /I "%3"=="-cui" (
-    IF "%1"=="-allcui" (
-        SET FLAG_CONFLICT=-allcui flag detected, -cui flag ignored.
+    IF /I "%1"=="-allcui_amd" (
+        SET FLAG_CONFLICT=-allcui_amd flag detected, -cui flag ignored.
         CALL :FLAG_CONFLICT_DETECTED %*
     ) ELSE (
         SET CONSOLE=1
         SET PROJECT=console.vcxproj
     )
 )
-IF "%FLAG_CONFLICT%" == "fatal" GOTO :ERROR_END
+IF /I "%FLAG_CONFLICT%" == "fatal" GOTO :ERROR_END
 rem Run an image render check
 IF /I "%3"=="-chk" (
     SET CHECK=1
@@ -408,8 +463,8 @@ IF /I "%3"=="-chk" (
 )
 rem Check if invalid command line flag
 IF NOT [%4]==[] (
-    IF NOT "%4"=="-minlog" (
-        IF NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
+    IF /I NOT "%4"=="-minlog" (
+        IF /I NOT "%4"=="-verbose" GOTO :VERBOSE_ERROR
     )
 )
 rem Enable verbose tracing (useful for debugging)
@@ -419,7 +474,7 @@ IF "%CONFIGURATION%"=="Debug" SET VERBOSE_CHK=true
 IF /I "%VERBOSE_CHK%"=="true" (
     rem Check if CUI or allCUI project build
     IF NOT %CONSOLE%==1 (
-        IF NOT "%PLATFORM_ARCH%"=="-allcui" (
+        IF /I NOT "%PLATFORM_ARCH%"=="-allcui_amd" (
             GOTO :VERBOSE_CUI_ERROR
         )
     )
@@ -450,7 +505,12 @@ ECHO   PACKAGE.............[%PACKAGE%]
 ECHO   VERSION.............[%VERSION_BASE%]
 ECHO   WORKING_DIR.........[%CD%]
 ECHO   DIST_DIRECTORY......[%DIST_DIR%]
-
+IF /I "%PLATFORM_ARCH%" == "ARM64" (
+    ECHO   PROCESSOR_ARCH......[%PROCESSOR_ARCHITECTURE%]
+    IF %LP3D_AMD64_ARM64_CROSS% EQU 1 (
+        ECHO   COMPILATION.........[ARM64 on AMD64 host]
+    )
+)
 rem Console output - see https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild-command-line-reference
 rem Set console output logging level - (normal:all output or minlog=only error output)
 SET LOGGING_FLAGS=
@@ -460,7 +520,7 @@ IF /I "%3"=="-minlog" (
 IF /I "%4"=="-minlog" (
     SET MINIMUM_LOGGING=1
 )
-IF /I %MINIMUM_LOGGING% == 1 (
+IF %MINIMUM_LOGGING% == 1 (
     SET LOGGING_FLAGS=/clp:ErrorsOnly /nologo
 )
 
@@ -474,8 +534,8 @@ rem Console output logging level message
 CALL :OUTPUT_LOGGING_MESSAGE %MINIMUM_LOGGING%
 
 rem Check if build all platforms
-IF /I "%PLATFORM_ARCH%"=="-allcui" (
-    GOTO :BUILD_ALL_CUI
+IF /I "%PLATFORM_ARCH%"=="-allcui_amd" (
+    GOTO :BUILD_ALL_CUI_AMD
 )
 
 rem Display the build configuration and platform settings
@@ -494,6 +554,7 @@ rem Launch msbuild
 rem Check build status
 IF %PLATFORM_ARCH%==Win32 (SET EXE=bin32\%PACKAGE%32%d%.exe)
 IF %PLATFORM_ARCH%==x64 (SET EXE=bin64\%PACKAGE%64%d%.exe)
+IF %PLATFORM_ARCH%==ARM64 (SET EXE=bin64\%PACKAGE%64%d%.exe)
 IF NOT EXIST "%EXE%" (
    ECHO.
    ECHO "-ERROR - %EXE% was not successfully built."
@@ -505,7 +566,7 @@ rem Perform 3rd party install if specified
 IF %THIRD_INSTALL%==1 (CALL :3RD_PARTY_INSTALL %PLATFORM_ARCH%)
 GOTO :END
 
-:BUILD_ALL_CUI
+:BUILD_ALL_CUI_AMD
 rem Display the build configuration and platform settings
 ECHO.
 ECHO -%BUILD_LBL% x86 and x86_64 CUI Platforms...
@@ -537,17 +598,25 @@ GOTO :END
 :CONFIGURE_VCTOOLS
 ECHO.
 ECHO -Set MSBuild platform toolset...
-IF %1==x64 (
+IF %1==x86_64 (
   IF "%LP3D_CONDA_BUILD%" NEQ "True" (
-    SET LP3D_MSC_VER=1941
-    SET LP3D_VCSDKVER=10.0
-    SET LP3D_VCTOOLSET=v143
-    SET LP3D_VCVARSALL_VER=-vcvars_ver=14.4
+    SET LP3D_MSC_VER=%LP3D_MSC64_VER%
+    SET LP3D_VCSDKVER=%LP3D_VC64SDKVER%
+    SET LP3D_VCTOOLSET=%LP3D_VC64TOOLSET%
+    SET LP3D_VCVARSALL_VER%LP3D_VC64VARSALL_VER%
   )
 ) ELSE (
-  SET LP3D_VCSDKVER=8.1
-  SET LP3D_VCTOOLSET=v141
-  SET LP3D_VCVARSALL_VER=-vcvars_ver=14.1
+  IF %1==ARM64 (
+    SET LP3D_MSC_VER=%LP3D_MSCARM64_VER%
+    SET LP3D_VCSDKVER=%LP3D_VCARM64SDKVER%
+    SET LP3D_VCTOOLSET=%LP3D_VCARM64TOOLSET%
+    SET LP3D_VCVARSALL_VER=%LP3D_VCARM64VARSALL_VER%
+  ) ELSE (
+    SET LP3D_MSC_VER=%LP3D_MSC32_VER%
+    SET LP3D_VCSDKVER=%LP3D_VC32SDKVER%
+    SET LP3D_VCTOOLSET=%LP3D_VC32TOOLSET%
+    SET LP3D_VCVARSALL_VER=%LP3D_VC32VARSALL_VER%
+  )
 )
 ECHO.
 ECHO   PLATFORM_ARCH..........[%1]
@@ -560,6 +629,15 @@ ECHO   MSVC_VCVARSALL_DIR.....[%LP3D_VCVARSALL_DIR%]
 EXIT /b
 
 :CONFIGURE_BUILD_ENV
+ECHO.
+ECHO -Configure %PACKAGE% %PLATFORM_ARCH% build environment...
+IF %PLATFORM_ARCH% EQU x86_64 (
+  SET LP3D_VCVARS=vcvars64.bat
+)
+IF %PLATFORM_ARCH% EQU ARM64 (
+  SET LP3D_VCVARS=vcvarsamd64_arm64.bat
+)
+
 IF "%PATH_PREPENDED%" NEQ "True" (
   IF "%LP3D_CONDA_BUILD%" EQU "True" (
     SET "PATH=%PATH%"
@@ -574,10 +652,10 @@ IF "%PATH_PREPENDED%" NEQ "True" (
       )
     ) ELSE (
       ECHO.
-      IF EXIST "%LP3D_VCVARSALL_DIR%\vcvars64.bat" (
-        CALL "%LP3D_VCVARSALL_DIR%\vcvars64.bat" %LP3D_VCVARSALL_VER%
+      IF EXIST "%LP3D_VCVARSALL_DIR%\%LP3D_VCVARS%" (
+        CALL "%LP3D_VCVARSALL_DIR%\%LP3D_VCVARS%" %LP3D_VCVARSALL_VER%
       ) ELSE (
-        ECHO -ERROR: vcvars64.bat not found.
+        ECHO -ERROR: %LP3D_VCVARS% not found.
         GOTO :ERROR_END
       )
     )
@@ -599,6 +677,7 @@ ECHO( -PATH......[!PATH!]
   ENDLOCAL
 )
 rem Set the LPub3D-Trace auto-build pre-processor defines
+ECHO.
 CALL autobuild_defs.cmd
 rem Display the defines set (as environment variable 'PovBuildDefs') for MSbuild
 ECHO.
@@ -606,8 +685,18 @@ ECHO   BUILD_DEFINES.....[%PovBuildDefs%]
 EXIT /b
 
 :BUILD_CHECK
-IF %1 == x64 SET PL=64
 IF %1 == Win32 SET PL=32
+IF %1 == x64 SET PL=64
+IF %1 == ARM64 (
+  IF %COMMANDPROMPTTYPE% == Cross (
+    IF %PROCESSOR_ARCHITECTURE% == AMD64 (
+      ECHO.
+      ECHO --Build check on ARM64 cross compilation is not supported.
+      EXIT /b
+    )
+  )
+  SET PL=64
+)
 REM IF "%APPVEYOR%" NEQ "True" (
     REM IF %1 == x86 SET PL=32
 REM )
@@ -653,10 +742,18 @@ EXIT /b
 
 :3RD_PARTY_INSTALL
 IF %1 == Win32 SET INSTALL_32BIT=1
-IF %1 == x64 SET INSTALL_64BIT=1
-IF %1 == -allcui (
+IF %1 == x64 (
+    SET INSTALL_64BIT=1
+    SET INSTALL_64BIT_ARCH=x86_64
+)
+IF %1 == ARM64 (
+    SET INSTALL_64BIT=1
+    SET INSTALL_64BIT_ARCH=ARM64
+)
+IF %1 == -allcui_amd (
     SET INSTALL_32BIT=1
     SET INSTALL_64BIT=1
+    SET INSTALL_64BIT_ARCH=x86_64
 )
 rem Version major and minor pulled in from autobuild_defs
 SET VERSION_BASE=%VERSION_MAJ%.%VERSION_MIN%
@@ -669,7 +766,7 @@ IF %INSTALL_ALL% == 1 (
 IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Installing Documentaton to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs]...
 IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs\" (
-    IF  %INSTALL_ALL% == 1 MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs\"
+    IF %INSTALL_ALL% == 1 MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs\"
 )
 IF  %INSTALL_ALL% == 1  SET DIST_INSTALL_PATH=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\docs
 IF  %INSTALL_ALL% == 1  SET DIST_INSTALL_SRC="..\..\distribution\platform-specific\windows"
@@ -681,7 +778,7 @@ IF  %INSTALL_ALL% == 1  XCOPY /Q /S /I /E /V /Y "%DIST_INSTALL_SRC%\Help" "%DIST
 IF  %INSTALL_ALL% == 1  ECHO.
 IF  %INSTALL_ALL% == 1  ECHO -Installing Resources...
 IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\" (
-    IF  %INSTALL_ALL% == 1  MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\"
+    IF %INSTALL_ALL% == 1  MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources\"
 )
 IF  %INSTALL_ALL% == 1  SET DIST_INSTALL_PATH=%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\resources
 IF  %INSTALL_ALL% == 1  ECHO.
@@ -698,7 +795,10 @@ IF %INSTALL_32BIT% == 1 (
     IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" (
         MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\"
     )
-    COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
+    FOR %%f IN ( %PACKAGE%32%d%.exe %PACKAGE%32%d%.pdb ) DO (
+        COPY /V /Y "bin32\%%f" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
+    )
+    REM COPY /V /Y "bin32\%PACKAGE%32%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\i386\" /B
     SET ARCH_LABEL=[32bit]
     SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\i386
     ECHO.
@@ -706,13 +806,16 @@ IF %INSTALL_32BIT% == 1 (
 IF %INSTALL_32BIT% == 1 CALL :MAKE_CONF_AND_INI_FILES
 IF %INSTALL_64BIT% == 1 (
     ECHO.
-    ECHO -Installing %PACKAGE%64%d%.exe to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64]...
-    IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" (
-        MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\"
+    ECHO -Installing %PACKAGE%64%d%.exe to [%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\%INSTALL_64BIT_ARCH%]...
+    IF NOT EXIST "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\%INSTALL_64BIT_ARCH%\" (
+        MKDIR "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\%INSTALL_64BIT_ARCH%\"
     )
-    COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\x86_64\" /B
+    FOR %%f IN ( %PACKAGE%64%d%.exe %PACKAGE%64%d%.pdb ) DO (
+        COPY /V /Y "bin64\%%f" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\%INSTALL_64BIT_ARCH%\" /B
+    )
+    REM COPY /V /Y "bin64\%PACKAGE%64%d%.exe" "%DIST_DIR%\%PACKAGE%-%VERSION_BASE%\bin\%INSTALL_64BIT_ARCH%\" /B
     SET ARCH_LABEL=[64bit]
-    SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\x86_64
+    SET DIST_INSTALL_PATH=%DIST_INSTALL_PATH_PREFIX%\%INSTALL_64BIT_ARCH%
     ECHO.
 )
 IF %INSTALL_64BIT% == 1 CALL :MAKE_CONF_AND_INI_FILES
@@ -843,7 +946,7 @@ IF "%FLAG_CONFLICT%" == "unknown" (
     GOTO :FLAG_CONFLICT_ERROR
 )
 ECHO.
-ECHO -08. (FLAG CONFLICT) %FLAG_CONFLICT_MSG% [%~nx0 %*].
+ECHO -08. (FLAG_CONFLICT) %FLAG_CONFLICT_MSG% [%~nx0 %*].
 ECHO      Enter '%~nx0 --help' to see Usage.
 ECHO.
 EXIT /b
@@ -852,8 +955,8 @@ EXIT /b
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -01. (FLAG ERROR) Platform or usage flag is invalid [%~nx0 %*].
-ECHO      Use x86 or x86_64 for platforms, -allcui for all CUIs, -run to execute
+ECHO -01. (PLATFORM_ERROR) Platform or usage flag is invalid [%~nx0 %*].
+ECHO      Use x86, x86_64, arm64 for platforms, -allcui_amd for all CUIs, -run to execute
 ECHO      without building, -rbld to rebuild or -verbose for 'Win Debug' messages.
 ECHO      For usage help use -help.
 GOTO :ERROR_END
@@ -862,7 +965,7 @@ GOTO :ERROR_END
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -02. (FLAG ERROR) Configuration flag is invalid [%~nx0 %*].
+ECHO -02. (CONFIGURATION_ERROR) Configuration flag is invalid [%~nx0 %*].
 ECHO      Use -avx or -sse2 with appropriate platform flag,
 ECHO      -rel for release build, -dbg for debug build, -ins to
 ECHO      install config files, -allins to install all documentation
@@ -874,7 +977,7 @@ GOTO :ERROR_END
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -03. (FLAG ERROR) AVX is not compatable with %PLATFORM_ARCH% platform [%~nx0 %*].
+ECHO -03. (AVX_ERROR) AVX is not compatable with %PLATFORM_ARCH% platform [%~nx0 %*].
 ECHO      Use -avx only with x86_64 flag.
 GOTO :ERROR_END
 
@@ -882,7 +985,7 @@ GOTO :ERROR_END
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -04. (FLAG ERROR) SSE2 is not compatable with %PLATFORM_ARCH% platform [%~nx0 %*].
+ECHO -04. (SSE2_ERROR) SSE2 is not compatable with %PLATFORM_ARCH% platform [%~nx0 %*].
 ECHO      Use -sse2 only with x86 flag.
 GOTO :ERROR_END
 
@@ -890,7 +993,7 @@ GOTO :ERROR_END
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -05. (FLAG ERROR) Project flag is invalid [%~nx0 %*].
+ECHO -05. (PROJECT_ERROR) Project flag is invalid [%~nx0 %*].
 ECHO      Use -cui for Console UI, -gui for Graphic UI,
 ECHO      -chk for Build Check or -minlog to display build errors only.
 GOTO :ERROR_END
@@ -899,7 +1002,7 @@ GOTO :ERROR_END
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -06. (FLAG ERROR) Verbose (Win Debug) or minum console output flag invalid [%~nx0 %*].
+ECHO -06. (VERBOSE_ERROR) Verbose (Win Debug) or minum console output flag invalid [%~nx0 %*].
 ECHO      Use -verbose for 'Win Debug' messages or -minlog to display build errors only.
 GOTO :ERROR_END
 
@@ -907,15 +1010,15 @@ GOTO :ERROR_END
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -07. (FLAG ERROR) Verbose (Win Debug) output flag can only be used with the CUI project [%~nx0 %*].
-ECHO      Use -verbose only with -cui or -allcui flags.
+ECHO -07. (VERBOSE_CUI_ERROR) Verbose (Win Debug) output flag can only be used with the CUI project [%~nx0 %*].
+ECHO      Use -verbose only with -cui or -allcui_amd flags.
 GOTO :ERROR_END
 
 :FLAG_CONFLICT_ERROR
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -08. (FLAG CONFLICT ERROR) Incompatable flag in the command arguments [%~nx0 %*].
+ECHO -08. (FLAG_CONFLICT_ERROR) Incompatable flag in the command arguments [%~nx0 %*].
 ECHO      See Usage.
 GOTO :ERROR_END
 
@@ -923,7 +1026,7 @@ GOTO :ERROR_END
 ECHO.
 CALL :USAGE
 ECHO.
-ECHO -09. (COMMAND ERROR) Invalid command string [%~nx0 %*].
+ECHO -09. (COMMAND_ERROR) Invalid command string [%~nx0 %*].
 ECHO      See Usage.
 GOTO :ERROR_END
 
@@ -937,8 +1040,8 @@ ECHO or Console User Interface (CUI) build projects.
 ECHO You can also select configuration Advanced Vector Extensions (AVX)
 ECHO for 64bit platforms or Streaming SIMD Extensions 2 (SSE2) for 32bit.
 ECHO.
-ECHO To run this scrip as is, you must have the following components:
-ECHO     - Visual Studio 2017 (I'm using Community Edition here)
+ECHO To run this script as is, you must have the following components:
+ECHO     - At least Visual Studio 2017 (I'm using 2022 Community Edition here)
 ECHO     - Git
 ECHO     - Local POV-Ray git repository
 ECHO However, you are free to reconfigue this script to use different components.
@@ -950,66 +1053,65 @@ ECHO Help...
 ECHO autobuild [ -help ]
 ECHO.
 ECHO First position flags...
-ECHO autobuild [ x86 ^| x86_64 ^| -allcui ^| -run ^| -rbld ^| -verbose ^| -help]
+ECHO autobuild [ x86 ^| x86_64 ^| arm64 ^| -allcui_amd ^| -run ^| -rbld ^| -verbose ^| -help]
 ECHO.
 ECHO All flags, 1st, 2nd, 3rd and 4th...
-ECHO autobuild [ x86 ^| x86_64 ^| -allcui ^| -run ^| -rbld ^| -verbose ^| -help]
+ECHO autobuild [ x86 ^| x86_64 ^| arm64 ^| -allcui_amd ^| -run ^| -rbld ^| -verbose ^| -help]
 ECHO           [ -rel ^| -dgb ^|-ins ^| -allins ^| -chk ^| -run ^| -rbld ^| -avx ^| sse2]
 ECHO           [-cui ^| -gui]
 ECHO           [ -verbose ]
 ECHO.
 ECHO ----------------------------------------------------------------
-ECHO Build all CUI projects and deploy all artefacts as a 3rd party installation bundle
-ECHO autobuild -allcui -allins
+ECHO Build all CUI AMD projects and deploy all artefacts as a 3rd party installation bundle
+ECHO autobuild -allcui_amd -allins
 ECHO.
-ECHO Build 64bit, Release and perform build check
-ECHO autobuild x86_64 -chk
+ECHO Build ARM 64bit, Release and perform build check
+ECHO autobuild arm64 -chk
 ECHO.
-ECHO Build 64bit, AVX-Release CUI project example:
+ECHO Build AMD 64bit, AVX-Release CUI project example:
 ECHO autobuild x86_64 -avx
 ECHO.
-ECHO Build 64bit, Release, CUI project with verbose output example:
+ECHO Build AMD 64bit, Release, CUI project with verbose output example:
 ECHO autobuild x86_64 -rel -cui -verbose
 ECHO.
-ECHO Build 32bit, Release GUI project example:
+ECHO Build AMD 32bit, Release GUI project example:
 ECHO autobuild x86 -rel -gui
 ECHO.
-ECHO Build 32bit, SSE2-Release GUI project example:
+ECHO Build AMD 32bit, SSE2-Release GUI project example:
 ECHO autobuild x86 -sse2 -gui
 ECHO.
-ECHO Build 32bit, Release CUI project example:
+ECHO Build AMD 32bit, Release CUI project example:
 ECHO autobuild
 ECHO.
 ECHO.
-ECHO Flags are not case sensitive, use lowere case.
+ECHO Flags are not case sensitive; however, it is better to use lowere case.
 ECHO.
 ECHO If no flag is supplied, 32bit platform, Release Configuration, CUI project built by default.
 ECHO.
 ECHO Flags:
-ECHO ----------------------------------------------------------------
-ECHO ^| Flag    ^| Pos ^| Type             ^| Description
-ECHO ----------------------------------------------------------------
-ECHO  -help......1.....Useage flag        [Difault=Off] Display useage.
-ECHO  x86........1.....Platform flag      [Default=On ] Build 32bit architecture.
-ECHO  x86_64.....1.....Platform flag      [Default=On ] Build 64bit architecture.
-ECHO  -allcui....1.....Project flag       [Default=On ] Build and install 32bit, 64bit, CUI configurations.
-ECHO  -allins....2.....Project flag       [Default=Off] Install all distribution artefacts to lpub3d_windows_3rdparty archive folder.
-ECHO  -ins.......2.....Project flag       [Default=On ] Install subset of distribution artefacts to lpub3d_windows_3rdparty archive folder.
-ECHO  -run.......2,1...Project flag       [Default=Off] Run an image redering check - must be preceded by x86 or x86_64 flag.
-ECHO  -rbld......2,1...Project flag       [Default=Off] Rebuild project - clean and rebuild all project components.
-EChO  -rel.......2.....Configuration flag [Default=On ] Specify a release build.
-EChO  -dgb.......2.....Configuration flag [Default=Off] Specify a debug build.
-ECHO  -avx.......2.....Configuraiton flag [Default=Off] AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
-ECHO  -sse2......2.....Configuration flag [Default=Off] SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
-ECHO  -chk.......2.....Project flag       [Default=On ] Build and run an image redering check.
-ECHO  -cui.......3.....Project flag       [Default=On ] Build Console User Interface (CUI) project (must be preceded by a configuration flag).
-ECHO  -gui.......3.....Project flag       [Default=Off] Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
-ECHO  -verbose...4,1...Project flag       [Default=Off] Display verbose output. Useful for debugging (must be preceded by -cui flag).
-ECHO  -minlog....4,3...Project flag       [Default=Off] Minimum build logging - only display build errors
+ECHO --------------------------------------------------------------------
+ECHO ^| Flag    ^| Pos ^| Type                          ^| Description
+ECHO --------------------------------------------------------------------
+ECHO  -help.......1.....Useage flag        [Difault=Off] Display useage.
+ECHO  x86.........1.....Platform flag      [Default=On ] Build AMD 32bit architecture.
+ECHO  x86_64......1.....Platform flag      [Default=On ] Build AMD 64bit architecture.
+ECHO  arm64.......1.....Platform flag      [Default=Off] Build ARM 64bit architecture.
+ECHO  -allcui_amd.1.....Project flag       [Default=On ] Build and install AMD 32bit, 64bit, CUI configurations.
+ECHO  -allins.....2.....Project flag       [Default=Off] Install all distribution artefacts to lpub3d_windows_3rdparty archive folder.
+ECHO  -ins........2.....Project flag       [Default=On ] Install subset of distribution artefacts to lpub3d_windows_3rdparty archive folder.
+ECHO  -run........2,1...Project flag       [Default=Off] Run an image redering check - must be preceded by x86 or x86_64 flag.
+ECHO  -rbld.......2,1...Project flag       [Default=Off] Rebuild project - clean and rebuild all project components.
+EChO  -rel........2.....Configuration flag [Default=On ] Specify a release build.
+EChO  -dgb........2.....Configuration flag [Default=Off] Specify a debug build.
+ECHO  -avx........2.....Configuraiton flag [Default=Off] AVX-Release, use Advanced Vector Extensions (must be preceded by x86_64 flag).
+ECHO  -avx512.....2.....Configuraiton flag [Default=Off] AVX512-Release, use Advanced Vector Extensions 512 (must be preceded by x86_64 flag).
+ECHO  -sse2.......2.....Configuration flag [Default=Off] SSE2-Release, use Streaming SIMD Extensions 2 (must be preceded by x86 flag).
+ECHO  -chk........2.....Project flag       [Default=On ] Build and run an image redering check.
+ECHO  -cui........3.....Project flag       [Default=On ] Build Console User Interface (CUI) project (must be preceded by a configuration flag).
+ECHO  -gui........3.....Project flag       [Default=Off] Build Graphic User Interface (GUI) project (must be preceded by a configuration flag).
+ECHO  -verbose....4,1...Project flag       [Default=Off] Display verbose output. Useful for debugging (must be preceded by -cui flag).
+ECHO  -minlog.....4,3...Project flag       [Default=Off] Minimum build logging - only display build errors
 ECHO.
-ECHO Flags are case sensitive, use lowere case.
-ECHO.
-ECHO If no flag is supplied, 32bit platform, Release Configuration, CUI project built by default.
 ECHO ----------------------------------------------------------------
 EXIT /b
 
