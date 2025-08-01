@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM64">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
@@ -8,6 +12,10 @@
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
       <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM64">
+      <Configuration>Release</Configuration>
+      <Platform>ARM64</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -19,14 +27,6 @@
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release-SSE2|Win32">
       <Configuration>Release-SSE2</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release-SSE2|x64">
-      <Configuration>Release-SSE2</Configuration>
-      <Platform>x64</Platform>
-    </ProjectConfiguration>
-    <ProjectConfiguration Include="Release-AVX|Win32">
-      <Configuration>Release-AVX</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release-AVX|x64">
@@ -43,13 +43,18 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -57,6 +62,11 @@
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <PlatformToolset>v140</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v140</PlatformToolset>
@@ -71,35 +81,16 @@
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <PlatformToolset>v140</PlatformToolset>
   </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-AVX|Win32'">
-    <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-  </PropertyGroup>
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|x64'">
-    <PlatformToolset>v140</PlatformToolset>
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-  </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+  <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-  </ImportGroup>
-  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|Win32'" Label="PropertySheets">
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="disabled_warnings.props" />
+    <Import Project="additional_preprocessor_definitions.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-AVX|x64'" Label="PropertySheets">
     <Import Project="povray64-avx.props" />
-    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -112,12 +103,22 @@
     <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>lpub3d_trace_cui64d</TargetName>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <OutDir>bin64\</OutDir>
+    <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>lpub3d_trace_cui64d</TargetName>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>bin32\</OutDir>
     <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>lpub3d_trace_cui32</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>bin64\</OutDir>
+    <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
+    <TargetName>lpub3d_trace_cui64</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <OutDir>bin64\</OutDir>
     <IntDir>build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
     <TargetName>lpub3d_trace_cui64</TargetName>
@@ -138,7 +139,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl2\include\SDL2;..\..\libraries\sdl2\include;..\..\vfe\win;..\..\vfe;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl3\include\build_config;..\..\libraries\sdl3\include;..\..\libraries\sdl3\include\SDL3;..\..\vfe\win\;..\..\vfe\;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(PovBuildDefs)BOOST_ALL_NO_LIB;_DEBUG;WIN_DEBUG;WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;WINVER=0x0500;_WIN32_WINNT=0x0500;COMMONCTRL_VERSION=0x500;CLASSLIB_DEFS_H;NOMINMAX;ISOLATION_AWARE_ENABLED;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -151,20 +152,16 @@
       <BrowseInformation>true</BrowseInformation>
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <DisableSpecificWarnings>4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>winprecomp.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
+      <AdditionalDependencies>setupapi.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <StackReserveSize>8388608</StackReserveSize>
       <LargeAddressAware>true</LargeAddressAware>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <BuildLog>
@@ -178,7 +175,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl2\include;..\..\libraries\sdl2\include\SDL2;..\..\..\windows;..\..\vfe\win;..\..\vfe;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl3\include\build_config;..\..\libraries\sdl3\include;..\..\libraries\sdl3\include\SDL3;..\..\vfe\win\;..\..\vfe\;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(PovBuildDefs)BOOST_ALL_NO_LIB;_DEBUG;WIN_DEBUG;WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;CLASSLIB_DEFS_H;NOMINMAX;ISOLATION_AWARE_ENABLED;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;BUILDING_AMD64=1;COMMONCTRL_VERSION=0x500;_WIN32_WINNT=0x0500;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
@@ -193,19 +190,51 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ForcedIncludeFiles>winprecomp.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <DisableSpecificWarnings>4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
+      <AdditionalDependencies>setupapi.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
       <SubSystem>Console</SubSystem>
       <StackReserveSize>67108864</StackReserveSize>
       <LargeAddressAware>true</LargeAddressAware>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
+    </Link>
+    <BuildLog>
+      <Path>
+      </Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <Midl />
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl3\include\build_config;..\..\libraries\sdl3\include;..\..\libraries\sdl3\include\SDL3;..\..\vfe\win\;..\..\vfe\;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>$(PovBuildDefs)BOOST_ALL_NO_LIB;_DEBUG;WIN_DEBUG;WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;CLASSLIB_DEFS_H;NOMINMAX;ISOLATION_AWARE_ENABLED;_CRT_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;BUILDING_ARM64=1;COMMONCTRL_VERSION=0x500;_WIN32_WINNT=0x0500;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <MinimalRebuild>false</MinimalRebuild>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <ForceConformanceInForLoopScope>true</ForceConformanceInForLoopScope>
+      <RuntimeTypeInfo>true</RuntimeTypeInfo>
+      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ForcedIncludeFiles>winprecomp.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>setupapi.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <ProgramDatabaseFile>$(OutDir)$(TargetName).pdb</ProgramDatabaseFile>
+      <SubSystem>Console</SubSystem>
+      <StackReserveSize>67108864</StackReserveSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <TargetMachine>MachineARM64</TargetMachine>
     </Link>
     <BuildLog>
       <Path>
@@ -214,7 +243,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl2\include;..\..\libraries\sdl2\include\SDL2;..\..\vfe\win;..\..\vfe;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl3\include\build_config;..\..\libraries\sdl3\include;..\..\libraries\sdl3\include\SDL3;..\..\vfe\win\;..\..\vfe\;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(PovBuildDefs)BOOST_ALL_NO_LIB;NDEBUG;WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;COMMONCTRL_VERSION=0x500;CLASSLIB_DEFS_H;WINVER=0x0500;_WIN32_WINNT=0x0500;NOMINMAX;ISOLATION_AWARE_ENABLED;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -227,20 +256,17 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <DisableSpecificWarnings>4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>winprecomp.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
+      <AdditionalDependencies>setupapi.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <StackReserveSize>8388608</StackReserveSize>
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <BuildLog>
@@ -253,7 +279,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl2\include;..\..\libraries\sdl2\include\SDL2;..\..\vfe\win;..\..\vfe;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl3\include\build_config;..\..\libraries\sdl3\include;..\..\libraries\sdl3\include\SDL3;..\..\vfe\win\;..\..\vfe\;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(PovBuildDefs)BOOST_ALL_NO_LIB;NDEBUG;WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;CLASSLIB_DEFS_H;NOMINMAX;ISOLATION_AWARE_ENABLED;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;BUILDING_AMD64=1;COMMONCTRL_VERSION=0x500;_WIN32_WINNT=0x0500;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -265,21 +291,52 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <DisableSpecificWarnings>4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>winprecomp.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
+      <AdditionalDependencies>setupapi.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <StackReserveSize>67108864</StackReserveSize>
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
+    </Link>
+    <BuildLog>
+      <Path>
+      </Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
+    <Midl />
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl3\include\build_config;..\..\libraries\sdl3\include;..\..\libraries\sdl3\include\SDL3;..\..\vfe\win\;..\..\vfe\;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>$(PovBuildDefs)BOOST_ALL_NO_LIB;NDEBUG;WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;CLASSLIB_DEFS_H;NOMINMAX;ISOLATION_AWARE_ENABLED;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;BUILDING_ARM64=1;COMMONCTRL_VERSION=0x500;_WIN32_WINNT=0x0500;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <StringPooling>true</StringPooling>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <BrowseInformation>true</BrowseInformation>
+      <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <FunctionLevelLinking>false</FunctionLevelLinking>
+      <ForcedIncludeFiles>winprecomp.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>setupapi.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Console</SubSystem>
+      <StackReserveSize>67108864</StackReserveSize>
+      <LargeAddressAware>true</LargeAddressAware>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <EntryPointSymbol>
       </EntryPointSymbol>
     </Link>
@@ -290,7 +347,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl2\include;..\..\libraries\sdl2\include\SDL2;..\..\vfe\win;..\..\vfe;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl3\include\build_config;..\..\libraries\sdl3\include;..\..\libraries\sdl3\include\SDL3;..\..\vfe\win\;..\..\vfe\;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(PovBuildDefs)BOOST_ALL_NO_LIB;NDEBUG;WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;COMMONCTRL_VERSION=0x500;CLASSLIB_DEFS_H;WINVER=0x0500;_WIN32_WINNT=0x0500;NOMINMAX;ISOLATION_AWARE_ENABLED;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;BUILD_SSE2=1;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -303,20 +360,17 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <DisableSpecificWarnings>4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>winprecomp.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
+      <AdditionalDependencies>setupapi.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <StackReserveSize>8388608</StackReserveSize>
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <BuildLog>
@@ -329,7 +383,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl2\include;..\..\libraries\sdl2\include\SDL2;..\..\vfe\win;..\..\vfe;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\internal\windows;..\..\platform\x86;..\..\platform\windows;..\..\windows\povconfig;..\..\libraries\boost;..\..\libraries\sdl3\include\build_config;..\..\libraries\sdl3\include;..\..\libraries\sdl3\include\SDL3;..\..\vfe\win\;..\..\vfe\;..\;..\..\source;..\..\libraries\jpeg;..\..\libraries\zlib;..\..\libraries\png;..\..\libraries\tiff\libtiff;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>$(PovBuildDefs)BOOST_ALL_NO_LIB;NDEBUG;WIN32;WIN32_LEAN_AND_MEAN;_WINDOWS;CLASSLIB_DEFS_H;NOMINMAX;ISOLATION_AWARE_ENABLED;_CRT_SECURE_NO_DEPRECATE;_SECURE_SCL=0;BUILDING_AMD64=1;COMMONCTRL_VERSION=0x500;_WIN32_WINNT=0x0500;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -341,20 +395,17 @@
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <DisableSpecificWarnings>4800;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <ForcedIncludeFiles>winprecomp.h;%(ForcedIncludeFiles)</ForcedIncludeFiles>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
+      <AdditionalDependencies>setupapi.lib;winmm.lib;imm32.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <StackReserveSize>67108864</StackReserveSize>
       <LargeAddressAware>true</LargeAddressAware>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <RandomizedBaseAddress>false</RandomizedBaseAddress>
-      <DataExecutionPrevention>
-      </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
     </Link>
     <BuildLog>
@@ -369,27 +420,21 @@
     <ClCompile Include="..\disp_text.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\vfe\win\console\winoptions.h" />
+    <ClInclude Include="..\disp.h" />
+    <ClInclude Include="..\disp_sdl.h" />
+    <ClInclude Include="..\disp_text.h" />
+    <ClInclude Include="..\povconfig\syspovconfig.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="console_resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="boost_system.vcxproj">
       <Project>{d870a978-8130-4d1d-9fb2-3ee2028d2c50}</Project>
     </ProjectReference>
-    <ProjectReference Include="openexr_eLut.vcxproj">
-      <Project>{39c65232-04fb-4622-8283-34829739887c}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="openexr_Iex.vcxproj">
-      <Project>{c46b9a53-86d8-4b7f-ab15-b2c04518a195}</Project>
-    </ProjectReference>
-    <ProjectReference Include="openexr_IlmThread.vcxproj">
-      <Project>{76addb29-9c6a-442c-9ba9-764c050f75dd}</Project>
-    </ProjectReference>
-    <ProjectReference Include="openexr_IlmImf.vcxproj">
-      <Project>{7df42126-d237-41d3-9abe-a3acc8bac56e}</Project>
-    </ProjectReference>
     <ProjectReference Include="boost_thread.vcxproj">
       <Project>{10b193d4-e27b-4438-a825-bfb3d2b4c74d}</Project>
-    </ProjectReference>
-    <ProjectReference Include="openexr_Half.vcxproj">
-      <Project>{9edb5c0f-bfd0-4a59-bb93-f06a52bb0128}</Project>
     </ProjectReference>
     <ProjectReference Include="jpeg.vcxproj">
       <Project>{3780ccde-4967-4c31-b6a3-3c2570bdd3e4}</Project>
@@ -399,8 +444,28 @@
       <Project>{e1ea88af-6b44-4225-b97b-b485fc9db23e}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="openexr_toFloat.vcxproj">
-      <Project>{9801d5ff-c1e0-46c5-a73e-47deece99ddb}</Project>
+    <ProjectReference Include="openexr_libdeflate.vcxproj">
+      <Project>{CE38D4CC-D466-3A87-8B50-F0995E956010}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="openexr_Iex.vcxproj">
+      <Project>{80E1CADA-1566-38EB-8302-53FD805A7D19}</Project>
+    </ProjectReference>
+    <ProjectReference Include="openexr_IlmThread.vcxproj">
+      <Project>{95BDF909-DF17-3E4A-827D-A6E5270B9D3E}</Project>
+    </ProjectReference>
+    <ProjectReference Include="openexr_Imath.vcxproj">
+      <Project>{CAE19FF4-89AD-3E89-B928-DBE52883FB7D}</Project>
+    </ProjectReference>
+    <ProjectReference Include="openexr_Core.vcxproj">
+      <Project>{09E90C84-A059-30FA-B76B-DBB1D6293CFC}</Project>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+    </ProjectReference>
+    <ProjectReference Include="openexr.vcxproj">
+      <Project>{562A216A-FDAA-3A84-880C-E70C23EF71CA}</Project>
+    </ProjectReference>
+    <ProjectReference Include="povbackend.vcxproj">
+      <Project>{c6d9b754-11eb-4fc3-8683-593b53e9ad1f}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="povbackend.vcxproj">
@@ -430,11 +495,8 @@
     <ProjectReference Include="povvm.vcxproj">
       <Project>{e7a73e97-7106-4d4a-98ba-aa43fbd19db4}</Project>
     </ProjectReference>
-    <ProjectReference Include="SDL2.vcxproj">
+    <ProjectReference Include="SDL3.vcxproj">
       <Project>{b68fb04c-e6f1-4594-99a0-fd6fd0c1d539}</Project>
-    </ProjectReference>
-    <ProjectReference Include="SDL2Main.vcxproj">
-      <Project>{a2ac28cc-77e7-48da-bccd-b422eaee3d84}</Project>
     </ProjectReference>
     <ProjectReference Include="tiff.vcxproj">
       <Project>{186baef6-cf24-42c1-8ce3-25590cb9f6e7}</Project>
@@ -448,16 +510,6 @@
       <Project>{8bb067c4-7135-4643-863c-49c520beea01}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\vfe\win\console\winoptions.h" />
-    <ClInclude Include="..\disp.h" />
-    <ClInclude Include="..\disp_sdl.h" />
-    <ClInclude Include="..\disp_text.h" />
-    <ClInclude Include="..\povconfig\syspovconfig.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="console_resource.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

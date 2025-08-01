@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Disable specific warnings.
+  
+  Useage:
+  - In Visual Studio, select the menu item View->Property Manager
+  - select the desired Project and do 'Add Existing Property Sheet'
+  
+  Disabled warnings:
+  - C4005 'identifier': macro redefinition
+  - C4018 'token': signed/unsigned mismatch
+  - C4100 'identifier': unreferenced formal parameter
+  - C4101 'identifier': unreferenced local variable
+  - C4127 conditional expression is constant
+  - C4133 'expression': incompatible types - from 'type1' to 'type2'
+  - C4152 non standard extension, function/data ptr conversion in expression
+  - C4201 nonstandard extension used : nameless struct/union
+  - C4244 'conversion': conversion from 'type1' to 'type2', possible loss of data
+  - C4267 'var' : conversion from 'size_t' to 'type', possible loss of data
+  - C4302 'conversion': truncation from 'type 1' to 'type 2'
+  - C4305 'conversion': truncation from 'type1' to 'type2'
+  - C4311 'variable': pointer truncation from 'type' to 'type'
+  - C4312 'operation': conversion from 'type1' to 'type2' of greater size
+  - C4334 'operator': result of 32-bit shift implicitly converted to 64 bits (was 64-bit shift intended?)
+  - C4355 'this': used in base member initializer list
+  - C4390 ';': empty controlled statement found; is this the intent?
+  - C4800 'type': Implicit conversion from 'type' to bool. Possible information loss
+  - C4995 'function': name was marked as #pragma deprecated
+  - C4996 Your code uses a function, class member, variable, or typedef that's marked deprecated. 
+
+-->
+ 
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <DisableSpecificWarnings>4005;4018;4100;4101;4127;4133;4152;4201;4244;4267;4302;4305;4311;4312;4334;4355;4390;4800;4995;4996;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+  </ItemDefinitionGroup>
+</Project>

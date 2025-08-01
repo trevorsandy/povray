@@ -5,6 +5,9 @@
       <UniqueIdentifier>{9c2f51c5-2d77-41cd-a1f1-e0379cb83921}</UniqueIdentifier>
       <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
     </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{9C68E1E7-4563-4F1E-8926-4EDE2EA0F5AD}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\libraries\jpeg\jcapimin.c">
@@ -148,31 +151,31 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\libraries\jpeg\jconfig.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libraries\jpeg\jdct.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libraries\jpeg\jerror.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libraries\jpeg\jinclude.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libraries\jpeg\jmemsys.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libraries\jpeg\jmorecfg.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libraries\jpeg\jpegint.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libraries\jpeg\jpeglib.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\libraries\jpeg\jversion.h">
-      <Filter>Source Files</Filter>
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

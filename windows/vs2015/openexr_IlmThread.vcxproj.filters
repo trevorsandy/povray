@@ -1,69 +1,60 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThread.cpp">
+    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThread.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadMutex.cpp">
+    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadPool.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadMutexPosix.cpp">
+    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphore.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadMutexWin32.cpp">
+    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphoreOSX.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadPool.cpp">
+    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphorePosix.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadPosix.cpp">
+    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphorePosixCompat.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadSemaphore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadSemaphorePosix.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadSemaphorePosixCompat.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadSemaphoreWin32.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\libraries\ilmbase\IlmThread\IlmThreadWin32.cpp">
+    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphoreWin32.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\libraries\ilmbase\IlmThread\IlmThread.h">
+    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThread.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\libraries\ilmbase\IlmThread\IlmThreadSemaphore.h">
+    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadExport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\libraries\ilmbase\IlmThread\IlmThreadMutex.h">
+    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadForward.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\libraries\ilmbase\IlmThread\IlmThreadPool.h">
+    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadMutex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\libraries\ilmbase\IlmThread\IlmThreadExport.h">
+    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadNamespace.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\libraries\ilmbase\IlmThread\IlmThreadForward.h">
+    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\libraries\ilmbase\IlmThread\IlmThreadNamespace.h">
+    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadProcessGroup.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphore.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{aa6afb66-8182-468e-9d30-dc020427f0b7}</UniqueIdentifier>
+      <UniqueIdentifier>{F22986E1-F795-36F0-B6F8-2D9B436A54D2}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{218473d0-07b5-4a0c-85f2-776237e88da7}</UniqueIdentifier>
+      <UniqueIdentifier>{4F4624A7-4854-3B4D-8932-C144F9BC7456}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

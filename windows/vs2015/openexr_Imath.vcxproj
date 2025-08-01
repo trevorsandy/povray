@@ -38,9 +38,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{95BDF909-DF17-3E4A-827D-A6E5270B9D3E}</ProjectGuid>
+    <ProjectGuid>{CAE19FF4-89AD-3E89-B928-DBE52883FB7D}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>OpenEXRIlmBaseIlmThread</ProjectName>
+    <ProjectName>OpenEXRIlmBaseImath</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'" Label="Configuration">
@@ -96,8 +96,8 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-	<Import Project="disabled_warnings.props" />
-	<Import Project="additional_preprocessor_definitions.props" />
+    <Import Project="disabled_warnings.props" />
+    <Import Project="additional_preprocessor_definitions.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release-AVX|x64'" Label="PropertySheets">
     <Import Project="povray64-avx.props" />
@@ -107,27 +107,27 @@
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">bin64\lib\arm\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">IlmThread64d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">Imath64d</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">.lib</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">bin64\lib\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">IlmThread64d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Imath64d</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.lib</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">bin32\lib\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">IlmThread32d</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Imath32d</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.lib</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">bin64\lib\arm\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">IlmThread64</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">Imath64</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">.lib</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">bin64\lib\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">IlmThread64</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Imath64</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.lib</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">bin32\lib\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">IlmThread32</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Imath32</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.lib</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release-AVX|x64'">bin64\lib\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release-AVX|x64'">build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
@@ -135,37 +135,36 @@
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release-AVX|x64'">.lib</TargetExt>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|Win32'">bin32\lib\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|Win32'">build\$(ProjectName)\$(Platform)\$(Configuration)\</IntDir>
-    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|Win32'">IlmThread32-sse2</TargetName>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|Win32'">Imath32-sse2</TargetName>
     <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|Win32'">.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>Disabled</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_DEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_HAS_ITERATOR_DEBUGGING=0;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -179,19 +178,18 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;..\config;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_DEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
@@ -200,10 +198,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_DEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -217,19 +215,18 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_DEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
@@ -238,10 +235,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_DEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -255,18 +252,17 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
@@ -277,10 +273,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -294,19 +290,18 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
@@ -315,10 +310,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -332,19 +327,18 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <Optimization>MaxSpeed</Optimization>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
@@ -353,10 +347,10 @@
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\deps\imath\lib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -370,7 +364,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-AVX|x64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -381,21 +375,22 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Release-SSE2"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Release-AVX"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Release-SSE2\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Release-AVX\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -409,7 +404,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release-SSE2|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <ExceptionHandling>Sync</ExceptionHandling>
@@ -420,21 +415,22 @@
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
-      <SupportJustMyCode></SupportJustMyCode>
+      <SupportJustMyCode>
+      </SupportJustMyCode>
       <UseFullPaths>false</UseFullPaths>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Release-AVX"</PreprocessorDefinitions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR="Release-SSE2"</PreprocessorDefinitions>
       <ObjectFileName>$(IntDir)</ObjectFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
     </ClCompile>
     <ResourceCompile>
-      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Release-AVX\"</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_HAS_ITERATOR_DEBUGGING=0;CMAKE_INTDIR=\"Release-SSE2\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <Midl>
-      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\..\libraries\openexr3\lib\IlmThread;..\..\libraries\openexr3\deps\deflate;..\..\libraries\openexr3\deps\imath\config;..\..\libraries\openexr3\lib\config;..\..\libraries\openexr3\lib\Iex;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
       <HeaderFileName>%(Filename).h</HeaderFileName>
       <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
@@ -447,29 +443,51 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThread.h" />
-    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadExport.h" />
-    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadForward.h" />
-    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadMutex.h" />
-    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadNamespace.h" />
-    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadPool.h" />
-    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadProcessGroup.h" />
-    <ClInclude Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphore.h" />
-    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThread.cpp" />
-    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadPool.cpp" />
-    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphore.cpp" />
-    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphoreOSX.cpp" />
-    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphorePosix.cpp" />
-    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphorePosixCompat.cpp" />
-    <ClCompile Include="..\..\libraries\openexr3\lib\IlmThread\IlmThreadSemaphoreWin32.cpp" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\half.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\halfFunction.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\halfLimits.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathBox.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathBoxAlgo.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathColor.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathColorAlgo.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathEuler.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathExport.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathForward.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathFrame.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathFrustum.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathFrustumTest.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathFun.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathGL.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathGLU.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathInt64.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathInterval.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathLine.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathLineAlgo.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathMath.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathMatrix.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathMatrixAlgo.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathNamespace.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathPlane.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathPlatform.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathQuat.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathRandom.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathRoots.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathShear.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathSphere.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathTypeTraits.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathVec.h" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\ImathVecAlgo.h" />
+    <ClCompile Include="..\..\libraries\openexr3\deps\imath\lib\half.cpp" />
+    <ClCompile Include="..\..\libraries\openexr3\deps\imath\lib\ImathColorAlgo.cpp" />
+    <ClCompile Include="..\..\libraries\openexr3\deps\imath\lib\ImathFun.cpp" />
+    <ClCompile Include="..\..\libraries\openexr3\deps\imath\lib\ImathMatrixAlgo.cpp" />
+    <ClCompile Include="..\..\libraries\openexr3\deps\imath\lib\ImathRandom.cpp" />
+    <ClInclude Include="..\..\libraries\openexr3\deps\imath\lib\toFloat.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\libraries\openexr3\deps\imath\config\ImathConfig.h" />
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <ProjectReference Include="openexr_Iex.vcxproj">
-      <Project>{80E1CADA-1566-38EB-8302-53FD805A7D19}</Project>
-      <Name>OpenEXR IlmBase Iex</Name>
-    </ProjectReference>
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
