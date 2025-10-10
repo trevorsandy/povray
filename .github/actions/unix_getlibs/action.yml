@@ -1,6 +1,6 @@
 # LPub3D Raytracer-cui build actions
 # Trevor SANDY <trevor.sandy@gmail.com>
-# Last Update: May 22, 2022
+# Last Update: October 10, 2022
 #
 name: 'Install Packages'
 description: 'Install required packages'
@@ -63,9 +63,15 @@ runs:
       rm ~PACKAGE_LIST
       echo "::endgroup::"
       if test -n "${do_update}" ; then
-        echo "::group::Update package manager database"
-        ${do_update}
-        echo "::endgroup::"
+        host_os=${{ matrix.os }}
+        if test "${host_os##*-}" -eq 13; then
+          echo "::group::Skip ${{ matrix.os }} update package manager database"
+          echo "::endgroup::"
+        else
+          echo "::group::Update package manager database"
+          ${do_update}
+          echo "::endgroup::"
+        fi
       else
         echo "::warning::No package manager update command found in matrix."
       fi
